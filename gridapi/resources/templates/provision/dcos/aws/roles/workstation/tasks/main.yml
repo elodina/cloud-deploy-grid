@@ -1,0 +1,6 @@
+---
+- include: ws_image.yml
+- include: dcos.yml
+- include: lb.yml
+
+- meta: flush_handlers

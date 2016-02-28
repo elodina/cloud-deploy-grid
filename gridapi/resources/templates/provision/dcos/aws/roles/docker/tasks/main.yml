@@ -1,0 +1,4 @@
+---
+- include: docker.yml
+
+- meta: flush_handlers

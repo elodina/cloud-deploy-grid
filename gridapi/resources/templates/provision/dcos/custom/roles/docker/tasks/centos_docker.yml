@@ -1,0 +1,38 @@
+---
+- name: install docker rpm packages
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "{{ docker_rpm_packages }}"
+  tags:
+    - common
+
+- name: configure docker consul dns
+  lineinfile:
+    dest: /etc/sysconfig/docker-network
+    regexp: ^DOCKER_NETWORK_OPTIONS
+    line: DOCKER_NETWORK_OPTIONS='--dns {{ nameserver }}'
+    state: present
+  notify:
+    - restart docker
+  tags:
+    - common
+
+- name: docker centos7 fix
+  lineinfile:
+    dest: /etc/sysconfig/docker-storage
+    regexp: ^DOCKER_STORAGE_OPTIONS=
+    line: DOCKER_STORAGE_OPTIONS='--storage-opt dm.fs=xfs'
+    state: present
+  notify:
+    - restart docker
+  tags:
+    - common
+
+- name: ensure docker is running
+  service:
+    name: docker
+    state: running
+  tags:
+    - common

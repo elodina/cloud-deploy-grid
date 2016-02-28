@@ -1,0 +1,7 @@
+---
+- include: packages.yml
+- include: tweaks.yml
+- include: disks.yml
+- include: dcos_specific.yml
+
+- meta: flush_handlers

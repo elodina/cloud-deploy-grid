@@ -1,0 +1,28 @@
+---
+- name: install mesos-cli
+  pip:
+    name: mesos.cli
+    state: present
+  tags:
+    - terminal
+
+- name: configure mesos-cli
+  copy:
+    src: "etc/.mesos.json"
+    dest: "/etc/.mesos.json"
+  tags:
+    - terminal
+
+#- name: haproxy-consul
+#  docker:
+#    name: haproxy-consul
+#    image: asteris/haproxy-consul
+#    state: started
+#    net: host
+#    env:
+#        HAPROXY_DOMAIN: "{{hostvars[inventory_hostname]['ec2_ip_address']}}.xip.io"
+#  tags:
+#    - terminal
+
+
+- meta: flush_handlers

@@ -1,0 +1,6 @@
+---
+- name: deploy dcos slave
+  ignore_errors: true
+  command: chdir="{{ dcos_install_dir }}" ./dcos_install.sh slave
+  tags:
+    - dcos

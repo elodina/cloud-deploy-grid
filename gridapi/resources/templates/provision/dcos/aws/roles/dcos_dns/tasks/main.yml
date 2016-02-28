@@ -1,0 +1,70 @@
+---
+- name: install packages
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - dnsmasq
+  tags:
+    - dns
+
+- name: ensure dnsmasq.d directory exists
+  file:
+    path: /etc/dnsmasq.d
+    state: directory
+  tags:
+    - dns
+
+- name: configure dnsmasq common
+  template:
+    src: etc/dnsmasq.d/10-common.conf
+    dest: /etc/dnsmasq.d/10-common.conf
+    mode: 755
+  notify:
+    - restart dnsmasq
+  tags:
+    - dns
+
+- name: configure dnsmasq domain
+  template:
+    src: etc/dnsmasq.d/20-hosts.conf
+    dest: /etc/dnsmasq.d/20-hosts.conf
+    mode: 755
+  notify:
+    - restart dnsmasq
+  tags:
+    - dns
+
+- name: configure dcos dns servers
+  template:
+    src: etc/dnsmasq.d/30-dnsservers.conf
+    dest: /etc/dnsmasq.d/30-dnsservers.conf
+    mode: 755
+  notify:
+    - restart dnsmasq
+  tags:
+    - dnsmasq
+
+- name: configure dnsmasq general dns servers
+  template:
+    src: etc/dnsmasq.d/90-general-dns.conf
+    dest: /etc/dnsmasq.d/90-general-dns.conf
+    mode: 755
+  notify:
+    - restart dnsmasq
+  tags:
+    - dnsmasq
+
+- name: enable dnsmasq
+  service:
+    name: dnsmasq
+    state: started
+    enabled: yes
+  tags:
+    - dns
+
+- set_fact:
+    nameserver: "{{ ansible_default_ipv4.address }}"
+
+- meta: flush_handlers
+

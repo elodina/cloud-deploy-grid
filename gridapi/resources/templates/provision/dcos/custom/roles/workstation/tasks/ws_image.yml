@@ -1,0 +1,20 @@
+---
+- name: install nginx image
+  command: "docker pull nginx"
+  tags:
+    - terminal
+
+- name: install zk image
+  command: "docker pull jplock/zookeeper"
+  tags:
+    - terminal
+
+- name: zk container
+  docker:
+    name: dcos_int_zk
+    image: jplock/zookeeper
+    state: started
+    ports:
+    - "2181:2181"
+    - "2888:2888"
+    - "3888:3888"

@@ -1,0 +1,14 @@
+{
+  "bootstrap_url":"http://{{ nameserver }}:28080",
+  "grid_name": "{{ dns_domain }}",
+  "exhibitor_storage_backend": "zookeeper",
+  "exhibitor_zk_hosts": "{{ nameserver }}:2181",
+  "exhibitor_zk_path": "/dcos",
+  "master_discovery":"static",
+{% set masterlist = [] %}
+{% for host in groups['dcos_masters'] -%}
+{{ masterlist.append(hostvars[host]['ansible_eth0']['ipv4']['address'])|default("", True)  }}
+{%- endfor %}
+  "master_list": "[\"{{ masterlist | join('\\",\\"') }}\"]",
+  "resolvers": "[\"{{ nameserver }}\"]"
+}

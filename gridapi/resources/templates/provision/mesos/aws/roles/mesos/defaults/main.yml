@@ -1,0 +1,22 @@
+---
+mesos_mode: both
+mesos_zk_chroot: mesos
+mesos_zk_dns: "zookeeper.service.{{ consul_dc }}"
+mesos_zk_port: 2181
+mesos_zk_connect: "zk://{{ mesos_zk_dns }}:{{ mesos_zk_port }}/{{ mesos_zk_chroot }}"
+
+# Dirs
+mesos_work_dir: /var/lib/mesos/work_dir
+mesos_replicated_log_dir: "{{ mesos_work_dir }}/replicated_log"
+
+# Flags
+mesos_isolation: "cgroups/cpu,cgroups/mem"
+mesos_quorum: "{{ groups['mesos-masters'] | intersect(groups[grid]) | length // 2 + 1 }}"
+mesos_recovery_slave_removal_limit: 20%
+mesos_log_auto_initialize: ?no-log_auto_initialize
+mesos_resources: "ports:[4000-7000,31000-32000]"
+mesos_gcdelay: "1800"
+mesos_executor_registration_timeout: "900secs"
+
+# Misc
+mesos_do_framework_auth: false

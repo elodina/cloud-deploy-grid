@@ -1,0 +1,21 @@
+---
+- name: create json file for triceratops
+  template:
+    src: '{{ item }}.json.j2'
+    dest: /etc/marathon/{{ item }}.json
+  with_items:
+    - triceratops
+  tags:
+    - triceratops
+
+- name: start triceratops
+  run_once: true
+  command: 'curl -X PUT -d@/etc/marathon/{{ item }}.json -H "Content-Type: application/json" http://localhost:18080/v2/apps/{{ item }}'
+  changed_when: false
+  with_items:
+    - triceratops
+  tags:
+    - triceratops
+    - marathon-jobs
+  notify:
+    - reload consul

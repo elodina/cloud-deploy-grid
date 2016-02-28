@@ -1,0 +1,5 @@
+---
+- name: restart exhibitor
+  service:
+    name: exhibitor
+    state: restarted

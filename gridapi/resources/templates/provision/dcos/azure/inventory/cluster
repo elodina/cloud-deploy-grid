@@ -1,0 +1,34 @@
+[role={{ grid_name }}_terminal]
+[role={{ grid_name }}_mesos_master]
+{% for role in roles -%}
+[role={{ grid_name }}_{{ role }}]
+{% endfor %}
+
+[terminal:children]
+role={{ grid_name }}_terminal
+
+[publisher:children]
+terminal
+
+[dns:children]
+terminal
+
+#Top Level Group
+[{{ grid_name }}:children]
+role={{ grid_name }}_mesos_master
+{% for role in roles -%}
+role={{ grid_name }}_{{ role }}
+{% endfor %}
+
+[dcos_masters:children]
+role={{ grid_name }}_mesos_master
+
+[dcos_slaves:children]
+{% for role in roles -%}
+role={{ grid_name }}_{{ role }}
+{% endfor %}
+
+[deployment:children]
+terminal
+dcos_masters
+dcos_slaves

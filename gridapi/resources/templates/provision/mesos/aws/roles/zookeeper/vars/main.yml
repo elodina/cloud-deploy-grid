@@ -1,0 +1,5 @@
+---
+
+mirror: http://www.us.apache.org/dist/zookeeper/
+version: 3.4.6
+sha256sum: 01b3938547cd620dc4c93efe07c0360411f4a66962a70500b163b59014046994

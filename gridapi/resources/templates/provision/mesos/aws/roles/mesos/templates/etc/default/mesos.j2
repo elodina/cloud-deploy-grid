@@ -1,0 +1,11 @@
+# {{ ansible_managed }}
+
+# options supported by mesos-init-wrapper
+IP={{ ansible_default_ipv4.address }}
+CLUSTER="{{ grid }}"
+LOGS="{{ log_dir }}"
+ULIMIT="{{ ulimit }}"
+
+# environment variables
+export MESOS_HOSTNAME={{ ansible_hostname }}.node.{{ consul_dc }}
+#export MESOS_HOSTNAME={{ inventory_hostname }}

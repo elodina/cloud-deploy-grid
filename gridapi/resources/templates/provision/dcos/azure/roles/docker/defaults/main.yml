@@ -1,0 +1,4 @@
+---
+docker_rpm_packages:
+  - docker
+  - docker-python

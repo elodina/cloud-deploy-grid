@@ -1,0 +1,137 @@
+---
+- name: get consul
+  get_url:
+    url: "https://releases.hashicorp.com/consul/{{ consul_version }}/consul_{{ consul_version }}_linux_amd64.zip"
+    dest: /tmp/consul.zip
+  tags: 
+    - consul
+
+- name: extract consul binaries
+  unarchive:
+    src: /tmp/consul.zip
+    dest: /usr/local/bin
+    copy: no
+    creates: /usr/local/bin/consul
+  notify:
+    - restart consul
+  tags:
+    - consul
+
+- name: get consul-ui
+  get_url:
+    url: "https://releases.hashicorp.com/consul/{{ consul_version }}/consul_{{ consul_version }}_web_ui.zip"
+    dest: /tmp/consul_web_ui.zip
+  tags:
+    - consul
+
+- name: create ui directory
+  file:
+    path: /usr/share/consul-ui
+    state: directory
+  tags:
+    - consul
+
+- name: extract consul-ui
+  unarchive:
+    src: /tmp/consul_web_ui.zip
+    dest: /usr/share/consul-ui
+    copy: no
+    creates: /usr/share/consul-ui/dist
+  tags:
+    - consul
+
+- include: service.yml
+
+- name: create config directory
+  file:
+    path: /etc/consul
+    state: directory
+  tags:
+    - consul
+
+- name: configure consul
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: u=rw,g=r,o=r
+  with_items:
+    - src: etc/consul/consul.json.j2
+      dest: /etc/consul/consul.json
+  notify:
+    - restart consul
+  tags:
+    - consul
+
+- name: deploy tls files
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - src: etc/consul/ssl/cacert.pem
+      dest: /etc/consul/ssl/{{ consul_ca_file }}
+    - src: etc/consul/ssl/certs/consul.cert.pem
+      dest: /etc/consul/ssl/{{ consul_cert_file }}
+    - src: etc/consul/ssl/private/consul.key.pem
+      dest: /etc/consul/ssl/{{ consul_key_file }}
+  when: consul_do_ssl
+  notify:
+    - restart consul
+  tags:
+    - consul
+
+- name: configure consul acl policy
+  template:
+    src: etc/consul/acl.json.j2
+    dest: /etc/consul/acl.json
+  notify:
+    - restart consul
+  tags:
+    - consul
+
+- name: install consul scripts
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: u=rwx,g=rx,o=rx
+  with_items:
+    - src: usr/local/bin/consul-wait-for-leader.sh
+      dest: /usr/local/bin
+    - src: usr/local/bin/consul-rolling-restart.sh
+      dest: /usr/local/bin
+  tags:
+    - consul
+
+- name: install check scripts
+  template:
+    src: usr/local/bin/check-service-active.j2
+    dest: /usr/local/bin/check-service-active
+    mode: u=rwx,g=rx,o=rx
+  tags:
+    - consul
+
+- name: enable consul
+  service:
+    name: consul
+    enabled: yes
+    state: started
+  tags:
+    - consul
+
+# Give consul time to elect a leader
+- name: wait for leader
+  command: /usr/local/bin/consul-wait-for-leader.sh
+  register: leader_status
+  tags:
+    - consul
+
+- include: acl.yml
+  when: consul_do_acl
+
+- include: noacl.yml
+  when: not consul_do_acl
+
+- include: dnsmasq.yml
+
+- include: nginx_proxy.yml
+
+- meta: flush_handlers

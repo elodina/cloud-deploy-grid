@@ -1,0 +1,26 @@
+- hosts: terminal
+  any_errors_fatal: true
+  sudo: True
+  roles:
+    - users
+
+- hosts: deployment
+
+- hosts: tag_role_{{ grid_name }}_{{ role }}
+  any_errors_fatal: true
+  sudo: True
+  roles:
+    - users
+    - common
+    - dnsmasq
+    - docker
+    - consul
+    - consul-template
+
+- hosts: consul-servers
+
+- hosts: tag_role_{{ grid_name }}_{{ role }}
+  any_errors_fatal: true
+  sudo: True
+  roles:
+    - mesos-slave_{{ grid_name }}_{{ role }}

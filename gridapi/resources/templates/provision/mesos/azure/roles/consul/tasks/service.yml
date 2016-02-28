@@ -1,0 +1,10 @@
+---
+- name: register service with systemd
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - src: usr/lib/systemd/system/consul.service
+      dest: /usr/lib/systemd/system/consul.service
+  tags:
+    - consul

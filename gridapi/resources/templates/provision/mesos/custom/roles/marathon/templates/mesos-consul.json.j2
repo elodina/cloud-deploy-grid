@@ -1,0 +1,21 @@
+{
+  "args": [
+    "--zk=zk://zookeeper.service.{{ consul_dc }}:2181/mesos"{% if consul_do_ssl %},
+    "--registry-ssl",
+    "--registry-ssl-verify=false"{% endif %}{% if consul_do_auth %},
+    "--registry-auth=admin:{{ nginx_admin_password }}"{% endif %}{% if consul_do_acl %},
+    "--registry-token={{ consul_acl_master_token }}"{% endif %},
+    "--refresh={{ mesos_consul_refresh }}"
+  ],
+  "container": {
+    "type": "DOCKER",
+    "docker": {
+      "network": "BRIDGE",
+      "image": "{{ mesos_consul_image }}:{{ mesos_consul_image_tag }}"
+    }
+  },
+  "id": "mesos-consul",
+  "instances": 1,
+  "cpus": 0.1,
+  "mem": 128
+}

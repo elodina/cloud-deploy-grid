@@ -1,0 +1,62 @@
+---
+- name: create user manager
+  user:
+    name: manager
+    state: present
+  tags:
+    - users
+
+- name: create manager ssh directory
+  file:
+    path: /home/manager/.ssh
+    state: directory
+    mode: 0700
+  tags:
+    - users
+
+- name: update private key
+  template:
+    src: home/manager/.ssh/id_rsa
+    dest: /home/manager/.ssh/id_rsa
+    owner: manager
+    group: manager
+    mode: 0600
+  tags:
+    - users
+
+- name: update public key
+  template:
+    src: home/manager/.ssh/id_rsa.pub
+    dest: /home/manager/.ssh/id_rsa.pub
+    owner: manager
+    group: manager
+    mode: 0644
+  tags:
+    - users
+
+- name: manager sudo settings
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    line: "manager ALL=(ALL) NOPASSWD: ALL"
+  tags:
+    - users
+
+- name: capture public key
+  command: "cat /home/manager/.ssh/id_rsa.pub"
+  register: public_key_json
+  tags:
+    - users
+
+- name: get public key
+  set_fact:
+     manager_public_key: "{{ public_key_json.stdout }}"
+  tags:
+    - users
+
+- name: set manager authorized keys
+  authorized_key:
+    user: manager
+    key: "{{ manager_public_key }}"
+  tags:
+    - users

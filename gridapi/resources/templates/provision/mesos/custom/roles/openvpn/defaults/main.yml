@@ -1,0 +1,7 @@
+---
+vpn_packages:
+  - openvpn
+
+vpn_pip_packages:
+  - duo_client
+  - python-pam

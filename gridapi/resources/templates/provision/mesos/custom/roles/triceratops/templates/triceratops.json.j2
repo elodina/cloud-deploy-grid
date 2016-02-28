@@ -1,0 +1,24 @@
+{
+  "id": "{{ triceratops_id }}",
+  "cpus": {{ triceratops_cpus }},
+  "mem": {{ triceratops_mem }},
+  "instances": 1,
+  "cmd": "chmod +x triceratops && ./triceratops server --debug --api $HOST:$PORT0 --marathon http://{{ marathon_host }}:{{ marathon_port }} --cassandra {dse-mesos.cassandraConnect} --bootstrap low_bootstrap.stack",
+  "uris": [
+    "{{ triceratops_mirror }}/triceratops",
+    "{{ triceratops_mirror }}/low_bootstrap.stack"
+  ],
+  "ports": [{{ triceratops_port }}],
+  "requirePorts": true,
+  "healthChecks": [
+    {
+      "protocol": "HTTP",
+      "path": "/health",
+      "gracePeriodSeconds": 120,
+      "intervalSeconds": 60,
+      "portIndex": 0,
+      "timeoutSeconds": 30,
+      "maxConsecutiveFailures": 15
+    }
+  ]
+}

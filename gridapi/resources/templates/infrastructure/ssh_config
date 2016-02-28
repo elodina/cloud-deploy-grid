@@ -1,0 +1,31 @@
+Host {{ access_ip }}
+    StrictHostKeyChecking no
+    UserKnownHostsFile=/dev/null
+    LogLevel=ERROR
+    ForwardAgent yes
+    User {{ user }}
+    Port 22
+    TCPKeepAlive no
+    ConnectTimeout 60
+    ProxyCommand none
+    PasswordAuthentication no
+    BatchMode yes
+    ServerAliveCountMax 30
+    ServerAliveInterval 20
+    Compression yes
+
+Host *
+    StrictHostKeyChecking no
+    UserKnownHostsFile=/dev/null
+    LogLevel=ERROR
+    ForwardAgent yes
+    User {{ user }}
+    Port 22
+    TCPKeepAlive no
+    ConnectTimeout 60
+    PasswordAuthentication no
+    BatchMode yes
+    ServerAliveCountMax 30
+    ServerAliveInterval 20
+    Compression yes
+    ProxyCommand ssh -o ForwardAgent=yes -o Compression=yes -o ConnectTimeout=60 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o PasswordAuthentication=no -q -A {{ user }}@{{ access_ip }} -W %h:%p

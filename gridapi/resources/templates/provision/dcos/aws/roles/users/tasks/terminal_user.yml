@@ -1,0 +1,47 @@
+---
+- name: create user manager
+  user:
+    name: manager
+    state: present
+    generate_ssh_key: yes
+  tags:
+    - users
+
+- name: manager sudo settings
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    line: "manager ALL=(ALL) NOPASSWD: ALL"
+  tags:
+    - users
+
+- name: capture public key
+  command: "cat /home/manager/.ssh/id_rsa.pub"
+  register: public_key_json
+  tags:
+    - users
+
+- name: get public key
+  set_fact:
+     manager_public_key: "{{ public_key_json.stdout }}"
+  tags:
+    - users
+
+- name: capture private key
+  command: "cat /home/manager/.ssh/id_rsa"
+  register: private_key_json
+  tags:
+    - terminal
+
+- name: get private key
+  set_fact:
+     manager_private_key: "{{ private_key_json.stdout }}"
+  tags:
+    - users
+
+- name: set manager authorized keys
+  authorized_key:
+    user: manager
+    key: "{{ manager_public_key }}"
+  tags:
+    - users

@@ -1,0 +1,132 @@
+- name: install vpn packages
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "{{ vpn_packages }}"
+  tags:
+    - openvpn
+
+- name: install vpn pip packages
+  pip:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "{{ vpn_pip_packages }}"
+  tags:
+    - openvpn
+
+- name: enable forwarding
+  sysctl:
+    name: "net.ipv4.ip_forward"
+    value: 1
+    sysctl_set: yes
+  tags:
+    - terminal
+
+- name: set nat
+  command: "iptables -t nat -A POSTROUTING -s 192.168.164.0/24 -j MASQUERADE"
+  tags:
+    - openvpn
+
+- name: configure openvpn
+  copy:
+    src: "etc/openvpn/server.conf"
+    dest: "/etc/openvpn/server.conf"
+  notify: restart openvpn
+  tags:
+    - openvpn
+
+- name: create openvpn authenticator
+  template:
+    src: etc/openvpn/duoauth.py
+    dest: /etc/openvpn/duoauth.py
+    mode: 0755
+  tags:
+    - openvpn
+
+- name: create openvpn key directory
+  file:
+    path: "/etc/openvpn/keys"
+    state: directory
+  notify: restart openvpn
+  tags:
+    - openvpn
+
+- name: generate CA key
+  command: openssl req -nodes -newkey rsa -keyout ca-key.pem -out ca-csr.pem -days 3650 -subj /CN=OpenVPN-CA/
+    chdir=/etc/openvpn/keys
+    creates=ca-key.pem
+  notify: restart openvpn
+  tags:
+    - openvpn
+
+- name: sign CA key
+  command: openssl x509 -req -in ca-csr.pem -out ca.crt -CAcreateserial -signkey ca-key.pem -days 3650
+    chdir=/etc/openvpn/keys
+    creates=ca.crt
+  notify: restart openvpn
+  tags:
+    - openvpn
+
+- name: generate server key
+  command: openssl req -nodes -newkey rsa -keyout server.key -out server.csr -days 3650 -subj /CN=OpenVPN/
+    chdir=/etc/openvpn/keys
+    creates=server.key
+  notify: restart openvpn
+  tags:
+    - openvpn
+
+- name: protect server key
+  file:
+    path: /etc/openvpn/keys/server.key
+    mode: 0400
+  notify: restart openvpn
+  tags:
+    - openvpn
+
+- name: generate CA serial
+  shell: echo "01" > ca.srl
+    chdir=/etc/openvpn/keys
+    creates=ca.srl
+  notify: restart openvpn
+  tags:
+    - openvpn
+
+- name: copy openssl server extension config
+  copy:
+    src: etc/openvpn/keys/openssl-server.ext
+    dest: /etc/openvpn/keys
+    owner: root
+    group: root
+    mode: 0400
+  notify: restart openvpn
+  tags:
+    - openvpn
+
+- name: sign server key
+  command: openssl x509 -req -in server.csr -out server.crt -CA ca.crt -CAkey ca-key.pem -days 3650 -extfile openssl-server.ext
+    chdir=/etc/openvpn/keys
+    creates=server.crt
+  notify: restart openvpn
+  tags:
+    - openvpn
+
+- name: generate tls-auth key
+  command: openvpn --genkey --secret ta.key
+    chdir=/etc/openvpn/keys
+    creates=ta.key
+  notify: restart openvpn
+  tags:
+    - openvpn
+
+- name: copy pre-generated DH params
+  copy:
+    src: etc/openvpn/keys/dh.pem
+    dest: /etc/openvpn/keys
+    owner: root
+    group: root
+    mode: 0400
+  notify: restart openvpn
+  tags:
+    - openvpn

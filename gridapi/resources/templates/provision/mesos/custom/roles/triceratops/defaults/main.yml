@@ -1,0 +1,13 @@
+---
+triceratops_mirror: https://triceratops.s3.amazonaws.com
+
+triceratops_id: triceratops
+triceratops_cpus: 0.5
+triceratops_mem: 512
+marathon_host: "leader.mesos.service.{{ consul_dc }}"
+marathon_port: 18080
+
+triceratops_framework_name: "triceratops"
+
+triceratops_host: "{{ triceratops_id }}.service.{{ consul_dc }}"
+triceratops_port: 31333

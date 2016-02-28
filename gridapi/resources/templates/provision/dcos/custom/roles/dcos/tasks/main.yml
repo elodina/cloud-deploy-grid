@@ -1,0 +1,23 @@
+---
+- name: Create DCOS dirs
+  file:
+    path: "{{ item }}"
+    state: directory
+    recurse: yes
+    mode: "0775"
+  with_items:
+     - "{{ dcos_install_dir }}"
+
+- name: Download DCOS install script
+  get_url:
+    url: "http://{{ nameserver }}:28080/dcos_install.sh"
+    dest: "{{ dcos_install_dir }}"
+    mode: 0755
+
+- include: master.yml
+  when: dcos_mode == 'master' or dcos_mode == 'both'
+
+- include: slave.yml
+  when: dcos_mode == 'slave' or dcos_mode == 'both'
+
+- meta: flush_handlers

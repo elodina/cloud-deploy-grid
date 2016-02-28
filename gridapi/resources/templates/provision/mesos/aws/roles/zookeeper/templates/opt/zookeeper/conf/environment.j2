@@ -1,0 +1,13 @@
+# {{ ansible_managed }}
+
+NAME=zookeeper
+
+USER=root
+GROUP=root
+
+ZOOLOGDIR=/var/log/$NAME
+ZOODATADIR="{{ zookeeper_data_dir }}"
+
+# TODO
+#USER=$NAME
+#GROUP=$NAME

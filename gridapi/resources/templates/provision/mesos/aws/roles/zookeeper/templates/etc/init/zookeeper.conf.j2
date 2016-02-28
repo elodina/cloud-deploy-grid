@@ -1,0 +1,23 @@
+# {{ ansible_managed }}
+
+description "ZooKeeper"
+
+limit nofile 32768 32768
+
+start on runlevel [2345]
+stop on [!12345]
+
+respawn
+respawn limit 2 5
+
+umask 007
+
+kill timeout 300
+
+script
+	. /opt/zookeeper/conf/environment
+    exec /opt/zookeeper/bin/zkServer.sh start-foreground
+end script
+
+# TODO
+# set uid and gid, fix logging
