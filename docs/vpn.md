@@ -4,7 +4,7 @@ Mesos Grid VPN Access
 OpenVPN for MacOS Setup:
 
 1. Install Tunnelblick
-2. go to curl -X http://localhost:5555/api/v1.0/grids/${grid_name}/deployment/infrastructure and get _accessip parameter
+2. go to curl -X http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure and get _accessip parameter
 3. ssh to _accessip, and create there some users and passwd them, using commands adduser/passwd respectively, eg:
 
 ```adduser vpnuser1```
@@ -13,7 +13,7 @@ OpenVPN for MacOS Setup:
 
 3. get OpenVPN config:
 ```
-echo -e `curl -qs http://localhost:5555/api/v1.0/grids/${grid_name}/deployment/vpn | tr -d '"'`
+echo -e `curl -qs http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/vpn | tr -d '"'`
 ```
 4. Save config as ${grid_name}.ovpn file
 5. ssh to _accessip and save /etc/openvpn/keys/ca.crt near ${grid_name}.ovpn file
@@ -40,7 +40,7 @@ DCOS Grid VPN Access
 OpenVPN for MacOS Setup:
 
 1. Install Tunnelblick
-2. go to curl http://localhost:5555/api/v1.0/grids/${grid_name}/deployment/infrastructure and save _accessip parameter
+2. go to curl http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure and save _accessip parameter
 3. ssh to _accessip, and create there some users and passwd them, using commands adduser/passwd respectively, eg:
 
 ```adduser vpnuser1```
@@ -49,7 +49,7 @@ OpenVPN for MacOS Setup:
 
 3. get OpenVPN config:
 ```
-echo -e `curl -qs http://localhost:5555/api/v1.0/grids/${grid_name}/deployment/vpn | tr -d '"'`
+echo -e `curl -qs http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/vpn | tr -d '"'`
 ```
 4. Save config as ${grid_name}.ovpn file
 5. ssh to _accessip and save /etc/openvpn/keys/ca.crt near ${grid_name}.ovpn file

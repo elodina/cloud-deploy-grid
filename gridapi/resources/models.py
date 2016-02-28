@@ -2,7 +2,7 @@ import json
 from peewee import SqliteDatabase, Model, BooleanField, CharField,\
     ForeignKeyField, IntegerField, TextField
 
-db = SqliteDatabase('grid.db', pragmas=(
+db = SqliteDatabase('grids.db', pragmas=(
     ('foreign_keys', 'ON'),
 ))
 
