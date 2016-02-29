@@ -1,0 +1,20 @@
+[Unit]
+Description=Exhibitor is a Java supervisor system for ZooKeeper.
+Documentation=https://github.com/Netflix/exhibitor/wiki
+After=zookeeper.service
+Wants=network-online.target
+
+[Service]
+User=root
+Group=root
+ExecStart=/usr/bin/java -jar \
+        {{ exhibitor_install_dir }}/exhibitor-{{ exhibitor_version}}.jar \
+        --defaultconfig {{ exhibitor_defaultconfig }} \
+        --configtype zookeeper --port {{ exhibitor_port }} \
+        --zkconfigconnect {{ exhibitor_zkconfigconnect }} \
+        --zkconfigzpath {{ exhibitor_zkconfigzpath }}
+ExecReload=/bin/kill -HUP $MAINPID
+KillSignal=SIGINT
+
+[Install]
+WantedBy=multi-user.target
