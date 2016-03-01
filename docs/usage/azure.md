@@ -23,7 +23,7 @@ curl http://localhost:5555/api/v2.0/grids/${grid_name}/groups -X POST -d "name=$
 Deploy grid's infrastructure
 
 ```
-curl http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure -X PUT -d "credentials=`cat credentials | base64 | tr '+/' '-_'`"
+curl http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure -X PUT --data-urlencode "credentials=`cat credentials`"
 ```
 
 Provision grid
@@ -35,7 +35,7 @@ curl http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/provision -X P
 Destroy grid
 
 ```
-curl http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure -X DELETE -d "credentials=`cat credentials | base64 | tr '+/' '-_'`"
+curl http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure -X DELETE --data-urlencode "credentials=`cat credentials`"
 ```
 
 Delete grid configs, etc
@@ -106,7 +106,7 @@ curl -X POST -d "name=${grid_name}" -d "provider=custom" -d "type=dcos" http://l
 Update config
 
 ```
-curl -X PUT -d "mastersips=172.29.15.83,172.29.15.225,172.29.14.184" -d "terminalips=52.71.23.21,172.29.13.62" -d "ssh_user=centos" -d "sshkeydata=`cat ~/.ssh/reference.pem | base64 -w 0 | tr '+/' '-_'`" http://localhost:5555/api/v2.0/grids/${grid_name}/config
+curl -X PUT -d "mastersips=172.29.15.83,172.29.15.225,172.29.14.184" -d "terminalips=52.71.23.21,172.29.13.62" -d "ssh_user=centos" --data-urlencode "sshkeydata=`cat ~/.ssh/reference.pem`" http://localhost:5555/api/v2.0/grids/${grid_name}/config
 ```
 
 Create group of slaves
@@ -118,7 +118,7 @@ curl -X POST -d "groupips=172.29.5.134,172.29.12.227,172.29.9.93" -d "name=infra
 Deploy grid's infrastructure
 
 ```
-curl http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure -X PUT -d "credentials=`cat credentials | base64 | tr '+/' '-_'`"
+curl http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure -X PUT
 ```
 
 Provision grid

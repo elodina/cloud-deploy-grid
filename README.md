@@ -138,7 +138,7 @@ curl -X DELETE http://localhost:5555/api/v2.0/grids/${grid_name}/config
 PUT - change grids config:
 
 ```
-curl -X PUT -d "master_type=m3.large" -d "masters=3" -d region="us-west-2" -d "sshkey=reference" -d "sshkeydata=`cat ~/.ssh/reference.pem | base64 -w 0 | tr '+/' '-_'`" http://localhost:5555/api/v2.0/grids/${grid_name}/config
+curl -X PUT -d "master_type=m3.large" -d "masters=3" -d region="us-west-2" -d "sshkey=reference" --data-urlencode "sshkeydata=`cat ~/.ssh/reference.pem`" http://localhost:5555/api/v2.0/grids/${grid_name}/config
 ```
 
 required parameters:
@@ -147,13 +147,13 @@ common:
 masters(number of masters hosts)
 
 aws:
-master_type(AWS instance type for master, default m3.large), region(AWS region for grid), sshkey(AWS ssh key name), sshkeydata(Private path of ssh key, encoded with BASE64)
+master_type(AWS instance type for master, default m3.large), region(AWS region for grid), sshkey(AWS ssh key name), sshkeydata(Private path of ssh key, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
 
 azure:
 master_type(Azure instance type for master, default is Basic_A2), location(Azure location for grid in format like "Central US"), ssh_user(user for ssh login), ssh_password(password for ssh user and sudo)
 
 custom:
-mastersips(Comma separated list of masters ips), terminalips(<terminal_external_ip>,<terminal_internal_ip>), ssh_user(ssh user for connection), sshkeydata(Private part of ssh key, encoded with BASE64)
+mastersips(Comma separated list of masters ips), terminalips(<terminal_external_ip>,<terminal_internal_ip>), ssh_user(ssh user for connection), sshkeydata(Private part of ssh key, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
 
 
 Grid Slave group list API Requests
@@ -294,12 +294,12 @@ PUT - deploy grid's infrastructure(virtual machines, networks, etc), example:
 
 AWS:
 ```
-curl -X PUT -d "aws_access_key_id=${key_id}" -d "aws_secret_access_key=${secret}" http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure
+curl -X PUT --data-urlencode "aws_access_key_id=${key_id}" --data-urlencode "aws_secret_access_key=${secret}" http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure
 ```
 
 AZURE:
 ```
-curl -X PUT -d "credentials=`cat credentials | base64 -w 0 | tr '+/' '-_'`" http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure
+curl -X PUT --data-urlencode "credentials=`cat credentials`" http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure
 ```
 
 CUSTOM:
@@ -313,10 +313,10 @@ common:
 parallelism(number of deploy threads, higher number increase deployment speed, but may cause instability, default is 5)
 
 aws:
-aws_access_key_id(self descriptive), aws_secret_access_key(self descriptive)
+aws_access_key_id(self descriptive,URL-encoded, e.g. curl --data-urlencode "${key}=${value}"), aws_secret_access_key(self descriptive,URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
 
 azure:
-credentials(credentials file, can be aquired here: https://manage.windowsazure.com/publishsettings )
+credentials(credentials file, can be aquired here: https://manage.windowsazure.com/publishsettings, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
 
 
 Grid Provision API Requests
@@ -338,7 +338,7 @@ PUT - run grid's provision(install software, configure settings, etc), example:
 
 AWS:
 ```
-curl -X PUT -d "aws_access_key_id=${key_id}" -d "aws_secret_access_key=${secret}" http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/provision
+curl -X PUT --data-urlencode "aws_access_key_id=${key_id}" --data-urlencode "aws_secret_access_key=${secret}" http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/provision
 ```
 
 AZURE:
@@ -355,14 +355,14 @@ required parameters:
 
 aws:
 
-aws_access_key_id(self descriptive), aws_secret_access_key(self descriptive)
+aws_access_key_id(self descriptive,URL-encoded, e.g. curl --data-urlencode "${key}=${value}"), aws_secret_access_key(self descriptive,URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
 
 
 optional parameters:
 
 common:
 
-duo_ikey, duo_skey, duo_host - duo security api parameters(duo.com) for vpn auth
+duo_ikey, duo_skey, duo_host - duo security api parameters(duo.com) for vpn auth, URL-encoded, e.g. curl --data-urlencode "${key}=${value}"
 PREREQUISITS FOR MFA:
 1) Created application at duo.com(Auth API)
 

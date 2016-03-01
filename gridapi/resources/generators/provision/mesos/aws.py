@@ -3,7 +3,7 @@ import yaml
 import jinja2
 import subprocess
 import os
-import base64
+import urllib
 from gridapi.resources.models import GridEntity, configs, groups
 
 class AutoDict(dict):
@@ -17,8 +17,8 @@ class AutoDict(dict):
 class aws_provision_mesos_generator(object):
     def __init__(self, grid_name, aws_access_key_id,
                  aws_secret_access_key, **kwargs):
-        self.aws_access_key_id = aws_access_key_id
-        self.aws_secret_access_key = aws_secret_access_key
+        self.aws_access_key_id = urllib.unquote(aws_access_key_id)
+        self.aws_secret_access_key = urllib.unquote(aws_secret_access_key)
         self.kwargs = kwargs
         self.grid_name = grid_name
         self.current_grid = GridEntity.select().where(
@@ -69,8 +69,7 @@ class aws_provision_mesos_generator(object):
     def generate_ssh_key(self):
         with open('result/{}/grid.pem'.format(
                 self.grid_name), 'w+') as ssh_key:
-            ssh_key.write(base64.urlsafe_b64decode(
-                self.current_config.sshkeydata.encode('utf-8')))
+            ssh_key.write(urllib.unquote(self.current_config.sshkeydata))
 
     def generate_group_vars_all(self):
         path = 'result/{}/group_vars/all'.format(self.grid_name)

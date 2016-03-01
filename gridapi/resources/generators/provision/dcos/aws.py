@@ -2,7 +2,7 @@ import json
 import jinja2
 import subprocess
 import os
-import base64
+import urllib
 from gridapi.resources.models import GridEntity, configs, groups
 
 class AutoDict(dict):
@@ -69,7 +69,7 @@ class aws_provision_dcos_generator(object):
 
     def generate_ssh_key(self):
         with open('result/{}/grid.pem'.format(self.grid_name), 'w+') as ssh_key:
-            ssh_key.write(base64.urlsafe_b64decode(self.current_config.sshkeydata.encode('utf-8')))
+            ssh_key.write(urllib.unquote(self.current_config.sshkeydata))
 
     def generate_group_vars_all(self):
         path = 'result/{}/group_vars/all'.format(self.grid_name)

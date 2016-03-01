@@ -49,6 +49,5 @@ class ConfigHandler(Resource):
         for key in config._data.keys():
             if key != 'id' and key != 'parentgrid':
                 setattr(config, key, args[key])
-
         config.save()
         return ast.literal_eval(str(config)), 200

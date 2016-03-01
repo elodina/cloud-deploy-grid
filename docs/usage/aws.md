@@ -10,7 +10,7 @@ curl -X POST -d "name=${grid_name}" -d "provider=aws" -d "type=mesos" http://loc
 Update config
 
 ```
-curl -X PUT -d "master_type=m3.large" -d "masters=3" -d region="us-west-2" -d "sshkey=reference" -d "sshkeydata=`cat ~/.ssh/reference.pem | base64 -w 0 | tr '+/' '-_'`" http://localhost:5555/api/v2.0/grids/${grid_name}/config
+curl -X PUT -d "master_type=m3.large" -d "masters=3" -d region="us-west-2" -d "sshkey=reference" --data-urlencode "sshkeydata=`cat ~/.ssh/reference.pem`" http://localhost:5555/api/v2.0/grids/${grid_name}/config
 ```
 
 Create group of slaves
@@ -22,13 +22,13 @@ curl -X POST -d "name=${group_name}" -d "role=role1" -d "attributes={\"foo\":\" 
 Deploy grid's infrastructure
 
 ```
-curl -X PUT -d aws_access_key_id=${key_id} -d "aws_secret_access_key=${secret}" http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure
+curl -X PUT --data-urlencode aws_access_key_id=${key_id} --data-urlencode "aws_secret_access_key=${secret}" http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure
 ```
 
 Provision grid
 
 ```
-curl -X PUT http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/provision
+curl -X PUT --data-urlencode aws_access_key_id=${key_id} --data-urlencode "aws_secret_access_key=${secret}" http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/provision
 ```
 
 Change slaves group size:
@@ -40,19 +40,19 @@ curl -X POST -d "name=${group_name}" -d "role=role1" -d "attributes={\"purpose\"
 Apply changes to infrastructure
 
 ```
-curl -X PUT -d aws_access_key_id=${key_id} -d "aws_secret_access_key=${secret}" http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure
+curl -X PUT --data-urlencode aws_access_key_id=${key_id} --data-urlencode "aws_secret_access_key=${secret}" http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure
 ```
 
 Provision fresh nodes
 
 ```
-curl -X PUT http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/provision
+curl -X PUT --data-urlencode aws_access_key_id=${key_id} --data-urlencode "aws_secret_access_key=${secret}" http://localhost:5555/api/v2.0/grids/${grid_name}/groups/${group_name}/provision
 ```
 
 Destroy grid
 
 ```
-curl -X DELETE -d aws_access_key_id=${key_id} -d "aws_secret_access_key=${secret}" http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure
+curl -X DELETE --data-urlencode aws_access_key_id=${key_id} --data-urlencode "aws_secret_access_key=${secret}" http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure
 ```
 
 Delete grids config, etc:

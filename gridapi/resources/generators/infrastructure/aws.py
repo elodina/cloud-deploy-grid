@@ -3,7 +3,7 @@ import json
 import os
 import subprocess
 import re
-import base64
+import urllib
 from gridapi.resources.models import GridEntity, configs, groups
 
 
@@ -38,8 +38,8 @@ class aws_infrastructure_generator(object):
     def __init__(self, grid_name, aws_access_key_id,
                  aws_secret_access_key, **kwargs):
         self.grid_name = grid_name
-        self.aws_access_key_id = aws_access_key_id
-        self.aws_secret_access_key = aws_secret_access_key
+        self.aws_access_key_id = urllib.unquote(aws_access_key_id)
+        self.aws_secret_access_key = urllib.unquote(aws_secret_access_key)
         self.current_grid = GridEntity.select().where(
             GridEntity.name == grid_name).get()
         self.current_config =\
@@ -487,8 +487,7 @@ class aws_infrastructure_generator(object):
     def generate_ssh_key(self):
         with open('result/{}/grid.pem'.format(
                 self.grid_name), 'w+') as ssh_key:
-            ssh_key.write(base64.urlsafe_b64decode(
-                self.current_config.sshkeydata.encode('utf-8')))
+            ssh_key.write(urllib.unquote(self.current_config.sshkeydata))
 
     def generate_all(self):
         os.environ['AWS_ACCESS_KEY_ID'] = '{}'.format(self.aws_access_key_id)
