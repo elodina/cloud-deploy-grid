@@ -1,0 +1,45 @@
+[terminal]
+{{ terminal_ip }}
+
+[{{ grid_name }}_mesos_master]
+{% for master_ip in masters_ips -%}
+{{ master_ip }}
+{% endfor %}
+{% for role, slave_ips in groups.iteritems() -%}
+[{{ grid_name }}_{{ role }}]
+{% for slave_ip in slave_ips -%}
+{{ slave_ip }}
+{% endfor %}
+{% endfor %}
+
+#Publisher
+[publisher:children]
+terminal
+
+#Top Level Group
+[{{ grid_name }}:children]
+{{ grid_name }}_mesos_master
+{% for role in roles -%}
+{{ grid_name }}_{{ role }}
+{% endfor %}
+
+#Services
+[consul-servers:children]
+{{ grid_name }}_mesos_master
+
+[mesos-masters:children]
+{{ grid_name }}_mesos_master
+
+[mesos-slaves:children]
+{% for role in roles -%}
+{{ grid_name }}_{{ role }}
+{% endfor %}
+
+[zookeepers:children]
+mesos-masters
+
+[deployment:children]
+terminal
+consul-servers
+mesos-masters
+mesos-slaves

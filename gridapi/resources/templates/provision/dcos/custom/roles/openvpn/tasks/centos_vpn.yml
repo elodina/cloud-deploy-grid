@@ -120,13 +120,21 @@
   tags:
     - openvpn
 
-- name: copy pre-generated DH params
-  copy:
-    src: etc/openvpn/keys/dh.pem
-    dest: /etc/openvpn/keys
-    owner: root
-    group: root
-    mode: 0400
+#- name: copy pre-generated DH params
+#  copy:
+#    src: etc/openvpn/keys/dh.pem
+#    dest: /etc/openvpn/keys
+#    owner: root
+#    group: root
+#    mode: 0400
+#  notify: restart openvpn
+#  tags:
+#    - openvpn
+
+- name: generate dh params
+  command: openssl dhparam -out /etc/openvpn/keys/dh.pem 2048
+    chdir=/etc/openvpn/keys
+    creates=dh.pem
   notify: restart openvpn
   tags:
     - openvpn

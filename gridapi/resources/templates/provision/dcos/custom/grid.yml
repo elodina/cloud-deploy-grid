@@ -1,0 +1,40 @@
+- hosts: dcos_masters
+
+- hosts: terminal
+  any_errors_fatal: true
+  sudo: True
+  roles:
+    - users
+    - dcos_dns
+    - terminal
+    - common
+    - docker
+    - openvpn
+
+- hosts: terminal
+  any_errors_fatal: true
+  sudo: True
+  roles:
+    - workstation
+
+- hosts: deployment
+  any_errors_fatal: true
+  sudo: True
+  roles:
+    - users
+    - common
+    - docker
+
+- hosts: dcos_masters
+  any_errors_fatal: true
+  sudo: True
+  roles:
+    - dcos
+
+{% for role in roles -%}
+- hosts: {{ grid_name }}_{{ role }}
+  any_errors_fatal: true
+  sudo: True
+  roles:
+    - dcos
+{% endfor %}
