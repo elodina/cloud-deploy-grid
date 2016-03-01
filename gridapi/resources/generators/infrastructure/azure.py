@@ -1,7 +1,7 @@
 import ast
 import json
 import os
-import base64
+import urllib
 from gridapi.resources.models import GridEntity, configs, groups
 
 
@@ -17,7 +17,7 @@ class AutoDict(dict):
 class azure_infrastructure_generator(object):
     def __init__(self, grid_name, credentials, **kwargs):
         self.grid_name = grid_name
-        self.credentials = base64.urlsafe_b64decode(credentials.encode('utf-8'))
+        self.credentials = urllib.unquote(credentials)
         self.current_grid = GridEntity.select().where(
             GridEntity.name == grid_name).get()
         self.current_config = configs[

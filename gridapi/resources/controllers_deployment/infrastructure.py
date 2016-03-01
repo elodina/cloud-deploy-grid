@@ -4,6 +4,7 @@ import os
 import ast
 import subprocess
 import shutil
+import urllib
 from retrying import retry
 from flask_restful import Resource, abort
 from gridapi.resources.parsers import infrastructure_deploymentparsers
@@ -168,7 +169,7 @@ class InfrastructureDeploymentHandler(Resource):
             if key != 'id' and key != 'parentgrid' and key !=\
                     '_lock' and key != '_status' and key !=\
                     '_accessip' and key != '_state':
-                setattr(infrastructure_deployment, key, args[key])
+                setattr(infrastructure_deployment, key, urllib.unquote(args[key]))
         infrastructure_deployment.save()
         def do_deploy():
             def _aws_get_access_ip(grid_name):

@@ -20,7 +20,7 @@ awsconfig_parser.add_argument(
     'sshkey', required=True, help='AWS ssh keypair name')
 awsconfig_parser.add_argument(
     'sshkeydata', required=True,
-    help='AWS ssh key private part, BASE64 encoded')
+    help='AWS ssh key private part, URL encoded')
 awsconfig_parser.add_argument(
     'ssh_user', default='centos', help='SSH user for VMs')
 
@@ -43,7 +43,7 @@ customconfig_parser.add_argument(
     'ssh_user', required=True, help='SSH user for VMs')
 customconfig_parser.add_argument(
     'sshkeydata', required=True,
-    help='ssh key private part, BASE64 encoded')
+    help='ssh key private part, URL encoded')
 customconfig_parser.add_argument(
     'mastersips', required=True,
     help='comma separated list of master ip addresses, 3 or 5')
@@ -57,32 +57,32 @@ infrastructure_deployment_parser = deployment_parser.copy()
 
 provision_deployment_parser = deployment_parser.copy()
 provision_deployment_parser.add_argument(
-    'duo_ikey', help='duo.com ikey for api access', default='')
+    'duo_ikey', help='duo.com ikey for api access, URL encoded', default='')
 provision_deployment_parser.add_argument(
-    'duo_skey', help='duo.com skey for api access', default='')
+    'duo_skey', help='duo.com skey for api access, URL encoded', default='')
 provision_deployment_parser.add_argument(
-    'duo_host', help='duo.com host for api access', default='')
+    'duo_host', help='duo.com host for api access, URL encoded', default='')
 
 aws_infrastructure_deployment_parser = infrastructure_deployment_parser.copy()
 aws_infrastructure_deployment_parser.add_argument(
     'parallelism', type=int, default=5, help='Terraform deployment threads')
 aws_infrastructure_deployment_parser.add_argument(
-    'aws_access_key_id', required=True, help='AWS Access key ID')
+    'aws_access_key_id', required=True, help='AWS Access key ID, URL encoded')
 aws_infrastructure_deployment_parser.add_argument(
-    'aws_secret_access_key', required=True, help='AWS Access key secret')
+    'aws_secret_access_key', required=True, help='AWS Access key secret, URL encoded')
 
 aws_provision_deployment_parser = provision_deployment_parser.copy()
 aws_provision_deployment_parser.add_argument(
-    'aws_access_key_id', required=True, help='AWS Access key ID')
+    'aws_access_key_id', required=True, help='AWS Access key ID, URL encoded')
 aws_provision_deployment_parser.add_argument(
-    'aws_secret_access_key', required=True, help='AWS Access key secret')
+    'aws_secret_access_key', required=True, help='AWS Access key secret, URL encoded')
 
 azure_infrastructure_deployment_parser = infrastructure_deployment_parser.copy()
 azure_infrastructure_deployment_parser.add_argument(
     'parallelism', type=int, default=5, help='Terraform deployment threads')
 azure_infrastructure_deployment_parser.add_argument(
     'credentials', required=True,
-    help='Azure credentials file, BASE64 encoded')
+    help='Azure credentials file, URL encoded')
 
 azure_provision_deployment_parser = provision_deployment_parser.copy()
 
