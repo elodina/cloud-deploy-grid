@@ -1,0 +1,38 @@
+[terminal]
+{{ terminal_ip }}
+[{{ grid_name }}_mesos_master]
+{% for master_ip in masters_ips -%}
+{{ master_ip }}
+{% endfor %}
+{% for role, slave_ips in groups.iteritems() -%}
+[{{ grid_name }}_{{ role }}]
+{% for slave_ip in slave_ips -%}
+{{ slave_ip }}
+{% endfor %}
+{% endfor %}
+
+[publisher:children]
+terminal
+
+[dns:children]
+terminal
+
+#Top Level Group
+[{{ grid_name }}:children]
+{{ grid_name }}_mesos_master
+{% for role in roles -%}
+{{ grid_name }}_{{ role }}
+{% endfor %}
+
+[dcos_masters:children]
+{{ grid_name }}_mesos_master
+
+[dcos_slaves:children]
+{% for role in roles -%}
+{{ grid_name }}_{{ role }}
+{% endfor %}
+
+[deployment:children]
+terminal
+dcos_masters
+dcos_slaves
