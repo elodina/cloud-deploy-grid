@@ -362,6 +362,8 @@ optional parameters:
 
 common:
 
+vpn_enabled - by default == 'True', if True - enable VPN server provisioinig, otherwise - disable
+
 duo_ikey, duo_skey, duo_host - duo security api parameters(duo.com) for vpn auth, URL-encoded, e.g. curl --data-urlencode "${key}=${value}"
 PREREQUISITS FOR MFA:
 1) Created application at duo.com(Auth API)
