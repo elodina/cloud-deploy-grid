@@ -62,6 +62,8 @@ provision_deployment_parser.add_argument(
     'duo_skey', help='duo.com skey for api access, URL encoded', default='')
 provision_deployment_parser.add_argument(
     'duo_host', help='duo.com host for api access, URL encoded', default='')
+provision_deployment_parser.add_argument(
+    'vpn_enabled', help='VPN flag, True by default', default='True')
 
 aws_infrastructure_deployment_parser = infrastructure_deployment_parser.copy()
 aws_infrastructure_deployment_parser.add_argument(
