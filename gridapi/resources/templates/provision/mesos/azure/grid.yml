@@ -6,9 +6,10 @@
     - common
     - dnsmasq
     - docker
-{% if vpn_enabled -%}
+{%- if vpn_enabled == 'True' %}
     - openvpn
 {% endif %}
+
 
 - hosts: deployment
   any_errors_fatal: true
