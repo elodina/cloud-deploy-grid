@@ -133,6 +133,7 @@ class aws_provision_mesos_generator(object):
         variables = {}
         variables['grid_name'] = self.grid_name
         variables['roles'] = self.current_roles
+        variables['vpn_enabled'] = self.kwargs['vpn_enabled']
         self._generate_template(path, variables)
 
     def generate_groups_runlists(self):

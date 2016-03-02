@@ -9,7 +9,10 @@
     - terminal
     - common
     - docker
+{%- if vpn_enabled == 'True' %}
     - openvpn
+{% endif %}
+
 
 - hosts: terminal
   any_errors_fatal: true

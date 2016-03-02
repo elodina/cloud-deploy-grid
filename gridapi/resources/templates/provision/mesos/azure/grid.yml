@@ -4,9 +4,12 @@
   roles:
     - users
     - common
-    - openvpn
     - dnsmasq
     - docker
+{%- if vpn_enabled == 'True' %}
+    - openvpn
+{% endif %}
+
 
 - hosts: deployment
   any_errors_fatal: true
