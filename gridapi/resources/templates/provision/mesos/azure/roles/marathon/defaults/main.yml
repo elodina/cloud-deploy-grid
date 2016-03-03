@@ -32,10 +32,10 @@ consul_nginx_image_tag: 1.1
 
 # jobs
 mesos_consul_image: ciscocloud/mesos-consul
-mesos_consul_image_tag: v0.2.1
+mesos_consul_image_tag: v0.3.2
 mesos_consul_refresh: "7s"
-marathon_consul_image: brianhicks/marathon-consul
-marathon_consul_image_tag: latest
+marathon_consul_image: ciscocloud/marathon-consul
+marathon_consul_image_tag: 0.2
 
 # security
 marathon_do_ssl: false
