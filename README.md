@@ -1,4 +1,4 @@
-Cluster API
+Grid API
 ===========
 
 Table of Contents
