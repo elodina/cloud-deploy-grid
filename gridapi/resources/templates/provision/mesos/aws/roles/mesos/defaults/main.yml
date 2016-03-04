@@ -1,5 +1,5 @@
 ---
-mesos_version: 0.27.0
+mesos_version: 0.23.0
 mesos_mode: both
 mesos_zk_chroot: mesos
 mesos_zk_dns: "zookeeper.service.{{ consul_dc }}"
