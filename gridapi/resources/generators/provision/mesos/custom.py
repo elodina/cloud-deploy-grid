@@ -79,6 +79,7 @@ class custom_provision_mesos_generator(object):
         path = 'result/{}/group_vars/all'.format(self.grid_name)
         variables = AutoDict()
         hosts_entries = AutoDict()
+        vars_json = json.loads(self.current_config.vars)
         for group in self.current_groups:
             for ip in group.groupips.split(','):
                 hostname = ip.replace('.','-')
@@ -94,6 +95,7 @@ class custom_provision_mesos_generator(object):
             hosts_entries['hosts'][str(terminal_host)] = str(terminal_ip)
         variables['hosts'] = json.dumps(hosts_entries['hosts'])
         variables['grid_name'] = self.current_grid.name
+        variables['other_vars'] = json.dumps(vars_json)
         self._generate_template(path, variables)
 
     def generate_group_vars_roles(self):

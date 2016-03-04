@@ -76,6 +76,7 @@ class custom_provision_dcos_generator(object):
         path = 'result/{}/group_vars/all'.format(self.grid_name)
         variables = AutoDict()
         hosts_entries = AutoDict()
+        vars_json = json.loads(self.current_config.vars)
         for group in self.current_groups:
             for ip in group.groupips.split(','):
                 hostname = ip.replace('.','-')

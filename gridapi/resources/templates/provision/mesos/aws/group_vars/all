@@ -9,3 +9,5 @@ hosts: {{ hosts }}
 consul_do_ssl: no
 consul_do_acl: no
 consul_do_auth: no
+
+{{ other_vars }}

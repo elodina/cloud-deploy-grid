@@ -11,7 +11,7 @@
     name: "{{ item }}"
     state: present
   with_items:
-    - "mesos-0.23.0"
+    - "mesos-{{ mesos_version }}"
   when: ansible_distribution == 'CentOS'
   tags:
     - mesos
@@ -42,7 +42,7 @@
 
 - name: download mesos python bindings
   get_url:
-    url: "http://downloads.mesosphere.io/master/centos/7/mesos-0.23.0-py2.7-linux-x86_64.egg"
+    url: "http://downloads.mesosphere.io/master/centos/7/mesos-{{ mesos_version }}-py2.7-linux-x86_64.egg"
     dest: /tmp/pymesos.egg
     mode: 0644
   tags:
