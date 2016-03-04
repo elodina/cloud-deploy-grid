@@ -379,6 +379,9 @@ class InfrastructureDeploymentHandler(Resource):
                 infrastructure_deployment._status = 'deployed'
                 parent_deployment._status = 'infrastructure_deployed'
             finally:
+                if grid.provider != 'custom':
+                    with open('result/{}/infrastructure/terraform.tfstate'.format(grid_name), 'r') as state_file:
+                        infrastructure_deployment._state = state_file.read()
                 infrastructure_deployment.save()
                 self.unlock(parent_deployment)
                 parent_deployment.save()

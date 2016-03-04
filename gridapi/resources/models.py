@@ -31,6 +31,7 @@ class GridEntity(BaseModel):
 class ConfigEntity(BaseModel):
     parentgrid = ForeignKeyField(
         GridEntity, to_field='id', on_delete='CASCADE', on_update='CASCADE')
+    vars = CharField(default='{"foo": "bar"}', null=True)
 
     def __str__(self):
         dict_representation = {}

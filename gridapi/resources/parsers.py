@@ -7,6 +7,7 @@ grid_parser.add_argument(
     'type', required=True, help='Grid type - mesos/dcos')
 
 config_parser = reqparse.RequestParser()
+config_parser.add_argument('vars', help='Ansible group_vars for all cluster', default='{\"foo\":\"bar\"}')
 
 awsconfig_parser = config_parser.copy()
 awsconfig_parser.add_argument(

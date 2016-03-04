@@ -95,6 +95,10 @@ class custom_provision_mesos_generator(object):
         variables['hosts'] = json.dumps(hosts_entries['hosts'])
         variables['grid_name'] = self.current_grid.name
         self._generate_template(path, variables)
+        vars_json = json.loads(self.current_config.vars)
+        vars_yaml = yaml.safe_dump(vars_json, default_flow_style=False)
+        with open(path, "a") as yaml_file:
+            yaml_file.write(vars_yaml)
 
     def generate_group_vars_roles(self):
         for role in self.current_roles:
