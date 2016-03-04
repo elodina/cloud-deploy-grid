@@ -1,26 +1,26 @@
-Grid 2.0 API
+Cluster API
 ===========
 
 Table of Contents
 =================
 
-  * [Grid API](#grid-api)
+  * [Cluster API](#cluster-api)
     * [Prerequisites](#prerequisites)
     * [Current Limitations](#current-limitations)
     * [Preparation](#preparation)
-    * [Grid List API Requests](#grid-list-api-requests)
-    * [Grid Entity API Requests](#grid-entity-api-requests)
-    * [Grid Config API Requests](#grid-config-api-requests)
-    * [Grid Slave group list API Requests](#grid-slave-group-list-api-requests)
-    * [Grid Slave group API Requests](#grid-slave-group-api-requests)
-    * [Grid Deployment API Requests](#grid-deployment-api-requests)
+    * [Cluster List API Requests](#cluster-list-api-requests)
+    * [Cluster Entity API Requests](#cluster-entity-api-requests)
+    * [Cluster Config API Requests](#cluster-config-api-requests)
+    * [Cluster Slave group list API Requests](#cluster-slave-group-list-api-requests)
+    * [Cluster Slave group API Requests](#cluster-slave-group-api-requests)
+    * [Cluster Deployment API Requests](#cluster-deployment-api-requests)
     * [Common usage scenario for Mesos on AWS](#common-usage-scenario-for-mesos-on-aws)
     * [Common usage scenario for Mesos on Azure](#common-usage-scenario-for-mesos-on-azure)
     * [Common usage scenario for DCOS on AWS](#common-usage-scenario-for-dcos-on-aws)
     * [Common usage scenario for DCOS on Azure](#common-usage-scenario-for-dcos-on-azure)
-    * [Mesos Cli Grid Access](#mesos-cli-grid-access)
-    * [Mesos Grid VPN Access](#mesos-grid-vpn-access)
-    * [DCOS Grid VPN Access](#dcos-grid-vpn-access)
+    * [Mesos Cli Cluster Access](#mesos-cli-cluster-access)
+    * [Mesos Cluster VPN Access](#mesos-cluster-vpn-access)
+    * [DCOS Cluster VPN Access](#dcos-cluster-vpn-access)
 
 Prerequisites
 -------------
@@ -41,7 +41,7 @@ Azure instances supported:
 Standard_DS1, Standard_DS2, Standard_DS3, Standard_DS4, Standard_DS11, Standard_DS12, Standard_DS13, Standard_DS14
 
 WARNING!
-All names(grid, groups, etc) should consist of only lowercase letters and numbers, should be started with
+All names(cluster, groups, etc) should consist of only lowercase letters and numbers, should be started with
 lowercase letter and be up to 16 characters long.
 
 
@@ -69,76 +69,76 @@ OS X:
 5. (In vagrant) run ./run
 
 
-Grid List API Requests
+Cluster List API Requests
 -------------------------
 
 ```
-http://localhost:5555/api/v2.0/grids
+http://localhost:5555/api/v1.0/clusters
 ```
 
 Supported requests:
 
-GET - get grid list, example:
+GET - get cluster list, example:
 
 ```
-curl http://localhost:5555/api/v2.0/grids
+curl http://localhost:5555/api/v1.0/clusters
 ```
 
-POST - add new grid, example:
+POST - add new cluster, example:
 
 ```
-curl -X POST -d "name=${grid_name}" -d "provider=aws" -d "type=mesos" http://localhost:5555/api/v2.0/grids
+curl -X POST -d "name=${cluster_name}" -d "provider=aws" -d "type=mesos" http://localhost:5555/api/v1.0/clusters
 ```
 
 required parameters - name(variable), provider(aws/azure/custom), type(mesos/dcos)
 
 
-Grid Entity API Requests
+Cluster Entity API Requests
 ---------------------------
 
 ```
-http://localhost:5555/api/v2.0/grids/${grid_name}
+http://localhost:5555/api/v1.0/clusters/${cluster_name}
 ```
 
 Supported requests:
 
-GET - get grid status, example:
+GET - get cluster status, example:
 
 ```
-curl http://localhost:5555/api/v2.0/grids/${grid_name}
+curl http://localhost:5555/api/v1.0/clusters/${cluster_name}
 ```
 
-DELETE - delete grid and its stuff, example:
+DELETE - delete cluster and its stuff, example:
 
 ```
-curl -X DELETE http://localhost:5555/api/v2.0/grids/${grid_name}
+curl -X DELETE http://localhost:5555/api/v1.0/clusters/${cluster_name}
 ```
 
-Grid Config API Requests
+Cluster Config API Requests
 ---------------------------
 
 ```
-http://localhost:5555/api/v2.0/grids/${grid_name}/config
+http://localhost:5555/api/v1.0/clusters/${cluster_name}/config
 ```
 
 Supported requests:
 
-GET - get grids config, example:
+GET - get clusters config, example:
 
 ```
-curl http://localhost:5555/api/v2.0/grids/${grid_name}/config
+curl http://localhost:5555/api/v1.0/clusters/${cluster_name}/config
 ```
 
-DELETE - delete grids config:
+DELETE - delete clusters config:
 
 ```
-curl -X DELETE http://localhost:5555/api/v2.0/grids/${grid_name}/config
+curl -X DELETE http://localhost:5555/api/v1.0/clusters/${cluster_name}/config
 ```
 
-PUT - change grids config:
+PUT - change clusters config:
 
 ```
-curl -X PUT -d "master_type=m3.large" -d "masters=3" -d region="us-west-2" -d "sshkey=reference" --data-urlencode "sshkeydata=`cat ~/.ssh/reference.pem`" http://localhost:5555/api/v2.0/grids/${grid_name}/config
+curl -X PUT -d "master_type=m3.large" -d "masters=3" -d region="us-west-2" -d "sshkey=reference" -d "sshkeydata=`cat ~/.ssh/reference.pem | base64 -w 0 | tr '+/' '-_'`" http://localhost:5555/api/v1.0/clusters/${cluster_name}/config
 ```
 
 required parameters:
@@ -147,34 +147,34 @@ common:
 masters(number of masters hosts)
 
 aws:
-master_type(AWS instance type for master, default m3.large), region(AWS region for grid), sshkey(AWS ssh key name), sshkeydata(Private path of ssh key, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
+master_type(AWS instance type for master, default m3.large), region(AWS region for cluster), sshkey(AWS ssh key name), sshkeydata(Private path of ssh key, encoded with BASE64)
 
 azure:
-master_type(Azure instance type for master, default is Basic_A2), location(Azure location for grid in format like "Central US"), ssh_user(user for ssh login), ssh_password(password for ssh user and sudo)
+master_type(Azure instance type for master, default is Basic_A2), location(Azure location for cluster in format like "Central US"), ssh_user(user for ssh login), ssh_password(password for ssh user and sudo)
 
 custom:
-mastersips(Comma separated list of masters ips), terminalips(<terminal_external_ip>,<terminal_internal_ip>), ssh_user(ssh user for connection), sshkeydata(Private part of ssh key, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
+mastersips(Comma separated list of masters ips), terminalips(<terminal_external_ip>,<terminal_internal_ip>), ssh_user(ssh user for connection), sshkeydata(Private part of ssh key, encoded with BASE64)
 
 
-Grid Slave group list API Requests
+Cluster Slave group list API Requests
 -------------------------------------
 
 ```
-http://localhost:5555/api/v2.0/grids/${grid_name}/groups
+http://localhost:5555/api/v1.0/clusters/${cluster_name}/groups
 ```
 
 Supported requests:
 
-GET - get grids slave groups, example:
+GET - get clusters slave groups, example:
 
 ```
-curl http://localhost:5555/api/v2.0/grids/${grid_name}/groups
+curl http://localhost:5555/api/v1.0/clusters/${cluster_name}/groups
 ```
 
 POST - add new group, example:
 
 ```
-curl -X POST -d "name=${group_name}" -d "role=role1" -d "attributes={\"foo\":\"bar\"}" -d "vars={\"foo\":\"bar\"}" -d "instance_type=r3.xlarge" -d "cpus=10" -d "ram=64" -d "disk_size=50" http://localhost:5555/api/v2.0/grids/${grid_name}/groups
+curl -X POST -d "name=${group_name}" -d "role=role1" -d "attributes={\"foo\":\"bar\"}" -d "vars={\"foo\":\"bar\"}" -d "instance_type=r3.xlarge" -d "cpus=10" -d "ram=64" -d "disk_size=50" http://localhost:5555/api/v1.0/clusters/${cluster_name}/groups
 ```
 required parameters - name(variable), role(variable), attributes(escaped json format), vars(escaped json format), instance_type(for AWS, for example - m3.large, for Azure, for example - Basic_A3), cpus(number of cpus per group), ram(amount of GB of ram per group), disk_size(hdd size, per HOST)
 
@@ -199,31 +199,31 @@ groupips(in custom provider, comma separated list of group ips)
 
 All of the new created disks will be mounted to /hdd/xvd{last letter of disk name, eg, x, y, whatever}
 
-Grid Slave group API Requests
+Cluster Slave group API Requests
 --------------------------------
 
 ```
-http://localhost:5555/api/v2.0/grids/${grid_name}/groups/${group_name}
+http://localhost:5555/api/v1.0/clusters/${cluster_name}/groups/${group_name}
 ```
 
 Supported requests:
 
-GET - get grids slave group parameters, example:
+GET - get clusters slave group parameters, example:
 
 ```
-curl http://localhost:5555/api/v2.0/grids/${grid_name}/groups/${group_name}
+curl http://localhost:5555/api/v1.0/clusters/${cluster_name}/groups/${group_name}
 ```
 
 DELETE - delete group, example:
 
 ```
-curl -X DELETE http://localhost:5555/api/v2.0/grids/${grid_name}/groups/${group_name}
+curl -X DELETE http://localhost:5555/api/v1.0/clusters/${cluster_name}/groups/${group_name}
 ```
 
 PUT - change group parameters, example:
 
 ```
-curl -X PUT -d "name=group2" -d "role=role1" -d "attributes={\"foo\":\"bar\"}" -d "vars={\"var1\":\"varvalue1\"}" -d "instance_type=r3.xlarge" -d "cpus=10" -d "ram=64" -d "disk_size=50" http://localhost:5555/api/v2.0/grids/${grid_name}/groups/${group_name}
+curl -X PUT -d "name=group2" -d "role=role1" -d "attributes={\"foo\":\"bar\"}" -d "vars={\"var1\":\"varvalue1\"}" -d "instance_type=r3.xlarge" -d "cpus=10" -d "ram=64" -d "disk_size=50" http://localhost:5555/api/v1.0/clusters/${cluster_name}/groups/${group_name}
 ```
 
 required parameters - name(variable), role(variable), attributes(escaped json format), vars(escaped json format), instance_type(for AWS, for example - m3.large, for Azure, for example - Basic_A3), cpus(number of cpus per group), ram(amount of GB of ram per group), disk_size(hdd size, per HOST)
@@ -254,57 +254,57 @@ spot_price(group of slaves will be make of spot instances), example:
 
 groupips(in custom provider, comma separated list of group ips)
 
-Grid Deployment API Requests
+Cluster Deployment API Requests
 -------------------------------
 
 ```
-http://localhost:5555/api/v2.0/grids/${grid_name}/deployment
+http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment
 ```
 
 Supported requests:
 
-GET - get grids deployment status, example:
+GET - get clusters deployment status, example:
 
 ```
-curl http://localhost:5555/api/v2.0/grids/${grid_name}/deployment
+curl http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment
 ```
 
-Grid Infrastructure Deployment API Requests
+Cluster Infrastructure Deployment API Requests
 ----------------------------------------------
 
 ```
-http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure
+http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment/infrastructure
 ```
 
 Supported requests:
 
-GET - get grids infrastructure deployment status, example:
+GET - get clusters infrastructure deployment status, example:
 
 ```
-curl http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure
+curl http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment/infrastructure
 ```
 
-DELETE - destroy grid's infrastructure(virtual machines, networks, etc), example:
+DELETE - destroy cluster's infrastructure(virtual machines, networks, etc), example:
 
 ```
-curl -X DELETE http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure
+curl -X DELETE http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment/infrastructure
 ```
 
-PUT - deploy grid's infrastructure(virtual machines, networks, etc), example:
+PUT - deploy cluster's infrastructure(virtual machines, networks, etc), example:
 
 AWS:
 ```
-curl -X PUT --data-urlencode "aws_access_key_id=${key_id}" --data-urlencode "aws_secret_access_key=${secret}" http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure
+curl -X PUT -d "aws_access_key_id=${key_id}" -d "aws_secret_access_key=${secret}" http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment/infrastructure
 ```
 
 AZURE:
 ```
-curl -X PUT --data-urlencode "credentials=`cat credentials`" http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure
+curl -X PUT -d "credentials=`cat credentials | base64 -w 0 | tr '+/' '-_'`" http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment/infrastructure
 ```
 
 CUSTOM:
 ```
-curl -X PUT http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure
+curl -X PUT http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment/infrastructure
 ```
 
 required parameters:
@@ -313,49 +313,49 @@ common:
 parallelism(number of deploy threads, higher number increase deployment speed, but may cause instability, default is 5)
 
 aws:
-aws_access_key_id(self descriptive,URL-encoded, e.g. curl --data-urlencode "${key}=${value}"), aws_secret_access_key(self descriptive,URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
+aws_access_key_id(self descriptive), aws_secret_access_key(self descriptive)
 
 azure:
-credentials(credentials file, can be aquired here: https://manage.windowsazure.com/publishsettings, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
+credentials(credentials file, can be aquired here: https://manage.windowsazure.com/publishsettings )
 
 
-Grid Provision API Requests
+Cluster Provision API Requests
 ------------------------------
 
 ```
-http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/provision
+http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment/provision
 ```
 
 Supported requests:
 
-GET - get grids provision status, example:
+GET - get clusters provision status, example:
 
 ```
-curl http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/provision
+curl http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment/provision
 ```
 
-PUT - run grid's provision(install software, configure settings, etc), example:
+PUT - run cluster's provision(install software, configure settings, etc), example:
 
 AWS:
 ```
-curl -X PUT --data-urlencode "aws_access_key_id=${key_id}" --data-urlencode "aws_secret_access_key=${secret}" http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/provision
+curl -X PUT -d "aws_access_key_id=${key_id}" -d "aws_secret_access_key=${secret}" http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment/provision
 ```
 
 AZURE:
 ```
-curl -X PUT http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/provision
+curl -X PUT http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment/provision
 ```
 
 CUSTOM:
 ```
-curl -X PUT http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/provision
+curl -X PUT http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment/provision
 ```
 
 required parameters:
 
 aws:
 
-aws_access_key_id(self descriptive,URL-encoded, e.g. curl --data-urlencode "${key}=${value}"), aws_secret_access_key(self descriptive,URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
+aws_access_key_id(self descriptive), aws_secret_access_key(self descriptive)
 
 
 optional parameters:
@@ -364,7 +364,7 @@ common:
 
 vpn_enabled - by default == 'True', if True - enable VPN server provisioinig, otherwise - disable
 
-duo_ikey, duo_skey, duo_host - duo security api parameters(duo.com) for vpn auth, URL-encoded, e.g. curl --data-urlencode "${key}=${value}"
+duo_ikey, duo_skey, duo_host - duo security api parameters(duo.com) for vpn auth
 PREREQUISITS FOR MFA:
 1) Created application at duo.com(Auth API)
 
@@ -373,14 +373,442 @@ PREREQUISITS FOR MFA:
 3) Installed duo.com mobile app on mobile device(the only supported way for now)
 
 
+How to use MFA:
+
+1) Create login(same as at duo.com) on Terminal server and passwd it
+
+2) Create new VPN connection
+
+3) password for vpn will be: "<local_password>,<duo_passcode_from_mobile_app>"
+example: "str0ng_pass,123123"
+
+
 It is possible to provision separate group, calling
 ```
-curl -X PUT http://localhost:5555/api/v2.0/grids/${grid_name}/groups/${group_name}/provision
+curl -X PUT http://localhost:5555/api/v1.0/clusters/${cluster_name}/groups/${group_name}/provision
 ```
 
-required parameters are the same as for grid provision calls
+required parameters are the same as for cluster provision calls
 
 
+Common usage scenario for Mesos on AWS
+--------------------------------------
+
+Create cluster
+
+```
+curl -X POST -d "name=${cluster_name}" -d "provider=aws" -d "type=mesos" http://localhost:5555/api/v1.0/clusters
+```
+
+Update config
+
+```
+curl -X PUT -d "master_type=m3.large" -d "masters=3" -d region="us-west-2" -d "sshkey=reference" -d "sshkeydata=`cat ~/.ssh/reference.pem | base64 -w 0 | tr '+/' '-_'`" http://localhost:5555/api/v1.0/clusters/${cluster_name}/config
+```
+
+Create group of slaves
+
+```
+curl -X POST -d "name=${group_name}" -d "role=role1" -d "attributes={\"foo\":\" bar\"}" -d "vars={\"foo\":\"bar\"}" -d "cpus=10" -d "ram=64" -d "disk_size=50" http://localhost:5555/api/v1.0/clusters/${cluster_name}/groups
+```
+
+Deploy cluster's infrastructure
+
+```
+curl -X PUT -d aws_access_key_id=${key_id} -d "aws_secret_access_key=${secret}" http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment/infrastructure
+```
+
+Provision cluster
+
+```
+curl -X PUT http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment/provision
+```
+
+Change slaves group size:
+
+```
+curl -X POST -d "name=${group_name}" -d "role=role1" -d "attributes={\"purpose\":\"log_storing\"}" -d "vars={\"x_factor\":\"42\"}" -d "cpus=20" -d "ram=128" -d "disk_size=50" http://localhost:5555/api/v1.0/clusters/${cluster_name}/groups
+```
+
+Apply changes to infrastructure
+
+```
+curl -X PUT -d aws_access_key_id=${key_id} -d "aws_secret_access_key=${secret}" http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment/infrastructure
+```
+
+Provision fresh nodes
+
+```
+curl -X PUT http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment/provision
+```
+
+Destroy cluster
+
+```
+curl -X DELETE -d aws_access_key_id=${key_id} -d "aws_secret_access_key=${secret}" http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment/infrastructure
+```
+
+Delete clusters config, etc:
+
+```
+curl -X DELETE http://localhost:5555/api/v1.0/clusters/${cluster_name}
+```
 
 
+Common usage scenario for Mesos on Azure
+----------------------------------------
 
+Create cluster
+
+```
+curl http://localhost:5555/api/v1.0/clusters -X POST -d "name=${cluster_name}" -d "provider=azure" -d "type=mesos"
+```
+
+Update config
+
+```
+curl http://localhost:5555/api/v1.0/clusters/${cluster_name}/config -X PUT -d "location=Central US" -d "masters=3" -d "ssh_password=${ssh_password}" -d "ssh_user=${ssh_user}" -d "master_type=Basic_A2"
+```
+
+Create group of slaves
+
+```
+curl http://localhost:5555/api/v1.0/clusters/${cluster_name}/groups -X POST -d "name=${group_name}" -d "role=role1" -d "attributes={\"purpose\":\"analytics\"}" -d "vars={\"y_factor\":\"43\"}" -d "cpus=12" -d "ram=16" -d "disk_size=50" -d "instance_type=Standard_D11"
+```
+
+Deploy cluster's infrastructure
+
+```
+curl http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment/infrastructure -X PUT -d "credentials=`cat credentials | base64 | tr '+/' '-_'`"
+```
+
+Provision cluster
+
+```
+curl http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment/provision -X PUT
+```
+
+Destroy cluster
+
+```
+curl http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment/infrastructure -X DELETE -d "credentials=`cat credentials | base64 | tr '+/' '-_'`"
+```
+
+Delete cluster configs, etc
+
+```
+curl http://localhost:5555/api/v1.0/clusters/${cluster_name} -X DELETE
+```
+
+
+Common usage scenario for Mesos on Custom Provider
+--------------------------------------------------
+
+Create cluster
+
+```
+curl http://localhost:5555/api/v1.0/clusters -X POST -d "name=${cluster_name}" -d "provider=custom" -d "type=mesos"
+```
+
+Update config
+
+```
+curl -X PUT -d "mastersips=172.29.15.83,172.29.15.225,172.29.14.184" -d "terminalips=52.71.23.21,172.29.13.62" -d "ssh_user=centos" -d "sshkeydata=`cat ~/.ssh/reference.pem | base64 -w 0 | tr '+/' '-_'`" http://localhost:5555/api/v1.0/clusters/${cluster_name}/config
+```
+
+Create group of slaves
+
+```
+curl -X POST -d "groupips=172.29.5.134,172.29.12.227,172.29.9.93" -d "name=infra" -d "role=infra" -d "attributes={\"type\":\"infra\"}" http://localhost:5555/api/v1.0/clusters/${cluster_name}/groups
+```
+
+Deploy cluster's infrastructure
+
+```
+curl http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment/infrastructure -X PUT
+```
+
+Provision cluster
+
+```
+curl http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment/provision -X PUT
+```
+
+Delete cluster configs, etc
+
+```
+curl http://localhost:5555/api/v1.0/clusters/${cluster_name} -X DELETE
+```
+
+
+Common usage scenario for DCOS on AWS
+-------------------------------------
+
+Create cluster
+
+```
+curl -X POST -d "name=${cluster_name}" -d "provider=aws" -d "type=dcos" http://localhost:5555/api/v1.0/clusters
+```
+
+Update config
+
+```
+curl -X PUT -d "master_type=m3.large" -d "masters=3" -d region="us-east-1" -d "sshkey=reference" -d "sshkeydata=`cat ~/.ssh/reference.pem | base64 -w 0 | tr '+/' '-_'`" http://localhost:5555/api/v1.0/clusters/${cluster_name}/config
+```
+
+Create group of slaves
+
+```
+curl -X POST -d "instance_type=r3.xlarge" -d "name=${group_name}" -d "role=myslaves" -d "attributes={\"type\":\"myslaves\"}" -d "vars={\"foo\":\"bar\"}" -d "cpus=12" -d "ram=60" -d "disk_size=200" http://localhost:5555/api/v1.0/clusters/${cluster_name}/groups
+```
+
+Deploy cluster's infrastructure
+
+```
+curl -X PUT -d aws_access_key_id=${key_id} -d "aws_secret_access_key=${secret}" http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment/infrastructure
+```
+
+Provision cluster
+
+```
+curl -X PUT http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment/provision
+```
+
+Destroy cluster
+
+```
+curl -X DELETE -d aws_access_key_id=${key_id} -d "aws_secret_access_key=${secret}" http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment/infrastructure
+```
+
+Delete clusters config, etc:
+
+```
+curl -X DELETE http://localhost:5555/api/v1.0/clusters/${cluster_name}
+```
+
+
+Common usage scenario for DCOS on Azure
+---------------------------------------
+
+Create cluster
+
+```
+curl -X POST -d "name=${cluster_name}" -d "provider=azure" -d "type=dcos" http://localhost:5555/api/v1.0/clusters
+```
+
+Update config
+
+```
+curl http://localhost:5555/api/v1.0/clusters/${cluster_name}/config -X PUT -d "location=Central US" -d "masters=3" -d "ssh_password=${ssh_password}" -d "ssh_user=${ssh_user}" -d "master_type=Basic_A2"
+```
+
+Create group of slaves
+
+```
+curl -X POST -d "instance_type=Basic_A2"  -d "name=${group_name}" -d "role=myslaves" -d "attributes={\"type\":\"myslaves\"}" -d "vars={\"foo\":\"bar\"}" -d "cpus=12" -d "ram=60" -d "disk_size=200" http://localhost:5555/api/v1.0/clusters/${cluster_name}/groups
+```
+
+Deploy cluster's infrastructure
+
+```
+curl http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment/infrastructure -X PUT -d "credentials=`cat credentials | base64 | tr '+/' '-_'`"
+```
+
+Provision cluster
+
+```
+curl http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment/provision -X PUT
+```
+
+Destroy cluster
+
+```
+curl http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment/infrastructure -X DELETE -d "credentials=`cat credentials | base64 | tr '+/' '-_'`"
+```
+
+Delete cluster configs, etc
+
+```
+curl http://localhost:5555/api/v1.0/clusters/${cluster_name} -X DELETE
+```
+
+Common usage scenario for DCOS on Custom Provider
+-------------------------------------------------
+
+Create cluster
+
+```
+curl -X POST -d "name=${cluster_name}" -d "provider=custom" -d "type=dcos" http://localhost:5555/api/v1.0/clusters
+```
+
+Update config
+
+```
+curl -X PUT -d "mastersips=172.29.15.83,172.29.15.225,172.29.14.184" -d "terminalips=52.71.23.21,172.29.13.62" -d "ssh_user=centos" -d "sshkeydata=`cat ~/.ssh/reference.pem | base64 -w 0 | tr '+/' '-_'`" http://localhost:5555/api/v1.0/clusters/${cluster_name}/config
+```
+
+Create group of slaves
+
+```
+curl -X POST -d "groupips=172.29.5.134,172.29.12.227,172.29.9.93" -d "name=infra" -d "role=infra" -d "attributes={\"type\":\"infra\"}" http://localhost:5555/api/v1.0/clusters/${cluster_name}/groups
+```
+
+Deploy cluster's infrastructure
+
+```
+curl http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment/infrastructure -X PUT -d "credentials=`cat credentials | base64 | tr '+/' '-_'`"
+```
+
+Provision cluster
+
+```
+curl http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment/provision -X PUT
+```
+
+Delete cluster configs, etc
+
+```
+curl http://localhost:5555/api/v1.0/clusters/${cluster_name} -X DELETE
+```
+
+
+Mesos Cli Cluster Access
+------------------------
+
+There are mesos-cli available on terminal
+For transparent usage it is recommended to switch to user "manager" first:
+```
+su -l manager
+```
+Mesos cli documentation:
+
+https://github.com/mesosphere/mesos-cli
+
+
+Mesos Cluster VPN Access
+------------------------
+
+OpenVPN for MacOS Setup:
+
+1. Install Tunnelblick
+2. go to curl -X http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment/infrastructure and get _accessip parameter
+3. ssh to _accessip, and create there some users and passwd them, using commands adduser/passwd respectively, eg:
+
+```adduser vpnuser1```
+
+```passwd vpnuser1```
+
+3. get OpenVPN config:
+```
+echo -e `curl -qs http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment/vpn | tr -d '"'`
+```
+4. Save config as ${cluster_name}.ovpn file
+5. ssh to _accessip and save /etc/openvpn/keys/ca.crt near ${cluster_name}.ovpn file
+6. Import this config into Tunnelblick by double clicking on ovpn file
+7. Connect to VPN using credentials from step 3)
+8. Following services are available
+
+Mesos:
+```
+http://leader.mesos.service.${cluster_name}:5050/
+```
+Marathon:
+```
+http://leader.mesos.service.${cluster_name}:18080/
+```
+Consul:
+```
+http://leader.mesos.service.${cluster_name}:8500/
+```
+
+DCOS Cluster VPN Access
+-----------------------
+
+OpenVPN for MacOS Setup:
+
+1. Install Tunnelblick
+2. go to curl http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment/infrastructure and save _accessip parameter
+3. ssh to _accessip, and create there some users and passwd them, using commands adduser/passwd respectively, eg:
+
+```adduser vpnuser1```
+
+```passwd vpnuser1```
+
+3. get OpenVPN config:
+```
+echo -e `curl -qs http://localhost:5555/api/v1.0/clusters/${cluster_name}/deployment/vpn | tr -d '"'`
+```
+4. Save config as ${cluster_name}.ovpn file
+5. ssh to _accessip and save /etc/openvpn/keys/ca.crt near ${cluster_name}.ovpn file
+6. Import this config into Tunnelblick by double clicking on ovpn file
+7. Connect to VPN using credentials from step 3)
+8. Following services are available
+
+DCOS GUI:
+```
+http://192.168.164.1/
+```
+Mesos:
+```
+http://192.168.164.1/mesos/
+```
+Marathon:
+```
+http://192.168.164.1/marathon/
+```
+
+Raid and single disk handling
+-----------------------------
+
+In order to have raids and disks handling, we need to pass raid/disk structure inside group's vars in escaped JSON format
+
+Structure format:
+
+For RAID handling:
+```
+raids:
+  ${raid_number}:
+    mountpoint: "${mount_directory}"
+    fstype: "${filesystem}"
+    level: "${raid_level}"
+    devices:
+      - /dev/${one_disk}
+      - /dev/${another_disk}
+```
+Where
+
+${raid_number} is unsigned integer value, e.g. 0, 1, 2
+
+${mount_directory} - is arbitrary directory in the system, for example, /data
+
+${filesystem} - is file system type, for example, xfs, ext4
+
+${raid_level} - is RAID's level, e.g. 0, 1, 5, 6, etc
+
+${one_disk} - disk device name, for example, xvdx
+
+${another_disk} - another disk device name, for example, xvdy
+
+
+For Disk handling:
+
+```
+disks:
+  ${disk_name}:
+    mountpoint: "${mount_directory}"
+    fstype: "${filesystem}"
+```
+
+Where
+
+${disk_name} - disk device name, for example, xvdz
+
+${mount_directory} - is arbitrary directory in the system, for example, /commitlog
+
+${filesystem} - is file system type, for example, xfs, ext4
+
+Example of creation of group with raid and disks handling
+
+```
+curl -X POST -d "instance_type=r3.xlarge" -d "name=infra" -d "role=infra" -d "attributes={\"type\":\"infra\"}" -d "vars={\"raids\":{\"0\":{\"mountpoint\":\"/data\",\"fstype\":\"xfs\",\"level\":\"0\",\"devices\":[\"/dev/xvdx\",\"/dev/xvdy\"]}},\"disks\":{\"xvdz\":{\"mountpoint\":\"/commitlog\",\"fstype\":\"xfs\"}}}" -d "cpus=10" -d "ram=64" -d "disk_size=50" -d "customhwconf={\"ebs_block_device\":[{\"device_name\":\"/dev/sdx\",\"volume_size\":\"200\",\"volume_type\":\"gp2\"},{\"device_name\":\"/dev/sdy\",\"volume_size\":\"200\",\"volume_type\":\"gp2\"},{\"device_name\":\"/dev/sdz\",\"volume_size\":\"200\",\"volume_type\":\"gp2\"}]}" http://localhost:5555/api/v1.0/clusters/${cluster_name}/groups
+```
