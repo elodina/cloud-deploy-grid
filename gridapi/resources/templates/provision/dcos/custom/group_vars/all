@@ -3,4 +3,3 @@ dns_domain: "{{ grid_name }}"
 nameserver: "{{ terminal_ip }}"
 hosts: {{ hosts }}
 
-{{ other_vars }}

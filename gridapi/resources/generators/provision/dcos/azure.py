@@ -1,6 +1,7 @@
 import json
 import jinja2
 import os
+import yaml
 from gridapi.resources.models import GridEntity, configs, groups
 
 class AutoDict(dict):
@@ -68,7 +69,6 @@ class azure_provision_dcos_generator(object):
         path = 'result/{}/group_vars/all'.format(self.grid_name)
         variables = AutoDict()
         hosts_entries = AutoDict()
-        vars_json = json.loads(self.current_config.vars)
         with open('result/{}/infrastructure/terraform.tfstate'.format(self.grid_name), 'r') as json_file:
             json_data = json.load(json_file)
             for module in json_data['modules']:
@@ -80,8 +80,11 @@ class azure_provision_dcos_generator(object):
         variables['hosts'] = json.dumps(hosts_entries['hosts'])
         variables['grid_name'] = self.current_grid.name
         variables['terminal_ip'] = self._nameserver()
-        variables['other_vars'] = json.dumps(vars_json)
         self._generate_template(path, variables)
+        vars_json = json.loads(self.current_config.vars)
+        vars_yaml = yaml.safe_dump(vars_json, default_flow_style=False)
+        with open(path, "a") as yaml_file:
+            yaml_file.write(vars_yaml)
 
     def generate_group_vars_roles(self):
         for role in self.current_roles:
