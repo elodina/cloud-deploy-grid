@@ -8,7 +8,7 @@ from gridapi.resources.controller_grouplist import GroupListHandler
 from gridapi.resources.controllers_deployment.common import\
     DeploymentHandler
 from gridapi.resources.controllers_deployment.infrastructure import\
-    InfrastructureDeploymentHandler
+    InfrastructureDeploymentHandler, ExportInfrastructureDeploymentHandler
 from gridapi.resources.controllers_deployment.provision import\
     ProvisionDeploymentHandler, GroupProvisionDeploymentHandler
 from gridapi.resources.controllers_deployment.vpn import\
@@ -29,6 +29,8 @@ api.add_resource(DeploymentHandler,
                  '/api/v2.0/grids/<grid_name>/deployment')
 api.add_resource(InfrastructureDeploymentHandler,
                  '/api/v2.0/grids/<grid_name>/deployment/infrastructure')
+api.add_resource(ExportInfrastructureDeploymentHandler,
+                 '/api/v2.0/grids/<grid_name>/deployment/infrastructure/export')
 api.add_resource(ProvisionDeploymentHandler,
                  '/api/v2.0/grids/<grid_name>/deployment/provision')
 api.add_resource(VpnHandler,

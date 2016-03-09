@@ -399,3 +399,84 @@ class InfrastructureDeploymentHandler(Resource):
                 target=do_deploy, args=(), kwargs={})
             deploy_thread.start()
         return ast.literal_eval(str(infrastructure_deployment)), 200
+
+
+class ExportInfrastructureDeploymentHandler(InfrastructureDeploymentHandler):
+    def _abort_if_infrastructure_deployment_was_not_successful(
+            self, grid_name):
+        grid = GridEntity.select().where(
+            GridEntity.name == grid_name).get()
+        infrastructure_deployment = infrastructure_deployments[
+            grid.provider].select().where(
+            infrastructure_deployments[
+                grid.provider].parentgrid == grid).get()
+        if infrastructure_deployment._status != 'deployed':
+            abort(404, message="Infrastructure Deployment of grid need to"
+                               " be successful first".format(grid_name))
+    def get(self, grid_name):
+        self._abort_if_grid_doesnt_exist(grid_name)
+        self._abort_if_config_doesnt_exist(grid_name)
+        self._abort_if_infrastructure_deployment_doesnt_exist(grid_name)
+        self._abort_if_infrastructure_deployment_was_not_successful(
+            grid_name)
+        grid = GridEntity.select().where(
+            GridEntity.name == grid_name).get()
+        infrastructure_deployment = infrastructure_deployments[
+            grid.provider].select().where(
+            infrastructure_deployments[
+                grid.provider].parentgrid == grid).get()
+
+        def _aws_hosts_export(grid_name):
+            export = []
+            with open('result/{}/infrastructure/terraform.tfstate'.format(
+                    grid_name), 'r') as input_file:
+                state = json.load(input_file)
+                for module in state['modules']:
+                    for resource, value in module['resources'].iteritems():
+                        if value['type'] == 'aws_instance' or value['type'] == 'aws_spot_instance_request':
+                            ip = value['primary']['attributes']['private_ip']
+                            export.append(('.'.join(resource.split('.')[1:]), ip))
+            export.sort(key=lambda(x): x[0])
+            return export
+
+        def _azure_hosts_export(grid_name):
+            export = []
+            with open('result/{}/infrastructure/terraform.tfstate'.format(
+                    grid_name), 'r') as input_file:
+                state = json.load(input_file)
+                for module in state['modules']:
+                    for resource, value in module['resources'].iteritems():
+                        if value['type'] == 'azure_instance':
+                            ip = value['primary']['attributes']['vip_address']
+                            export.append(('.'.join(resource.split('.')[1:]), ip))
+            export.sort(key=lambda(x): x[0])
+            return export
+
+        def _custom_hosts_export(grid_name):
+            export = []
+            grid_config = configs[grid.provider].select().where(
+                configs[grid.provider].parentgrid == grid).get()
+            export.append(('terminal', grid_config.terminalips.split(',')[1]))
+            for ip in grid_config.mastersips.split(','):
+                export.append(('master', ip))
+            for group in groups[grid.provider].select():
+                if group.parentgrid.name == grid_name:
+                    for ip in group.groupips.split(','):
+                        export.append(('group_{}_host'.format(group.name), ip))
+            return export
+
+        hosts_export = {
+            'aws': _aws_hosts_export,
+            'azure': _azure_hosts_export,
+            'custom': _custom_hosts_export
+        }
+        if not os.path.exists('result/{}/infrastructure'.format(grid_name)):
+            os.makedirs('result/{}/infrastructure'.format(grid_name))
+        with open('result/{}/infrastructure/terraform.tfstate'.format(
+                grid_name), 'w+') as state_file:
+            state_file.write(infrastructure_deployment._state)
+        with open('result/{}/infrastructure/terraform.tfstate'.format(
+                grid_name), 'r') as state_file:
+            export = hosts_export[grid.provider](grid_name)
+        shutil.rmtree('result/{}'.format(grid_name))
+        return ast.literal_eval(str(export)), 200
