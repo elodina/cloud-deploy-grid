@@ -38,6 +38,20 @@ azureconfig_parser.add_argument(
 azureconfig_parser.add_argument(
     'ssh_password', required=True, help='SSH password for VMs')
 
+gcsconfig_parser = config_parser.copy()
+gcsconfig_parser.add_argument(
+    'masters', required=True, type=int,
+    help='Number of Master nodes in grid')
+gcsconfig_parser.add_argument(
+    'master_type', default='n1-standard-1', help='Master instance type')
+gcsconfig_parser.add_argument(
+    'project', required=True, help='GCE Project')
+gcsconfig_parser.add_argument(
+    'zone', required=True, help='GCE Zone, for example europe-west1-b')
+gcsconfig_parser.add_argument('sshkeydata', required=True,
+    help='ssh key public part, URL encoded')
+gcsconfig_parser.add_argument(
+    'ssh_user', required=True, help='SSH user for VMs')
 
 customconfig_parser = config_parser.copy()
 customconfig_parser.add_argument(
@@ -89,6 +103,14 @@ azure_infrastructure_deployment_parser.add_argument(
 
 azure_provision_deployment_parser = provision_deployment_parser.copy()
 
+gcs_infrastructure_deployment_parser = infrastructure_deployment_parser.copy()
+gcs_infrastructure_deployment_parser.add_argument(
+    'parallelism', type=int, default=5, help='Terraform deployment threads')
+gcs_infrastructure_deployment_parser.add_argument(
+    'credentials', required=True, help='GCS credentials file, URL encoded')
+
+gcs_provision_deployment_parser = provision_deployment_parser.copy()
+
 custom_infrastructure_deployment_parser = infrastructure_deployment_parser.copy()
 
 custom_provision_deployment_parser = provision_deployment_parser.copy()
@@ -132,6 +154,22 @@ azuregroup_parser.add_argument(
     'instance_type', default='Standard_DS11',
     help='Azure Instance type, by default Standard_DS11')
 
+gcsgroup_parser = group_parser.copy()
+gcsgroup_parser.add_argument('cpus', required=True, type=int,
+                          help='Number of CPUs in group')
+gcsgroup_parser.add_argument('ram', required=True, type=int,
+                          help='Amount of RAM in group, in GB')
+gcsgroup_parser.add_argument('disk_size', required=True, type=int,
+                          help='Slave disk size(per slave), in GB')
+gcsgroup_parser.add_argument(
+    'customhwconf',
+    help='Add custom hardware configuration to slaves, escaped JSON format')
+gcsgroup_parser.add_argument('instance_type', default='n1-standard-2',
+                             help='GCE Instance type, by default n1-standard-2')
+gcsgroup_parser.add_argument('zone', help='Zone to place group to')
+gcsgroup_parser.add_argument('preemptible', type=bool, default=False,
+                             help='Make instance preemptible')
+
 customgroup_parser = group_parser.copy()
 customgroup_parser.add_argument(
     'groupips', required=True,
@@ -140,23 +178,27 @@ customgroup_parser.add_argument(
 configparsers = {
     'aws': awsconfig_parser,
     'azure': azureconfig_parser,
+    'gcs': gcsconfig_parser,
     'custom': customconfig_parser
 }
 
 infrastructure_deploymentparsers = {
     'aws': aws_infrastructure_deployment_parser,
     'azure': azure_infrastructure_deployment_parser,
+    'gcs': gcs_infrastructure_deployment_parser,
     'custom': custom_infrastructure_deployment_parser
 }
 
 provision_deploymentparsers = {
     'aws': aws_provision_deployment_parser,
     'azure': azure_provision_deployment_parser,
+    'gcs': gcs_provision_deployment_parser,
     'custom': custom_provision_deployment_parser
 }
 
 groupparsers = {
     'aws': awsgroup_parser,
     'azure': azuregroup_parser,
+    'gcs': gcsgroup_parser,
     'custom': customgroup_parser
 }

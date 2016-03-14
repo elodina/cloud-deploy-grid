@@ -6,6 +6,7 @@ from gridapi.resources.models import GridEntity, configs, deployments,\
     groups
 from gridapi.libs.aws.instances import ec2instances, ec2instances_load
 from gridapi.libs.azure.instances import azureinstances
+from gridapi.libs.gcs.instances import gcsinstances
 
 
 class GroupHandler(Resource):
@@ -56,12 +57,20 @@ class GroupHandler(Resource):
             ram / float(azureinstances[image]['ram'])))
         return max(amount_by_cpu, amount_by_ram)
 
+    def _gcs_slave_calculator(self, cpus, ram, image):
+        amount_by_cpu = int(math.ceil(
+            cpus / float(gcsinstances[image]['cpu'])))
+        amount_by_ram = int(math.ceil(
+            ram / float(gcsinstances[image]['ram'])))
+        return max(amount_by_cpu, amount_by_ram)
+
     def _custom_slave_calculator(self, groupips):
         return len(groupips.split(','))
 
     _slave_calculator = {
         'aws': _aws_slave_calculator,
         'azure': _azure_slave_calculator,
+        'gcs': _gcs_slave_calculator,
         'custom': _custom_slave_calculator
     }
 

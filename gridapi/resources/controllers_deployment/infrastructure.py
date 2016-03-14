@@ -14,12 +14,15 @@ from gridapi.resources.generators.infrastructure.aws import\
     aws_infrastructure_generator
 from gridapi.resources.generators.infrastructure.azure import\
     azure_infrastructure_generator
+from gridapi.resources.generators.infrastructure.gcs import\
+    gcs_infrastructure_generator
 from gridapi.resources.generators.infrastructure.custom import\
     custom_infrastructure_generator
 
 infrastructure_generators = {
     'aws': aws_infrastructure_generator,
     'azure': azure_infrastructure_generator,
+    'gcs': gcs_infrastructure_generator,
     'custom': custom_infrastructure_generator
 }
 
@@ -211,6 +214,9 @@ class InfrastructureDeploymentHandler(Resource):
                                     return value['primary']['attributes'][
                                         'vip_address']
 
+            def _gcs_get_access_ip(grid_name):
+                pass
+
             def _custom_get_access_ip(grid_name):
                 grid_config = configs[grid.provider].select().where(
                     configs[grid.provider].parentgrid == grid).get()
@@ -220,6 +226,7 @@ class InfrastructureDeploymentHandler(Resource):
             get_access_ip = {
                 'aws': _aws_get_access_ip,
                 'azure': _azure_get_access_ip,
+                'gcs': _gcs_get_access_ip,
                 'custom': _custom_get_access_ip
             }
 
@@ -247,6 +254,10 @@ class InfrastructureDeploymentHandler(Resource):
                             host), '22'])
                 except:
                     raise Exception('host is offline')
+
+            @retry(stop_max_attempt_number=30, wait_fixed=5000)
+            def _gcs_check_host(host):
+                pass
 
             @retry(stop_max_attempt_number=30, wait_fixed=5000)
             def _custom_check_host(host, grid_name):
@@ -307,6 +318,9 @@ class InfrastructureDeploymentHandler(Resource):
                                         'vip_address']
                                     check_host[grid.provider](ip)
 
+            def _gcs_check_hosts_online(grid_name):
+                pass
+
             def _custom_check_hosts_online(grid_name):
                 all_ips = []
                 grid_config = configs[grid.provider].select().where(
@@ -322,6 +336,7 @@ class InfrastructureDeploymentHandler(Resource):
             check_hosts_online = {
                 'aws': _aws_check_hosts_online,
                 'azure': _azure_check_hosts_online,
+                'gcs': _gcs_check_hosts_online,
                 'custom': _custom_check_hosts_online
             }
 

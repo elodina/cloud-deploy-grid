@@ -231,102 +231,51 @@ class aws_infrastructure_generator(object):
             json.dump(self.networking, networking_file)
 
     def generate_security(self):
-        self.security['resource']['aws_security_group']['gridwide'][
-            'name'] = '${var.grid_name}'
-        self.security['resource']['aws_security_group']['gridwide'][
-            'description'] = '${var.grid_name} security group'
-        self.security['resource']['aws_security_group']['gridwide'][
-            'vpc_id'] = '${aws_vpc.vpc.id}'
-        self.security['resource']['aws_security_group']['gridwide'][
-            'tags']['Name'] = '${var.grid_name}'
-        self.security['resource']['aws_security_group']['gridwide'][
-            'depends_on'] = ['aws_vpc.vpc']
-        self.security['resource']['aws_security_group_rule'][
-            'egress_global_all'][
-            'security_group_id'] = '${aws_security_group.gridwide.id}'
-        self.security['resource']['aws_security_group_rule'][
-            'egress_global_all']['type'] = 'egress'
-        self.security['resource']['aws_security_group_rule'][
-            'egress_global_all']['from_port'] = '0'
-        self.security['resource']['aws_security_group_rule'][
-            'egress_global_all']['to_port'] = '0'
-        self.security['resource']['aws_security_group_rule'][
-            'egress_global_all']['protocol'] = '-1'
-        self.security['resource']['aws_security_group_rule'][
-            'egress_global_all']['cidr_blocks'] = ['0.0.0.0/0']
-        self.security['resource']['aws_security_group_rule'][
-            'ingress_ssh_internal'][
-            'security_group_id'] = '${aws_security_group.gridwide.id}'
-        self.security['resource']['aws_security_group_rule'][
-            'ingress_ssh_internal']['type'] = 'ingress'
-        self.security['resource']['aws_security_group_rule'][
-            'ingress_ssh_internal']['from_port'] = '0'
-        self.security['resource']['aws_security_group_rule'][
-            'ingress_ssh_internal']['to_port'] = '0'
-        self.security['resource']['aws_security_group_rule'][
-            'ingress_ssh_internal']['protocol'] = '-1'
-        self.security['resource']['aws_security_group_rule'][
-            'ingress_ssh_internal']['cidr_blocks'] = ['172.16.0.0/12']
-        self.security['resource']['aws_security_group']['terminal'][
-            'name'] = '${var.grid_name}_terminal'
-        self.security['resource']['aws_security_group']['terminal'][
-            'description'] = '${var.grid_name}_terminal security group'
-        self.security['resource']['aws_security_group']['terminal'][
-            'vpc_id'] = '${aws_vpc.vpc.id}'
-        self.security['resource']['aws_security_group']['terminal'][
-            'tags']['Name'] = '${var.grid_name}_terminal'
-        self.security['resource']['aws_security_group']['terminal'][
-            'depends_on'] = ['aws_vpc.vpc']
-        self.security['resource']['aws_security_group_rule'][
-            'ingress_ssh_terminal'][
-            'security_group_id'] = '${aws_security_group.terminal.id}'
-        self.security['resource']['aws_security_group_rule'][
-            'ingress_ssh_terminal']['type'] = 'ingress'
-        self.security['resource']['aws_security_group_rule'][
-            'ingress_ssh_terminal']['from_port'] = '22'
-        self.security['resource']['aws_security_group_rule'][
-            'ingress_ssh_terminal']['to_port'] = '22'
-        self.security['resource']['aws_security_group_rule'][
-            'ingress_ssh_terminal']['protocol'] = 'tcp'
-        self.security['resource']['aws_security_group_rule'][
-            'ingress_ssh_terminal']['cidr_blocks'] = ['0.0.0.0/0']
-        self.security['resource']['aws_security_group'][
-            'publisher']['name'] = '${var.grid_name}_publisher'
-        self.security['resource']['aws_security_group'][
-            'publisher'][
-            'description'] = '${var.grid_name}_publisher security group'
-        self.security['resource']['aws_security_group'][
-            'publisher']['vpc_id'] = '${aws_vpc.vpc.id}'
-        self.security['resource']['aws_security_group'][
-            'publisher']['tags']['Name'] = '${var.grid_name}_publisher'
-        self.security['resource']['aws_security_group'][
-            'publisher']['depends_on'] = ['aws_vpc.vpc']
-        self.security['resource']['aws_security_group_rule'][
-            'ingress_all_tcp_publisher'][
-            'security_group_id'] = '${aws_security_group.publisher.id}'
-        self.security['resource']['aws_security_group_rule'][
-            'ingress_all_tcp_publisher']['type'] = 'ingress'
-        self.security['resource']['aws_security_group_rule'][
-            'ingress_all_tcp_publisher']['from_port'] = '1'
-        self.security['resource']['aws_security_group_rule'][
-            'ingress_all_tcp_publisher']['to_port'] = '65535'
-        self.security['resource']['aws_security_group_rule'][
-            'ingress_all_tcp_publisher']['protocol'] = 'tcp'
-        self.security['resource']['aws_security_group_rule'][
-            'ingress_all_tcp_publisher']['cidr_blocks'] = ['0.0.0.0/0']
-        self.security['resource']['aws_security_group_rule'][
-            'ingress_all_udp_publisher'][
-            'security_group_id'] = '${aws_security_group.publisher.id}'
-        self.security['resource']['aws_security_group_rule'][
-            'ingress_all_udp_publisher']['type'] = 'ingress'
-        self.security['resource']['aws_security_group_rule'][
-            'ingress_all_udp_publisher']['from_port'] = '1'
-        self.security['resource']['aws_security_group_rule'][
-            'ingress_all_udp_publisher']['to_port'] = '65535'
-        self.security['resource']['aws_security_group_rule'][
-            'ingress_all_udp_publisher']['protocol'] = 'udp'
-        self.security['resource']['aws_security_group_rule'][
-            'ingress_all_udp_publisher']['cidr_blocks'] = ['0.0.0.0/0']
+        self.security['resource']['aws_security_group']['gridwide']['name'] = '${var.grid_name}'
+        self.security['resource']['aws_security_group']['gridwide']['description'] = '${var.grid_name} security group'
+        self.security['resource']['aws_security_group']['gridwide']['vpc_id'] = '${aws_vpc.vpc.id}'
+        self.security['resource']['aws_security_group']['gridwide']['tags']['Name'] = '${var.grid_name}'
+        self.security['resource']['aws_security_group']['gridwide']['depends_on'] = ['aws_vpc.vpc']
+        self.security['resource']['aws_security_group_rule']['egress_global_all']['security_group_id'] = '${aws_security_group.gridwide.id}'
+        self.security['resource']['aws_security_group_rule']['egress_global_all']['type'] = 'egress'
+        self.security['resource']['aws_security_group_rule']['egress_global_all']['from_port'] = '0'
+        self.security['resource']['aws_security_group_rule']['egress_global_all']['to_port'] = '0'
+        self.security['resource']['aws_security_group_rule']['egress_global_all']['protocol'] = '-1'
+        self.security['resource']['aws_security_group_rule']['egress_global_all']['cidr_blocks'] = ['0.0.0.0/0']
+        self.security['resource']['aws_security_group_rule']['ingress_ssh_internal']['security_group_id'] = '${aws_security_group.gridwide.id}'
+        self.security['resource']['aws_security_group_rule']['ingress_ssh_internal']['type'] = 'ingress'
+        self.security['resource']['aws_security_group_rule']['ingress_ssh_internal']['from_port'] = '0'
+        self.security['resource']['aws_security_group_rule']['ingress_ssh_internal']['to_port'] = '0'
+        self.security['resource']['aws_security_group_rule']['ingress_ssh_internal']['protocol'] = '-1'
+        self.security['resource']['aws_security_group_rule']['ingress_ssh_internal']['cidr_blocks'] = ['172.16.0.0/12']
+        self.security['resource']['aws_security_group']['terminal']['name'] = '${var.grid_name}_terminal'
+        self.security['resource']['aws_security_group']['terminal']['description'] = '${var.grid_name}_terminal security group'
+        self.security['resource']['aws_security_group']['terminal']['vpc_id'] = '${aws_vpc.vpc.id}'
+        self.security['resource']['aws_security_group']['terminal']['tags']['Name'] = '${var.grid_name}_terminal'
+        self.security['resource']['aws_security_group']['terminal']['depends_on'] = ['aws_vpc.vpc']
+        self.security['resource']['aws_security_group_rule']['ingress_ssh_terminal']['security_group_id'] = '${aws_security_group.terminal.id}'
+        self.security['resource']['aws_security_group_rule']['ingress_ssh_terminal']['type'] = 'ingress'
+        self.security['resource']['aws_security_group_rule']['ingress_ssh_terminal']['from_port'] = '22'
+        self.security['resource']['aws_security_group_rule']['ingress_ssh_terminal']['to_port'] = '22'
+        self.security['resource']['aws_security_group_rule']['ingress_ssh_terminal']['protocol'] = 'tcp'
+        self.security['resource']['aws_security_group_rule']['ingress_ssh_terminal']['cidr_blocks'] = ['0.0.0.0/0']
+        self.security['resource']['aws_security_group']['publisher']['name'] = '${var.grid_name}_publisher'
+        self.security['resource']['aws_security_group']['publisher']['description'] = '${var.grid_name}_publisher security group'
+        self.security['resource']['aws_security_group']['publisher']['vpc_id'] = '${aws_vpc.vpc.id}'
+        self.security['resource']['aws_security_group']['publisher']['tags']['Name'] = '${var.grid_name}_publisher'
+        self.security['resource']['aws_security_group']['publisher']['depends_on'] = ['aws_vpc.vpc']
+        self.security['resource']['aws_security_group_rule']['ingress_all_tcp_publisher']['security_group_id'] = '${aws_security_group.publisher.id}'
+        self.security['resource']['aws_security_group_rule']['ingress_all_tcp_publisher']['type'] = 'ingress'
+        self.security['resource']['aws_security_group_rule']['ingress_all_tcp_publisher']['from_port'] = '1'
+        self.security['resource']['aws_security_group_rule']['ingress_all_tcp_publisher']['to_port'] = '65535'
+        self.security['resource']['aws_security_group_rule']['ingress_all_tcp_publisher']['protocol'] = 'tcp'
+        self.security['resource']['aws_security_group_rule']['ingress_all_tcp_publisher']['cidr_blocks'] = ['0.0.0.0/0']
+        self.security['resource']['aws_security_group_rule']['ingress_all_udp_publisher']['security_group_id'] = '${aws_security_group.publisher.id}'
+        self.security['resource']['aws_security_group_rule']['ingress_all_udp_publisher']['type'] = 'ingress'
+        self.security['resource']['aws_security_group_rule']['ingress_all_udp_publisher']['from_port'] = '1'
+        self.security['resource']['aws_security_group_rule']['ingress_all_udp_publisher']['to_port'] = '65535'
+        self.security['resource']['aws_security_group_rule']['ingress_all_udp_publisher']['protocol'] = 'udp'
+        self.security['resource']['aws_security_group_rule']['ingress_all_udp_publisher']['cidr_blocks'] = ['0.0.0.0/0']
         with open('result/{}/infrastructure/security.tf'.format(
                 self.grid_name), 'w') as security_file:
             json.dump(self.security, security_file)
