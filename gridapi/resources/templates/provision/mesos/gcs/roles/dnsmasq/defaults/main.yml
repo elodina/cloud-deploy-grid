@@ -1,0 +1,2 @@
+---
+hostname: "{{ ansible_hostname }}.node.{{ dns_domain }}"

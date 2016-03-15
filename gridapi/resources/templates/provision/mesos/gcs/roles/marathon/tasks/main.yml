@@ -1,0 +1,80 @@
+---
+
+- name: install marathon package
+  yum:
+    name: marathon
+    state: present
+  tags:
+    - marathon
+
+- name: install wait script
+  template:
+    src: marathon-wait-for-listen.sh.j2
+    dest: /usr/local/bin/marathon-wait-for-listen.sh
+    mode: u=rwx,g=rx,o=rx
+  tags:
+    - marathon
+
+- include: conf.yml
+
+- name: configure marathon init file
+  replace:
+    dest: /usr/lib/systemd/system/marathon.service
+    regexp: "=network.target"
+    replace: '=mesos-master.service'
+  notify:
+    - reload marathon
+    - restart marathon
+  tags:
+    - marathon
+
+- name: enable and start marathon
+  service:
+    enabled: yes
+    name: marathon
+    state: started
+  tags:
+    - marathon
+
+- meta: flush_handlers
+
+# - include: nginx-proxy.yml
+
+- name: deploy iptables configuration
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - src: marathon-consul.cfg
+      dest: /etc/consul-template/config.d
+  notify:
+    - reload consul-template
+  tags:
+    - marathon
+
+- name: deploy iptables template
+  template:
+    src: marathon-iptables.tmpl.j2
+    dest: /etc/consul-template/templates/marathon-iptables.tmpl
+  notify:
+    - reload consul-template
+  tags:
+    - marathon
+
+- name: ensure consul.d is present
+  file:
+    path: "{{ consul_dir }}"
+    state: directory
+  tags:
+    - marathon
+
+- name: generate marathon consul service
+  template:
+    src: marathon-consul.j2
+    dest: "{{ consul_dir }}/marathon.json"
+  notify:
+    - reload consul
+  tags:
+    - marathon
+
+- include: jobs.yml

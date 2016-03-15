@@ -1,0 +1,47 @@
+---
+- name: create secret file
+  when: mesos_do_framework_auth|bool
+  copy:
+    dest: /etc/marathon/mesos_authentication_secret
+    content: "{{ marathon_secret }}"
+  notify:
+    - restart marathon
+  tags:
+    - marathon
+
+- name: set principal and secret
+  when: mesos_do_framework_auth|bool
+  copy:
+    dest: /etc/marathon/conf/{{ item.key }}
+    content: "{{ item.value }}"
+  with_items:
+    - key: mesos_authentication_principal
+      value: "{{ marathon_principal }}"
+    - key: mesos_authentication_secret_file
+      value: /etc/marathon/mesos_authentication_secret
+  notify:
+    - restart marathon
+  tags:
+    - marathon
+
+# and removing if options become unset
+- name: remove secret file
+  when: not mesos_do_framework_auth|bool
+  file:
+    dest: /etc/marathon/mesos_authentication_secret
+    state: absent
+  notify:
+    - restart marathon
+
+- name: remove principal and secret
+  when: not mesos_do_framework_auth|bool
+  file:
+    dest: /etc/marathon/conf/{{ item }}
+    state: absent
+  with_items:
+    - mesos_authentication_principal
+    - mesos_authentication_secret_file
+  notify:
+    - restart marathon
+  tags:
+    - marathon

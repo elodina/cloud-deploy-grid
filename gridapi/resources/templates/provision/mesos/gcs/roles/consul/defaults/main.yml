@@ -1,0 +1,29 @@
+---
+consul_version: 0.5.2
+consul_is_server: no
+consul_dc: dc1
+consul_dns_domain: "{{ consul_dc }}"
+consul_servers_group: consul-servers
+consul_bind: "{{ ansible_default_ipv4.address }}"
+consul_client: "{{ ansible_default_ipv4.address }}"
+consul_advertise: "{{ ansible_default_ipv4.address }}"
+consul_retry_join: "{% for host in groups[consul_servers_group] | intersect(groups[grid]) | intersect(groups[consul_dc]) %}\"{{ hostvars[host].ansible_default_ipv4.address }}\"{% if not loop.last %}, {% endif %}{% endfor %}"
+consul_bootstrap_expect: "{{ groups[consul_servers_group] | intersect(groups[grid]) | intersect(groups[consul_dc]) | length }}"
+consul_disable_remote_exec: "true"
+
+consul_nginx_image: ciscocloud/nginx-consul
+consul_nginx_image_tag: 1.1
+
+consul_do_acl: no
+consul_acl_master_token: "89ff9d38-534a-41aa-a3a6-e4985bcd11c0"
+consul_acl_agent_token: "2015697f-8048-4a63-954a-3ebb9cb0ab99"
+consul_acl_grid: "{{ grid }}"
+consul_acl_default_policy: "allow"
+consul_acl_down_policy: "allow"
+
+consul_do_ssl: no
+consul_ca_file: ca.cert
+consul_cert_file: consul.cert
+consul_key_file: consul.key
+
+consul_do_auth: no

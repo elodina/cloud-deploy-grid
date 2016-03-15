@@ -1,0 +1,3 @@
+---
+zookeeper_data_dir: /var/lib/zookeeper
+zookeeper_id: "{% for host in groups['zookeepers'] | intersect(groups[grid]) %}{% if hostvars[host].ansible_fqdn == ansible_fqdn %}{{ loop.index0 }}{% endif %}{% endfor %}"

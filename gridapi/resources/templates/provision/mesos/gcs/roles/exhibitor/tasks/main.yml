@@ -1,0 +1,35 @@
+---
+- name: create exhibitor directories
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ exhibitor_install_dir }}"
+    - "{{ exhibitor_conf_dir }}"
+    - "{{ exhibitor_log_dir }}"
+  tags:
+    - exhibitor
+
+- name: get exhibitor
+  get_url:
+    url: "{{ exhibitor_mirror }}/exhibitor-{{ exhibitor_version }}.jar"
+    dest: "{{ exhibitor_install_dir }}/exhibitor-{{ exhibitor_version }}.jar"
+  notify: restart exhibitor
+  tags:
+    - exhibitor
+
+- name: create exhibitor config
+  template:
+    src: opt/exhibitor/conf/default.j2
+    dest: /opt/exhibitor/conf/default
+  notify: restart exhibitor
+  tags:
+    - exhibitor
+
+- name: register exhibitor with systemd
+  template: 
+    src: usr/lib/systemd/system/exhibitor.service.j2
+    dest: /usr/lib/systemd/system/exhibitor.service
+  notify: restart exhibitor
+  tags:
+    - exhibitor

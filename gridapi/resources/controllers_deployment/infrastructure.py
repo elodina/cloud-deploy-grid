@@ -523,6 +523,19 @@ class ExportInfrastructureDeploymentHandler(InfrastructureDeploymentHandler):
             export.sort(key=lambda(x): x[0])
             return export
 
+        def _gcs_hosts_export(grid_name):
+            export = []
+            with open('result/{}/infrastructure/terraform.tfstate'.format(
+                    grid_name), 'r') as input_file:
+                state = json.load(input_file)
+                for module in state['modules']:
+                    for resource, value in module['resources'].iteritems():
+                        if value['type'] == 'google_compute_instance':
+                            ip = value['primary']['attributes']['network_interface.0.address']
+                            export.append(('.'.join(resource.split('.')[1:]), ip))
+            export.sort(key=lambda(x): x[0])
+            return export
+
         def _custom_hosts_export(grid_name):
             export = []
             grid_config = configs[grid.provider].select().where(
@@ -539,6 +552,7 @@ class ExportInfrastructureDeploymentHandler(InfrastructureDeploymentHandler):
         hosts_export = {
             'aws': _aws_hosts_export,
             'azure': _azure_hosts_export,
+            'gcs': _gcs_hosts_export,
             'custom': _custom_hosts_export
         }
         if not os.path.exists('result/{}/infrastructure'.format(grid_name)):

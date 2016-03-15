@@ -98,6 +98,8 @@ class gcs_infrastructure_generator(object):
         self.terminal['resource']['google_compute_instance']['{}-terminal'.format(self.grid_name)]['can_ip_forward'] = 'true'
         self.terminal['resource']['google_compute_instance']['{}-terminal'.format(self.grid_name)]['metadata']['ssh_user'] = '${var.ssh_user}'
         self.terminal['resource']['google_compute_instance']['{}-terminal'.format(self.grid_name)]['metadata']['sshKeys'] = '${var.ssh_user}:${var.ssh_key} ${var.ssh_user}'
+        self.terminal['resource']['google_compute_instance']['{}-terminal'.format(self.grid_name)]['metadata']['dc'] = '${var.grid_name}'
+        self.terminal['resource']['google_compute_instance']['{}-terminal'.format(self.grid_name)]['metadata']['role'] = '{}_terminal'.format(self.grid_name)
         self.terminal['resource']['google_compute_instance']['{}-terminal'.format(self.grid_name)]['depends_on'] = ['google_compute_network.{}-network'.format(self.grid_name)]
         with open('result/{}/infrastructure/terminal.tf'.format(
                 self.grid_name), 'w') as terminal_file:
@@ -116,6 +118,8 @@ class gcs_infrastructure_generator(object):
         self.masters['resource']['google_compute_instance']['{}-mesos_master'.format(self.grid_name)]['network_interface'].append({'network':'${var.grid_name}-network','access_config':{}})
         self.masters['resource']['google_compute_instance']['{}-mesos_master'.format(self.grid_name)]['metadata']['ssh_user'] = '${var.ssh_user}'
         self.masters['resource']['google_compute_instance']['{}-mesos_master'.format(self.grid_name)]['metadata']['sshKeys'] = '${var.ssh_user}:${var.ssh_key} ${var.ssh_user}'
+        self.masters['resource']['google_compute_instance']['{}-mesos_master'.format(self.grid_name)]['metadata']['dc'] = '${var.grid_name}'
+        self.masters['resource']['google_compute_instance']['{}-mesos_master'.format(self.grid_name)]['metadata']['role'] = '{}_mesos_master'.format(self.grid_name)
         self.masters['resource']['google_compute_instance']['{}-mesos_master'.format(self.grid_name)]['depends_on'] = ['google_compute_network.{}-network'.format(self.grid_name)]
         with open('result/{}/infrastructure/masters.tf'.format(
                 self.grid_name), 'w') as masters_file:
@@ -136,10 +140,12 @@ class gcs_infrastructure_generator(object):
             group_export['resource']['google_compute_instance']['{}-mesos_group_{}'.format(self.grid_name, group.name)]['network_interface'].append({'network':'${var.grid_name}-network','access_config':{}})
             group_export['resource']['google_compute_instance']['{}-mesos_group_{}'.format(self.grid_name, group.name)]['metadata']['ssh_user'] = '${var.ssh_user}'
             group_export['resource']['google_compute_instance']['{}-mesos_group_{}'.format(self.grid_name, group.name)]['metadata']['sshKeys'] = '${var.ssh_user}:${var.ssh_key} ${var.ssh_user}'
+            group_export['resource']['google_compute_instance']['{}-mesos_group_{}'.format(self.grid_name, group.name)]['metadata']['dc'] = '${var.grid_name}'
+            group_export['resource']['google_compute_instance']['{}-mesos_group_{}'.format(self.grid_name, group.name)]['metadata']['role'] = '{}_{}'.format(self.grid_name, group.role)
             group_export['resource']['google_compute_instance']['{}-mesos_group_{}'.format(self.grid_name, group.name)]['depends_on'] = ['google_compute_network.{}-network'.format(self.grid_name)]
             if group.customhwconf is not None:
                 group_export['resource']['google_compute_instance']['{}-mesos_group_{}'.format(self.grid_name, group.name)].update(ast.literal_eval(group.customhwconf))
-            with open('result/{}/infrastructure/{}.tf'.format(
+            with open('result/{}/infrastructure/group_{}.tf'.format(
                     self.grid_name, group.name), 'w') as group_file:
                 json.dump(group_export, group_file)
 
