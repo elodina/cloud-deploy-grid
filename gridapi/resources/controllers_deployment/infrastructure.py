@@ -133,6 +133,14 @@ class InfrastructureDeploymentHandler(Resource):
                 self.unlock(parent_deployment)
                 parent_deployment.save()
                 os.chdir(cwd)
+                try:
+                    del os.environ['AWS_ACCESS_KEY_ID']
+                except:
+                    print('no such env')
+                try:
+                    del os.environ['AWS_SECRET_ACCESS_KEY']
+                except:
+                    print('no such env')
                 shutil.rmtree('result/{}'.format(grid_name))
         try:
             self.lock(parent_deployment)
@@ -215,7 +223,21 @@ class InfrastructureDeploymentHandler(Resource):
                                         'vip_address']
 
             def _gcs_get_access_ip(grid_name):
-                pass
+                if os.path.isfile(
+                        'result/{}/infrastructure/terraform.tfstate'.
+                        format(grid_name)) and os.access(
+                        'result/{}/infrastructure/terraform.tfstate'.
+                        format(grid_name), os.R_OK):
+                    with open(
+                            'result/{}/infrastructure/terraform.tfstate'.
+                            format(grid_name), 'r') as json_file:
+                        json_data = json.load(json_file)
+                        for module in json_data['modules']:
+                            for resource, value in module[
+                                    'resources'].iteritems():
+                                if resource == 'google_compute_instance.{}-terminal'.format(grid_name):
+                                    return value['primary']['attributes'][
+                                        'network_interface.0.access_config.0.assigned_nat_ip']
 
             def _custom_get_access_ip(grid_name):
                 grid_config = configs[grid.provider].select().where(
@@ -257,7 +279,19 @@ class InfrastructureDeploymentHandler(Resource):
 
             @retry(stop_max_attempt_number=30, wait_fixed=5000)
             def _gcs_check_host(host):
-                pass
+                try:
+                    subprocess.check_call([
+                        'ssh', '-F', 'result/{}/ssh_config'.format(
+                            grid_name),
+                        '-o', 'UserKnownHostsFile=/dev/null',
+                        '-o', 'StrictHostKeyChecking=no',
+                        '-o', 'PasswordAuthentication=no',
+                        '-o', 'ConnectTimeout=10',
+                        '{}'.format(host), 'exit'])
+                    print('{} is online'.format(host))
+                except:
+                    print('{} is offline'.format(host))
+                    raise Exception('host is offline')
 
             @retry(stop_max_attempt_number=30, wait_fixed=5000)
             def _custom_check_host(host, grid_name):
@@ -278,6 +312,7 @@ class InfrastructureDeploymentHandler(Resource):
             check_host = {
                 'aws': _aws_check_host,
                 'azure': _azure_check_host,
+                'gcs': _gcs_check_host,
                 'custom': _custom_check_host
             }
 
@@ -319,7 +354,22 @@ class InfrastructureDeploymentHandler(Resource):
                                     check_host[grid.provider](ip)
 
             def _gcs_check_hosts_online(grid_name):
-                pass
+                if os.path.isfile('result/{}/infrastructure/terraform.'
+                                  'tfstate'.format(
+                        grid_name)) and os.access(
+                    'result/{}/infrastructure/terraform.tfstate'.format(
+                        grid_name), os.R_OK):
+                    with open('result/{}/infrastructure/terraform.'
+                              'tfstate'.format(
+                            grid_name), "r") as json_file:
+                        json_data = json.load(json_file)
+                        for module in json_data['modules']:
+                            for resource, value in module['resources'].\
+                                    iteritems():
+                                if value['type'] == 'google_compute_instance':
+                                    ip = value['primary']['attributes'][
+                                        'network_interface.0.address']
+                                    check_host[grid.provider](ip)
 
             def _custom_check_hosts_online(grid_name):
                 all_ips = []
@@ -401,8 +451,14 @@ class InfrastructureDeploymentHandler(Resource):
                 self.unlock(parent_deployment)
                 parent_deployment.save()
                 os.chdir(cwd)
-                del os.environ['AWS_ACCESS_KEY_ID']
-                del os.environ['AWS_SECRET_ACCESS_KEY']
+                try:
+                    del os.environ['AWS_ACCESS_KEY_ID']
+                except:
+                    print('no such env')
+                try:
+                    del os.environ['AWS_SECRET_ACCESS_KEY']
+                except:
+                    print('no such env')
                 shutil.rmtree('result/{}'.format(grid_name))
         try:
             self.lock(parent_deployment)

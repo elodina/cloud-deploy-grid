@@ -49,7 +49,7 @@ gcsconfig_parser.add_argument(
 gcsconfig_parser.add_argument(
     'zone', required=True, help='GCE Zone, for example europe-west1-b')
 gcsconfig_parser.add_argument('sshkeydata', required=True,
-    help='ssh key public part, URL encoded')
+    help='ssh key private part, URL encoded')
 gcsconfig_parser.add_argument(
     'ssh_user', required=True, help='SSH user for VMs')
 
