@@ -143,6 +143,8 @@ class gcs_infrastructure_generator(object):
             group_export['resource']['google_compute_instance']['{}-mesos_group_{}'.format(self.grid_name, group.name)]['metadata']['dc'] = '${var.grid_name}'
             group_export['resource']['google_compute_instance']['{}-mesos_group_{}'.format(self.grid_name, group.name)]['metadata']['role'] = '{}_{}'.format(self.grid_name, group.role)
             group_export['resource']['google_compute_instance']['{}-mesos_group_{}'.format(self.grid_name, group.name)]['depends_on'] = ['google_compute_network.{}-network'.format(self.grid_name)]
+            if group.preemptible:
+                group_export['resource']['google_compute_instance']['{}-mesos_group_{}'.format(self.grid_name, group.name)]['scheduling']['preemptible'] = 'true'
             if group.customhwconf is not None:
                 group_export['resource']['google_compute_instance']['{}-mesos_group_{}'.format(self.grid_name, group.name)].update(ast.literal_eval(group.customhwconf))
             with open('result/{}/infrastructure/group_{}.tf'.format(
