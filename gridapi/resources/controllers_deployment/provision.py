@@ -11,6 +11,8 @@ from gridapi.resources.generators.provision.mesos.aws import\
     aws_provision_mesos_generator
 from gridapi.resources.generators.provision.mesos.azure import\
     azure_provision_mesos_generator
+from gridapi.resources.generators.provision.mesos.gcs import\
+    gcs_provision_mesos_generator
 from gridapi.resources.generators.provision.mesos.custom import\
     custom_provision_mesos_generator
 from gridapi.resources.generators.provision.dcos.azure import\
@@ -24,6 +26,7 @@ provision_generators = {
     'mesos': {
         'aws': aws_provision_mesos_generator,
         'azure': azure_provision_mesos_generator,
+        'gcs': gcs_provision_mesos_generator,
         'custom': custom_provision_mesos_generator
     },
     'dcos': {

@@ -15,6 +15,7 @@ Table of Contents
     * [Grid Slave group API Requests](#grid-slave-group-api-requests)
     * [Grid Deployment API Requests](#grid-deployment-api-requests)
     * [Common usage scenario for Mesos on AWS](#common-usage-scenario-for-mesos-on-aws)
+    * [Common usage scenario for Mesos on GCS](#common-usage-scenario-for-mesos-on-gcs)
     * [Common usage scenario for Mesos on Azure](#common-usage-scenario-for-mesos-on-azure)
     * [Common usage scenario for DCOS on AWS](#common-usage-scenario-for-dcos-on-aws)
     * [Common usage scenario for DCOS on Azure](#common-usage-scenario-for-dcos-on-azure)
@@ -90,7 +91,7 @@ POST - add new grid, example:
 curl -X POST -d "name=${grid_name}" -d "provider=aws" -d "type=mesos" http://localhost:5555/api/v2.0/grids
 ```
 
-required parameters - name(variable), provider(aws/azure/custom), type(mesos/dcos)
+required parameters - name(variable), provider(aws/azure/gcs/custom), type(mesos/dcos)
 
 
 Grid Entity API Requests
@@ -152,6 +153,9 @@ master_type(AWS instance type for master, default m3.large), region(AWS region f
 azure:
 master_type(Azure instance type for master, default is Basic_A2), location(Azure location for grid in format like "Central US"), ssh_user(user for ssh login), ssh_password(password for ssh user and sudo)
 
+gcs:
+master_type(GCS instance type for master, default is n1-standard-1), zone(GCS Zone in format like "us-east1-a"), project(GCS project ID), ssh_user(user for ssh login), sshkeydata(Private path of ssh key, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
+
 custom:
 mastersips(Comma separated list of masters ips), terminalips(<terminal_external_ip>,<terminal_internal_ip>), ssh_user(ssh user for connection), sshkeydata(Private part of ssh key, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
 
@@ -178,6 +182,12 @@ curl -X POST -d "name=${group_name}" -d "role=role1" -d "attributes={\"foo\":\"b
 ```
 required parameters - name(variable), role(variable), attributes(escaped json format), vars(escaped json format), instance_type(for AWS, for example - m3.large, for Azure, for example - Basic_A3), cpus(number of cpus per group), ram(amount of GB of ram per group), disk_size(hdd size, per HOST)
 
+zone(GCS zone to place group to, GCS only), example:
+
+```
+-d "zone=us-east1-c"
+```
+
 optional parameters:
 
 az(availability zone to place group to, AWS only), example:
@@ -186,18 +196,29 @@ az(availability zone to place group to, AWS only), example:
 -d "az=c"
 ```
 
-customhwconf(escaped json format, look at https://www.terraform.io/docs/configuration/syntax.html)
-
-example of customhwconf:
+customhwconf(escaped json format, look at https://www.terraform.io/docs/configuration/syntax.html), example:
 
 ```
 {\"ebs_block_device\":[{\"device_name\":\"/dev/sdx\",\"volume_size\":\"200\",\"volume_type\":\"gp2\"}]}
 ```
+All of the new created disks will be mounted to /hdd/xvd{last letter of disk name, eg, x, y, whatever}
+
 
 groupips(in custom provider, comma separated list of group ips)
 
 
-All of the new created disks will be mounted to /hdd/xvd{last letter of disk name, eg, x, y, whatever}
+preemptible(True/False in GCS, enables machine's preemptibility(https://cloud.google.com/preemptible-vms/), example:
+
+```
+-d "preemptible=True"
+```
+
+
+spot_price(only in AWS - group of slaves will be make of spot instances), example:
+
+```
+-d "spot_price=0.9"
+```
 
 Grid Slave group API Requests
 --------------------------------
@@ -228,6 +249,13 @@ curl -X PUT -d "name=group2" -d "role=role1" -d "attributes={\"foo\":\"bar\"}" -
 
 required parameters - name(variable), role(variable), attributes(escaped json format), vars(escaped json format), instance_type(for AWS, for example - m3.large, for Azure, for example - Basic_A3), cpus(number of cpus per group), ram(amount of GB of ram per group), disk_size(hdd size, per HOST)
 
+zone(GCS zone to place group to, GCS only), example:
+
+```
+-d "zone=us-east1-c"
+```
+
+
 optional parameters:
 
 az(availability zone to place group to, AWS only), example:
@@ -253,6 +281,13 @@ spot_price(group of slaves will be make of spot instances), example:
 ```
 
 groupips(in custom provider, comma separated list of group ips)
+
+
+preemptible(True/False in GCS, enables machine's preemptibility(https://cloud.google.com/preemptible-vms/), example:
+
+```
+-d "preemptible=True"
+```
 
 Grid Deployment API Requests
 -------------------------------
@@ -302,6 +337,11 @@ AZURE:
 curl -X PUT --data-urlencode "credentials=`cat credentials`" http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure
 ```
 
+GCS:
+```
+curl -X PUT --data-urlencode "credentials=`cat credentials`" http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure
+```
+
 CUSTOM:
 ```
 curl -X PUT http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure
@@ -317,6 +357,9 @@ aws_access_key_id(self descriptive,URL-encoded, e.g. curl --data-urlencode "${ke
 
 azure:
 credentials(credentials file, can be aquired here: https://manage.windowsazure.com/publishsettings, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
+
+gcs:
+credentials(credentials file, should be aquired, as described here: https://www.terraform.io/docs/providers/google/index.html, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
 
 
 Grid Provision API Requests
@@ -346,6 +389,11 @@ AZURE:
 curl -X PUT http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/provision
 ```
 
+GCS:
+```
+curl -X PUT --data-urlencode "credentials=`cat credentials`" http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/provision
+```
+
 CUSTOM:
 ```
 curl -X PUT http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/provision
@@ -358,6 +406,10 @@ aws:
 aws_access_key_id(self descriptive,URL-encoded, e.g. curl --data-urlencode "${key}=${value}"), aws_secret_access_key(self descriptive,URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
 
 
+gcs:
+credentials(credentials file, should be aquired, as described here: https://www.terraform.io/docs/providers/google/index.html, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
+
+
 optional parameters:
 
 common:
@@ -365,6 +417,7 @@ common:
 vpn_enabled - by default == 'True', if True - enable VPN server provisioinig, otherwise - disable
 
 duo_ikey, duo_skey, duo_host - duo security api parameters(duo.com) for vpn auth, URL-encoded, e.g. curl --data-urlencode "${key}=${value}"
+
 PREREQUISITS FOR MFA:
 1) Created application at duo.com(Auth API)
 
@@ -499,6 +552,52 @@ Delete grid configs, etc
 ```
 curl http://localhost:5555/api/v2.0/grids/${grid_name} -X DELETE
 ```
+
+Common usage scenario for Mesos on GCS
+--------------------------------------
+
+Create grid
+
+```
+curl -X POST -d "name=${grid_name}" -d "provider=gcs" -d "type=mesos" http://localhost:5555/api/v2.0/grids
+```
+
+Update config
+
+```
+curl -X PUT -d "project=super-project-123456" -d "vars={\"mesos_version\":\"0.26.0\"}" -d "master_type=n1-standard-1" -d "masters=3" -d zone="europe-west1-b" -d "ssh_user=centos" --data-urlencode "sshkeydata=`cat ~/.ssh/id_rsa`" http://localhost:5555/api/v2.0/grids/${grid_name}/config
+```
+
+Create group of slaves
+
+```
+curl -X POST -d "zone=europe-west1-b" -d "instance_type=n1-standard-1" -d "name=infra" -d "role=infra" -d "attributes={\"type\":\"infra\"}" -d "cpus=1" -d "ram=10" -d "disk_size=50" http://localhost:5555/api/v2.0/grids/${grid_name}/groups
+```
+
+Deploy grid's infrastructure
+
+```
+curl -X PUT --data-urlencode "credentials=`cat credentials.json`" http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure
+```
+
+Provision grid
+
+```
+curl -X PUT --data-urlencode "credentials=`cat credentials.json`" http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/provision
+```
+
+Destroy grid
+
+```
+curl -X DELETE --data-urlencode "credentials=`cat credentials.json`" http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure
+```
+
+Delete grid configs, etc
+
+```
+curl -X DELETE http://localhost:5555/api/v2.0/grids/${grid_name}
+```
+
 
 Common usage scenario for Mesos on Custom Provider
 --------------------------------------------------

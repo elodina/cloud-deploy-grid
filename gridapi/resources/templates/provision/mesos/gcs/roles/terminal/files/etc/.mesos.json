@@ -1,0 +1,8 @@
+{
+    "profile": "default",
+    "default": {
+        "master": "leader.mesos.service:5050",
+        "log_level": "warning",
+        "log_file": "/tmp/mesos-cli.log"
+    }
+}

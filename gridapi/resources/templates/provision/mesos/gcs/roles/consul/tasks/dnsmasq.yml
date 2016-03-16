@@ -1,0 +1,17 @@
+---
+- name: configure consul for dnsmasq
+  template:
+    src: etc/dnsmasq.d/30-consul.conf
+    dest: /etc/dnsmasq.d/30-consul.conf
+    mode: 755
+  notify:
+    - restart dnsmasq
+  tags:
+    - consul
+
+- name: add dnsmasq to /etc/resolv.conf
+  copy:
+    dest: /etc/resolv.conf
+    content: "search {{ consul_dns_domain }} node.{{ consul_dns_domain }}\nnameserver 127.0.0.1\n"
+  tags:
+    - consul

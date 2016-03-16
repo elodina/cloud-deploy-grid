@@ -1,0 +1,8 @@
+---
+
+# master|slave|both
+mode: master
+log_dir: /var/log/mesos
+work_dir: /var/lib/mesos
+ulimit: "-n 8192"
+isolation: "cgroups/cpu,cgroups/mem"

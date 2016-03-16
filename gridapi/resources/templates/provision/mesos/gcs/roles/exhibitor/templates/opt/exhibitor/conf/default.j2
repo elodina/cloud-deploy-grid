@@ -1,0 +1,26 @@
+# {{ ansible_managed }}
+
+#log-index-directory
+zookeeper-install-directory=/opt/zookeeper
+zookeeper-data-directory=/var/lib/zookeeper
+#zookeeper-log-directory=/var/log/zookeeper
+servers-spec={% for host in groups['zookeepers'] %}S\:{{ loop.index0 }}\:{{ hostvars[host].ansible_default_ipv4.address }}{% if not loop.last %},{% endif %}{% endfor %}
+
+# Misc
+#backup-extra
+#zoo-cfg-extra
+#java-environment
+#log4j-properties
+#client-port
+#connect-port
+#election-port
+#check-ms
+#cleanup-period-ms
+#cleanup-max-files
+#backup-max-store-ms
+#backup-period-ms
+#auto-manage-instances
+#auto-manage-instances-settling-period-ms
+#observer-threshold
+#auto-manage-instances-fixed-ensemble-size
+#auto-manage-instances-apply-all-at-once

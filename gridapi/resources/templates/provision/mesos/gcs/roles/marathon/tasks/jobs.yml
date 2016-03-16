@@ -1,0 +1,32 @@
+---
+- name: create json files for jobs
+  template:
+    src: '{{ item }}.json.j2'
+    dest: /etc/marathon/{{ item }}.json
+  with_items:
+    - mesos-consul
+    - marathon-consul
+  tags:
+    - marathon
+    - marathon-jobs
+
+- name: start jobs
+  run_once: true
+  command: 'curl -X PUT -d@/etc/marathon/{{ item }}.json -H "Content-Type: application/json" http://localhost:18080/v2/apps/{{ item }}'
+  changed_when: false
+  with_items:
+    - mesos-consul
+    - marathon-consul
+  tags:
+    - marathon
+    - marathon-jobs
+
+- name: set event hooks
+  run_once: true
+  command: "curl -X POST http://localhost:18080/v2/eventSubscriptions?callbackUrl={{ item }}"
+  changed_when: false
+  with_items:
+    - "http://marathon-consul.service.{{ consul_dc }}:4000/events"
+  tags:
+    - marathon
+    - marathon-jobs

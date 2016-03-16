@@ -1,0 +1,12 @@
+# Service discovery
+grid: "{{ grid_name }}"
+datacenter: "{{ grid_name }}"
+consul_dc: "{{ grid_name }}"
+dns_domain: "{{ grid_name }}"
+hosts: {{ hosts }}
+
+# Security
+consul_do_ssl: no
+consul_do_acl: no
+consul_do_auth: no
+

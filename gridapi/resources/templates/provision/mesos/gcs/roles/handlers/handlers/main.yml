@@ -1,0 +1,49 @@
+---
+- name: reload consul
+  command: systemctl reload consul
+  notify:
+    - wait for consul to listen
+
+- name: wait for consul to listen
+  command: /usr/local/bin/consul-wait-for-leader.sh
+
+- name: restart consul
+  command: /usr/local/bin/consul-rolling-restart.sh
+  notify:
+    - wait for consul to listen
+
+- name: reload consul-template
+  command: systemctl reload consul-template
+
+- name: restart consul-template
+  command: systemcl restart consul-template
+
+- name: restart nginx
+  service: 
+    name: nginx
+    state: restarted
+
+- name: reload nginx
+  service: 
+    name: nginx
+    state: reloaded
+
+- name: restart docker
+  service:
+    name: docker
+    state: restarted
+
+- name: restart networkmanager
+  service:
+    name: NetworkManager
+    state: restarted
+
+- name: restart dnsmasq
+  service:
+    name: dnsmasq
+    state: restarted
+
+- name: restart openvpn
+  service:
+    name: openvpn@server
+    state: restarted

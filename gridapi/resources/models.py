@@ -61,6 +61,15 @@ class AzureConfigEntity(ConfigEntity):
     ssh_password = CharField(null=True)
 
 
+class GCSConfigEntity(ConfigEntity):
+    masters = IntegerField(null=True)
+    master_type = CharField(null=True)
+    project = CharField(null=True)
+    zone = CharField(null=True)
+    sshkeydata = TextField(null=True)
+    ssh_user = CharField(null=True)
+
+
 class CustomConfigEntity(ConfigEntity):
     ssh_user = CharField(null=True)
     sshkeydata = TextField(null=True)
@@ -110,6 +119,18 @@ class AzureInfrastructureDeploymentEntity(AzureDeploymentEntity):
 class AzureProvisionDeploymentEntity(AzureDeploymentEntity):
     pass
 
+
+class GCSDeploymentEntity(DeploymentEntity):
+    pass
+
+
+class GCSInfrastructureDeploymentEntity(GCSDeploymentEntity):
+    _accessip = CharField(null=True)
+    _state = TextField(default='{"foo": "bar"}')
+
+
+class GCSProvisionDeploymentEntity(GCSDeploymentEntity):
+    pass
 
 class CustomDeploymentEntity(DeploymentEntity):
     pass
@@ -163,36 +184,51 @@ class AzureGroupEntity(GroupEntity):
     customhwconf = CharField(default='', null=True)
 
 
+class GCSGroupEntity(GroupEntity):
+    instance_type = CharField(null=True)
+    cpus = IntegerField(null=True)
+    ram = IntegerField(null=True)
+    disk_size = IntegerField(null=True)
+    customhwconf = CharField(default='', null=True)
+    preemptible = BooleanField(default=False, null=True)
+    zone = CharField(default='', null=True)
+
+
 class CustomGroupEntity(GroupEntity):
     groupips = CharField(null=True)
 
 configs = {
     'aws': AWSConfigEntity,
     'azure': AzureConfigEntity,
+    'gcs': GCSConfigEntity,
     'custom': CustomConfigEntity
 }
 
 deployments = {
     'aws': AWSDeploymentEntity,
     'azure': AzureDeploymentEntity,
+    'gcs': GCSDeploymentEntity,
     'custom': CustomDeploymentEntity
 }
 
 infrastructure_deployments = {
     'aws': AWSInfrastructureDeploymentEntity,
     'azure': AzureInfrastructureDeploymentEntity,
+    'gcs': GCSInfrastructureDeploymentEntity,
     'custom': CustomInfrastructureDeploymentEntity
 }
 
 provision_deployments = {
     'aws': AWSProvisionDeploymentEntity,
     'azure': AzureProvisionDeploymentEntity,
+    'gcs': GCSProvisionDeploymentEntity,
     'custom': CustomProvisionDeploymentEntity
 }
 
 groups = {
     'aws': AWSGroupEntity,
     'azure': AzureGroupEntity,
+    'gcs': GCSGroupEntity,
     'custom': CustomGroupEntity
 }
 
