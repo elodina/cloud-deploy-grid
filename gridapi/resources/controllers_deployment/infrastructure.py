@@ -16,6 +16,8 @@ from gridapi.resources.generators.infrastructure.azure import\
     azure_infrastructure_generator
 from gridapi.resources.generators.infrastructure.gcs import\
     gcs_infrastructure_generator
+from gridapi.resources.generators.infrastructure.openstack import\
+    openstack_infrastructure_generator
 from gridapi.resources.generators.infrastructure.custom import\
     custom_infrastructure_generator
 
@@ -23,6 +25,7 @@ infrastructure_generators = {
     'aws': aws_infrastructure_generator,
     'azure': azure_infrastructure_generator,
     'gcs': gcs_infrastructure_generator,
+    'openstack': openstack_infrastructure_generator,
     'custom': custom_infrastructure_generator
 }
 
@@ -239,6 +242,21 @@ class InfrastructureDeploymentHandler(Resource):
                                     return value['primary']['attributes'][
                                         'network_interface.0.access_config.0.assigned_nat_ip']
 
+            def _openstack_get_access_ip(grid_name):
+                if os.path.isfile(
+                        'result/{}/infrastructure/terraform.tfstate'.
+                        format(grid_name)) and os.access(
+                        'result/{}/infrastructure/terraform.tfstate'.
+                        format(grid_name), os.R_OK):
+                    with open(
+                            'result/{}/infrastructure/terraform.tfstate'.
+                            format(grid_name), 'r') as json_file:
+                        json_data = json.load(json_file)
+                        for module in json_data['modules']:
+                            for resource, value in module['resources'].iteritems():
+                                if resource == 'openstack_compute_instance_v2.{}-terminal'.format(grid_name):
+                                    return value['primary']['attributes']['floating_ip']
+
             def _custom_get_access_ip(grid_name):
                 grid_config = configs[grid.provider].select().where(
                     configs[grid.provider].parentgrid == grid).get()
@@ -249,6 +267,7 @@ class InfrastructureDeploymentHandler(Resource):
                 'aws': _aws_get_access_ip,
                 'azure': _azure_get_access_ip,
                 'gcs': _gcs_get_access_ip,
+                'openstack': _openstack_get_access_ip,
                 'custom': _custom_get_access_ip
             }
 
@@ -294,6 +313,22 @@ class InfrastructureDeploymentHandler(Resource):
                     raise Exception('host is offline')
 
             @retry(stop_max_attempt_number=30, wait_fixed=5000)
+            def _openstack_check_host(host):
+                try:
+                    subprocess.check_call([
+                        'ssh', '-F', 'result/{}/ssh_config'.format(
+                            grid_name),
+                        '-o', 'UserKnownHostsFile=/dev/null',
+                        '-o', 'StrictHostKeyChecking=no',
+                        '-o', 'PasswordAuthentication=no',
+                        '-o', 'ConnectTimeout=10',
+                        '{}'.format(host), 'exit'])
+                    print('{} is online'.format(host))
+                except:
+                    print('{} is offline'.format(host))
+                    raise Exception('host is offline')
+
+            @retry(stop_max_attempt_number=30, wait_fixed=5000)
             def _custom_check_host(host, grid_name):
                 try:
                     subprocess.check_call([
@@ -313,6 +348,7 @@ class InfrastructureDeploymentHandler(Resource):
                 'aws': _aws_check_host,
                 'azure': _azure_check_host,
                 'gcs': _gcs_check_host,
+                'openstack': _openstack_check_host,
                 'custom': _custom_check_host
             }
 
@@ -371,6 +407,24 @@ class InfrastructureDeploymentHandler(Resource):
                                         'network_interface.0.address']
                                     check_host[grid.provider](ip)
 
+            def _openstack_check_hosts_online(grid_name):
+                if os.path.isfile('result/{}/infrastructure/terraform.'
+                                  'tfstate'.format(
+                        grid_name)) and os.access(
+                    'result/{}/infrastructure/terraform.tfstate'.format(
+                        grid_name), os.R_OK):
+                    with open('result/{}/infrastructure/terraform.'
+                              'tfstate'.format(
+                            grid_name), "r") as json_file:
+                        json_data = json.load(json_file)
+                        for module in json_data['modules']:
+                            for resource, value in module['resources'].\
+                                    iteritems():
+                                if value['type'] == 'openstack_compute_instance_v2':
+                                    ip = value['primary']['attributes'][
+                                        'network.0.fixed_ip_v4']
+                                    check_host[grid.provider](ip)
+
             def _custom_check_hosts_online(grid_name):
                 all_ips = []
                 grid_config = configs[grid.provider].select().where(
@@ -387,6 +441,7 @@ class InfrastructureDeploymentHandler(Resource):
                 'aws': _aws_check_hosts_online,
                 'azure': _azure_check_hosts_online,
                 'gcs': _gcs_check_hosts_online,
+                'openstack': _openstack_check_hosts_online,
                 'custom': _custom_check_hosts_online
             }
 
@@ -536,6 +591,19 @@ class ExportInfrastructureDeploymentHandler(InfrastructureDeploymentHandler):
             export.sort(key=lambda(x): x[0])
             return export
 
+        def _openstack_hosts_export(grid_name):
+            export = []
+            with open('result/{}/infrastructure/terraform.tfstate'.format(
+                    grid_name), 'r') as input_file:
+                state = json.load(input_file)
+                for module in state['modules']:
+                    for resource, value in module['resources'].iteritems():
+                        if value['type'] == 'openstack_compute_instance_v2':
+                            ip = value['primary']['attributes']['network.0.fixed_ip_v4']
+                            export.append(('.'.join(resource.split('.')[1:]), ip))
+            export.sort(key=lambda(x): x[0])
+            return export
+
         def _custom_hosts_export(grid_name):
             export = []
             grid_config = configs[grid.provider].select().where(
@@ -553,6 +621,7 @@ class ExportInfrastructureDeploymentHandler(InfrastructureDeploymentHandler):
             'aws': _aws_hosts_export,
             'azure': _azure_hosts_export,
             'gcs': _gcs_hosts_export,
+            'openstack': _openstack_hosts_export,
             'custom': _custom_hosts_export
         }
         if not os.path.exists('result/{}/infrastructure'.format(grid_name)):

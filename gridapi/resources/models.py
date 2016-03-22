@@ -70,6 +70,18 @@ class GCSConfigEntity(ConfigEntity):
     ssh_user = CharField(null=True)
 
 
+class OpenstackConfigEntity(ConfigEntity):
+    masters = IntegerField(null=True)
+    master_type = CharField(null=True)
+    terminal_type = CharField(null=True)
+    image_name = CharField(null=True)
+    sshkeydata = TextField(null=True)
+    tenant = CharField(null=True)
+    region = CharField(null=True)
+    external_network_uuid = CharField(null=True)
+    floating_ip_pool = CharField(null=True)
+    ssh_user = CharField(null=True)
+
 class CustomConfigEntity(ConfigEntity):
     ssh_user = CharField(null=True)
     sshkeydata = TextField(null=True)
@@ -131,6 +143,20 @@ class GCSInfrastructureDeploymentEntity(GCSDeploymentEntity):
 
 class GCSProvisionDeploymentEntity(GCSDeploymentEntity):
     pass
+
+
+class OpenstackDeploymentEntity(DeploymentEntity):
+    pass
+
+
+class OpenstackInfrastructureDeploymentEntity(OpenstackDeploymentEntity):
+    _accessip = CharField(null=True)
+    _state = TextField(default='{"foo": "bar"}')
+
+
+class OpenstackProvisionDeploymentEntity(OpenstackDeploymentEntity):
+    pass
+
 
 class CustomDeploymentEntity(DeploymentEntity):
     pass
@@ -194,6 +220,11 @@ class GCSGroupEntity(GroupEntity):
     zone = CharField(default='', null=True)
 
 
+class OpenstackGroupEntity(GroupEntity):
+    instance_type = CharField(null=True)
+    slaves = IntegerField(null=True)
+    customhwconf = CharField(default='', null=True)
+
 class CustomGroupEntity(GroupEntity):
     groupips = CharField(null=True)
 
@@ -201,6 +232,7 @@ configs = {
     'aws': AWSConfigEntity,
     'azure': AzureConfigEntity,
     'gcs': GCSConfigEntity,
+    'openstack': OpenstackConfigEntity,
     'custom': CustomConfigEntity
 }
 
@@ -208,6 +240,7 @@ deployments = {
     'aws': AWSDeploymentEntity,
     'azure': AzureDeploymentEntity,
     'gcs': GCSDeploymentEntity,
+    'openstack': OpenstackDeploymentEntity,
     'custom': CustomDeploymentEntity
 }
 
@@ -215,6 +248,7 @@ infrastructure_deployments = {
     'aws': AWSInfrastructureDeploymentEntity,
     'azure': AzureInfrastructureDeploymentEntity,
     'gcs': GCSInfrastructureDeploymentEntity,
+    'openstack': OpenstackInfrastructureDeploymentEntity,
     'custom': CustomInfrastructureDeploymentEntity
 }
 
@@ -222,6 +256,7 @@ provision_deployments = {
     'aws': AWSProvisionDeploymentEntity,
     'azure': AzureProvisionDeploymentEntity,
     'gcs': GCSProvisionDeploymentEntity,
+    'openstack': OpenstackProvisionDeploymentEntity,
     'custom': CustomProvisionDeploymentEntity
 }
 
@@ -229,6 +264,7 @@ groups = {
     'aws': AWSGroupEntity,
     'azure': AzureGroupEntity,
     'gcs': GCSGroupEntity,
+    'openstack': OpenstackGroupEntity,
     'custom': CustomGroupEntity
 }
 

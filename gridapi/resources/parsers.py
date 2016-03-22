@@ -53,6 +53,29 @@ gcsconfig_parser.add_argument('sshkeydata', required=True,
 gcsconfig_parser.add_argument(
     'ssh_user', required=True, help='SSH user for VMs')
 
+openstackconfig_parser = config_parser.copy()
+openstackconfig_parser.add_argument(
+    'masters', required=True, type=int,
+    help='Number of Master nodes in grid')
+openstackconfig_parser.add_argument(
+    'master_type', required=True, help='Master instance type')
+openstackconfig_parser.add_argument(
+    'terminal_type', required=True, help='Terminal instance type')
+openstackconfig_parser.add_argument(
+    'image_name', required=True, help='Image name for instances, e.g. like centos-7')
+openstackconfig_parser.add_argument(
+    'floating_ip_pool', default='public', help='Floating ip pool')
+openstackconfig_parser.add_argument('sshkeydata', required=True,
+    help='ssh key private part, URL encoded')
+openstackconfig_parser.add_argument(
+    'tenant', required=True, help='Openstack tenant name')
+openstackconfig_parser.add_argument(
+    'region', required=True, help='Openstack region name')
+openstackconfig_parser.add_argument(
+    'external_network_uuid', required=True, help='UUID of external network')
+openstackconfig_parser.add_argument(
+    'ssh_user', default='root', help='SSH user for VMs')
+
 customconfig_parser = config_parser.copy()
 customconfig_parser.add_argument(
     'ssh_user', required=True, help='SSH user for VMs')
@@ -94,6 +117,7 @@ aws_provision_deployment_parser.add_argument(
 aws_provision_deployment_parser.add_argument(
     'aws_secret_access_key', required=True, help='AWS Access key secret, URL encoded')
 
+
 azure_infrastructure_deployment_parser = infrastructure_deployment_parser.copy()
 azure_infrastructure_deployment_parser.add_argument(
     'parallelism', type=int, default=5, help='Terraform deployment threads')
@@ -103,6 +127,7 @@ azure_infrastructure_deployment_parser.add_argument(
 
 azure_provision_deployment_parser = provision_deployment_parser.copy()
 
+
 gcs_infrastructure_deployment_parser = infrastructure_deployment_parser.copy()
 gcs_infrastructure_deployment_parser.add_argument(
     'parallelism', type=int, default=5, help='Terraform deployment threads')
@@ -111,9 +136,24 @@ gcs_infrastructure_deployment_parser.add_argument(
 
 gcs_provision_deployment_parser = provision_deployment_parser.copy()
 
+
+openstack_infrastructure_deployment_parser = infrastructure_deployment_parser.copy()
+openstack_infrastructure_deployment_parser.add_argument(
+    'parallelism', type=int, default=5, help='Terraform deployment threads')
+openstack_infrastructure_deployment_parser.add_argument(
+    'api_user', required=True, help='api username')
+openstack_infrastructure_deployment_parser.add_argument(
+    'api_pass', required=True, help='api password, URL encoded')
+openstack_infrastructure_deployment_parser.add_argument(
+    'api_url', required=True, help='api auth url, URL encoded, example: http://openstack.example.com:5000/v2.0')
+
+openstack_provision_deployment_parser = provision_deployment_parser.copy()
+
+
 custom_infrastructure_deployment_parser = infrastructure_deployment_parser.copy()
 
 custom_provision_deployment_parser = provision_deployment_parser.copy()
+
 
 group_parser = reqparse.RequestParser()
 group_parser.add_argument('name', required=True)
@@ -170,6 +210,16 @@ gcsgroup_parser.add_argument('zone', help='Zone to place group to')
 gcsgroup_parser.add_argument('preemptible', type=bool, default=False,
                              help='Make instance preemptible')
 
+
+openstackgroup_parser = group_parser.copy()
+openstackgroup_parser.add_argument('instance_type', required=True,
+                             help='Openstack Instance type')
+openstackgroup_parser.add_argument('slaves', required=True, type=int, help='Number of Slave nodes in group')
+openstackgroup_parser.add_argument(
+    'customhwconf',
+    help='Add custom hardware configuration to slaves, escaped JSON format')
+
+
 customgroup_parser = group_parser.copy()
 customgroup_parser.add_argument(
     'groupips', required=True,
@@ -179,6 +229,7 @@ configparsers = {
     'aws': awsconfig_parser,
     'azure': azureconfig_parser,
     'gcs': gcsconfig_parser,
+    'openstack': openstackconfig_parser,
     'custom': customconfig_parser
 }
 
@@ -186,6 +237,7 @@ infrastructure_deploymentparsers = {
     'aws': aws_infrastructure_deployment_parser,
     'azure': azure_infrastructure_deployment_parser,
     'gcs': gcs_infrastructure_deployment_parser,
+    'openstack': openstack_infrastructure_deployment_parser,
     'custom': custom_infrastructure_deployment_parser
 }
 
@@ -193,6 +245,7 @@ provision_deploymentparsers = {
     'aws': aws_provision_deployment_parser,
     'azure': azure_provision_deployment_parser,
     'gcs': gcs_provision_deployment_parser,
+    'openstack': openstack_provision_deployment_parser,
     'custom': custom_provision_deployment_parser
 }
 
@@ -200,5 +253,6 @@ groupparsers = {
     'aws': awsgroup_parser,
     'azure': azuregroup_parser,
     'gcs': gcsgroup_parser,
+    'openstack': openstackgroup_parser,
     'custom': customgroup_parser
 }
