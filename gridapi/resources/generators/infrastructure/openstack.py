@@ -61,6 +61,7 @@ class openstack_infrastructure_generator(object):
         self.networking['resource']['openstack_networking_subnet_v2']['{}-subnet'.format(self.grid_name)]['network_id'] = '${{openstack_networking_network_v2.{}-network.id}}'.format(self.grid_name)
         self.networking['resource']['openstack_networking_subnet_v2']['{}-subnet'.format(self.grid_name)]['cidr'] = '172.26.0.0/16'
         self.networking['resource']['openstack_networking_subnet_v2']['{}-subnet'.format(self.grid_name)]['ip_version'] = '4'
+        self.networking['resource']['openstack_networking_subnet_v2']['{}-subnet'.format(self.grid_name)]['dns_nameservers'] = ['8.8.8.8', '8.8.4.4']
         self.networking['resource']['openstack_networking_router_v2']['{}-router'.format(self.grid_name)]['name'] = '${var.grid_name}-router'
         self.networking['resource']['openstack_networking_router_v2']['{}-router'.format(self.grid_name)]['region'] = self.current_config.region
         self.networking['resource']['openstack_networking_router_v2']['{}-router'.format(self.grid_name)]['external_gateway'] = self.current_config.external_network_uuid
@@ -81,13 +82,13 @@ class openstack_infrastructure_generator(object):
         self.security['resource']['openstack_compute_secgroup_v2']['{}-gridwide'.format(self.grid_name)]['name'] = '${var.grid_name}-gridwide'
         self.security['resource']['openstack_compute_secgroup_v2']['{}-gridwide'.format(self.grid_name)]['description'] = '${var.grid_name}-gridwide'
         self.security['resource']['openstack_compute_secgroup_v2']['{}-gridwide'.format(self.grid_name)]['rule'] = []
-        self.security['resource']['openstack_compute_secgroup_v2']['{}-gridwide'.format(self.grid_name)]['rule'].append({'ip_protocol': 'tcp', 'from_port': '0', 'to_port': '65535', 'cidr': '${{openstack_networking_subnet_v2.{}-subnet.cidr}}'.format(self.grid_name)})
-        self.security['resource']['openstack_compute_secgroup_v2']['{}-gridwide'.format(self.grid_name)]['rule'].append({'ip_protocol': 'udp', 'from_port': '0', 'to_port': '65535', 'cidr': '${{openstack_networking_subnet_v2.{}-subnet.cidr}}'.format(self.grid_name)})
+        self.security['resource']['openstack_compute_secgroup_v2']['{}-gridwide'.format(self.grid_name)]['rule'].append({'ip_protocol': 'tcp', 'from_port': '1', 'to_port': '65535', 'cidr': '${{openstack_networking_subnet_v2.{}-subnet.cidr}}'.format(self.grid_name)})
+        self.security['resource']['openstack_compute_secgroup_v2']['{}-gridwide'.format(self.grid_name)]['rule'].append({'ip_protocol': 'udp', 'from_port': '1', 'to_port': '65535', 'cidr': '${{openstack_networking_subnet_v2.{}-subnet.cidr}}'.format(self.grid_name)})
         self.security['resource']['openstack_compute_secgroup_v2']['{}-gridwide'.format(self.grid_name)]['rule'].append({'ip_protocol': 'icmp', 'from_port': '-1', 'to_port': '-1', 'cidr': '${{openstack_networking_subnet_v2.{}-subnet.cidr}}'.format(self.grid_name)})
         self.security['resource']['openstack_compute_secgroup_v2']['{}-terminal'.format(self.grid_name)]['name'] = '${var.grid_name}-terminal'
         self.security['resource']['openstack_compute_secgroup_v2']['{}-terminal'.format(self.grid_name)]['description'] = '${var.grid_name}-terminal'
         self.security['resource']['openstack_compute_secgroup_v2']['{}-terminal'.format(self.grid_name)]['rule'] = []
-        self.security['resource']['openstack_compute_secgroup_v2']['{}-terminal'.format(self.grid_name)]['rule'].append({'ip_protocol': 'tcp', 'from_port': '0', 'to_port': '65535', 'cidr': '0.0.0.0/0'})
+        self.security['resource']['openstack_compute_secgroup_v2']['{}-terminal'.format(self.grid_name)]['rule'].append({'ip_protocol': 'tcp', 'from_port': '1', 'to_port': '65535', 'cidr': '0.0.0.0/0'})
         self.security['resource']['openstack_compute_secgroup_v2']['{}-terminal'.format(self.grid_name)]['rule'].append({'ip_protocol': 'udp', 'from_port': '1194', 'to_port': '1194', 'cidr': '0.0.0.0/0'})
         self.security['resource']['openstack_compute_secgroup_v2']['{}-terminal'.format(self.grid_name)]['rule'].append({'ip_protocol': 'icmp', 'from_port': '-1', 'to_port': '-1', 'cidr': '0.0.0.0/0'})
         with open('result/{}/infrastructure/security.tf'.format(

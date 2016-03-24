@@ -1,0 +1,58 @@
+---
+
+- name: download package
+  get_url: 
+#    url: "{{ mirror }}/zookeeper-{{ version }}/zookeeper-{{ version }}.tar.gz"
+    url: "http://repo.elodina.s3.amazonaws.com/zookeeper-3.4.6.tar.gz"
+    dest: /opt
+    sha256sum: "{{ sha256sum }}"
+  tags:
+    - zookeeper
+
+- name: extract package
+  command: tar xzf zookeeper-{{ version }}.tar.gz
+  args:
+    chdir: /opt
+    creates: /opt/zookeeper-{{ version }}/zookeeper-{{ version }}.jar
+  tags:
+    - zookeeper
+
+- name: create symbolic link to install dir
+  file:
+    src: /opt/zookeeper-{{ version }}
+    dest: /opt/zookeeper
+    state: link
+  tags:
+    - zookeeper
+
+- name: create configuration files
+  template:
+    src: opt/zookeeper/conf/{{ item }}.j2
+    dest: /opt/zookeeper/conf/{{ item }}
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - environment
+    - zoo.cfg
+  notify: restart zookeeper
+  tags:
+    - zookeeper
+
+- name: create data dir
+  file:
+    path: "{{ zookeeper_data_dir }}"
+    state: directory
+  tags:
+    - zookeeper
+
+- name: create myid
+  template:
+    src: opt/zookeeper/conf/myid.j2
+    dest: "{{ zookeeper_data_dir}}/myid"
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart zookeeper
+  tags:
+    - zookeeper

@@ -13,6 +13,8 @@ from gridapi.resources.generators.provision.mesos.azure import\
     azure_provision_mesos_generator
 from gridapi.resources.generators.provision.mesos.gcs import\
     gcs_provision_mesos_generator
+from gridapi.resources.generators.provision.mesos.openstack import\
+    openstack_provision_mesos_generator
 from gridapi.resources.generators.provision.mesos.custom import\
     custom_provision_mesos_generator
 from gridapi.resources.generators.provision.dcos.azure import\
@@ -27,6 +29,7 @@ provision_generators = {
         'aws': aws_provision_mesos_generator,
         'azure': azure_provision_mesos_generator,
         'gcs': gcs_provision_mesos_generator,
+        'openstack': openstack_provision_mesos_generator,
         'custom': custom_provision_mesos_generator
     },
     'dcos': {
@@ -177,6 +180,14 @@ class ProvisionDeploymentHandler(Resource):
                 self.unlock(parent_deployment)
                 parent_deployment.save()
                 os.chdir(cwd)
+                try:
+                    del os.environ['AWS_ACCESS_KEY_ID']
+                except:
+                    print('no such env')
+                try:
+                    del os.environ['AWS_SECRET_ACCESS_KEY']
+                except:
+                    print('no such env')
                 shutil.rmtree('result/{}'.format(grid_name))
         try:
             self.lock(parent_deployment)
@@ -283,8 +294,14 @@ class GroupProvisionDeploymentHandler(ProvisionDeploymentHandler):
                 self.unlock(parent_deployment)
                 parent_deployment.save()
                 os.chdir(cwd)
-                del os.environ['AWS_ACCESS_KEY_ID']
-                del os.environ['AWS_SECRET_ACCESS_KEY']
+                try:
+                    del os.environ['AWS_ACCESS_KEY_ID']
+                except:
+                    print('no such env')
+                try:
+                    del os.environ['AWS_SECRET_ACCESS_KEY']
+                except:
+                    print('no such env')
                 shutil.rmtree('result/{}'.format(grid_name))
         try:
             self.lock(parent_deployment)

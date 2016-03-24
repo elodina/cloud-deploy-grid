@@ -1,0 +1,16 @@
+[Unit]
+Description=ZooKeeper is a centralized service for maintaining configuration information.
+Documentation=https://zookeeper.apache.org/
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=root
+Group=root
+Environment=/etc/sysconfig/zookeeper
+ExecStart=/opt/zookeeper/bin/zkServer.sh start-foreground
+ExecReload=/bin/kill -HUP $MAINPID
+KillSignal=SIGINT
+
+[Install]
+WantedBy=multi-user.target

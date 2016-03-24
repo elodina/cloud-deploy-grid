@@ -1,0 +1,55 @@
+---
+- name: create common configuration on slave
+  template:
+    src: etc/default/mesos.j2
+    dest: /etc/default/mesos
+  notify: 
+    - restart mesos-slave
+  tags:
+    - mesos
+
+- name: create slave configuration
+  template:
+    src: etc/default/mesos-slave.j2
+    dest: /etc/default/mesos-slave
+  notify: restart mesos-slave
+  tags:
+    - mesos
+
+- name: create master config dir
+  file:
+    path: /etc/mesos-slave
+    state: directory
+  tags:
+    - mesos
+
+- name: set containerizers
+  copy:
+    content: "docker,mesos"
+    dest: /etc/mesos-slave/containerizers
+  notify: restart mesos-slave
+  tags:
+    - mesos
+
+- name: set resources
+  copy:
+    content: "{{ mesos_resources }}"
+    dest: /etc/mesos-slave/resources
+  notify: restart mesos-slave
+  tags:
+    - mesos
+
+- name: set attributes
+  copy:
+    src: "etc/mesos-slave/attributes"
+    dest: /etc/mesos-slave/attributes
+  notify: restart mesos-slave
+  tags:
+    - mesos
+
+- name: ensure docker is running
+  service:
+    name: docker
+    state: running
+  tags:
+    - mesos

@@ -1,0 +1,24 @@
+---
+- shell: "yum -y update && touch /etc/system_is_updated"
+  args:
+    creates: "/etc/system_is_updated"
+
+- name: add epel repo
+  yum:
+    name: epel-release
+    state: present
+  tags:
+    - common 
+
+- name: install common packages
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "{{ common_rpm_packages }}"
+  tags:
+    - common
+
+- include: centos_golang.yml
+
+- include: centos_mono.yml
