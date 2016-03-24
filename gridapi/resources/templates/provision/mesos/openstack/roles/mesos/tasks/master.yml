@@ -1,0 +1,59 @@
+---
+
+- name: create common configuration on master
+  template:
+    src: etc/default/mesos.j2
+    dest: /etc/default/mesos
+  notify: 
+    - restart mesos-master
+  tags:
+    - mesos
+
+- name: create master configuration
+  template:
+    src: etc/default/mesos-master.j2
+    dest: /etc/default/mesos-master
+  notify: restart mesos-master
+  tags:
+    - mesos
+
+- name: create master config dir
+  file:
+    path: /etc/mesos-master
+    state: directory
+  tags:
+    - mesos
+
+- name: set master flags
+  copy:
+    dest: "/etc/mesos-master/{{ item.key }}"
+    content: "{{ item.value }}"
+  with_items:
+    - key: recovery_slave_removal_limit
+      value: "{{ mesos_recovery_slave_removal_limit }}"
+    - key: "{{ mesos_log_auto_initialize }}"
+      value: ""
+  notify: restart mesos-master
+  tags:
+    - mesos
+
+- name: create replicated log dir
+  file:
+    path: "{{ mesos_replicated_log_dir }}"
+    state: directory
+  tags:
+    - mesos
+
+- name: check if log is initialized
+  shell: "[ -f {{ mesos_replicated_log_dir }}/LOG ]"
+  ignore_errors: true
+  register: repl_log_state
+  tags:
+    - mesos
+
+- name: initialize log
+  shell: "mesos-log initialize --path={{ mesos_replicated_log_dir }}"
+  when: repl_log_state|failed
+  notify: restart mesos-master
+  tags:
+    - mesos

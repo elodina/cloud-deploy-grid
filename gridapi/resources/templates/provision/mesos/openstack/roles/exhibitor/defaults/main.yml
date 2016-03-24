@@ -1,0 +1,11 @@
+---
+exhibitor_mirror: https://elodina-exhibitor.s3.amazonaws.com
+exhibitor_version: 1.5.5
+
+exhibitor_install_dir: /opt/exhibitor
+exhibitor_conf_dir: /opt/exhibitor/conf
+exhibitor_log_dir: /var/log/exhibitor
+exhibitor_port: 8080
+exhibitor_defaultconfig: "{{ exhibitor_conf_dir }}/default"
+exhibitor_zkconfigconnect: "{% for host in groups['zookeepers'] %}{{ hostvars[host].ansible_default_ipv4.address }}:2181{% if not loop.last %},{% endif %}{% endfor %}"
+exhibitor_zkconfigzpath: /exhibitor/config

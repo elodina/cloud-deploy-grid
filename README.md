@@ -16,6 +16,7 @@ Table of Contents
     * [Grid Deployment API Requests](#grid-deployment-api-requests)
     * [Common usage scenario for Mesos on AWS](#common-usage-scenario-for-mesos-on-aws)
     * [Common usage scenario for Mesos on GCS](#common-usage-scenario-for-mesos-on-gcs)
+    * [Common usage scenario for Mesos on Openstack](#common-usage-scenario-for-mesos-on-openstack)
     * [Common usage scenario for Mesos on Azure](#common-usage-scenario-for-mesos-on-azure)
     * [Common usage scenario for DCOS on AWS](#common-usage-scenario-for-dcos-on-aws)
     * [Common usage scenario for DCOS on Azure](#common-usage-scenario-for-dcos-on-azure)
@@ -156,6 +157,9 @@ master_type(Azure instance type for master, default is Basic_A2), location(Azure
 gcs:
 master_type(GCS instance type for master, default is n1-standard-1), zone(GCS Zone in format like "us-east1-a"), project(GCS project ID), ssh_user(user for ssh login), sshkeydata(Private path of ssh key, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
 
+openstack:
+master_type(Openstack instance type for master), terminal_type(Openstack instance type for terminal server), image_name(Image name for instances, e.g. like centos-7), tenant(Openstack tenant name), region(Openstack region name), external_network_uuid(UUID of external network), sshkeydata(Private path of ssh key, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
+
 custom:
 mastersips(Comma separated list of masters ips), terminalips(<terminal_external_ip>,<terminal_internal_ip>), ssh_user(ssh user for connection), sshkeydata(Private part of ssh key, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
 
@@ -180,45 +184,51 @@ POST - add new group, example:
 ```
 curl -X POST -d "name=${group_name}" -d "role=role1" -d "attributes={\"foo\":\"bar\"}" -d "vars={\"foo\":\"bar\"}" -d "instance_type=r3.xlarge" -d "cpus=10" -d "ram=64" -d "disk_size=50" http://localhost:5555/api/v2.0/grids/${grid_name}/groups
 ```
-required parameters - name(variable), role(variable), attributes(escaped json format), vars(escaped json format), instance_type(for AWS, for example - m3.large, for Azure, for example - Basic_A3), cpus(number of cpus per group), ram(amount of GB of ram per group), disk_size(hdd size, per HOST)
+required parameters:
 
-zone(GCS zone to place group to, GCS only), example:
+common:
+name(variable), role(variable)
 
-```
--d "zone=us-east1-c"
-```
+aws:
+instance_type(instance type for slave), cpus(number of cpus per group), ram(amount of GB of ram per group), disk_size(hdd size, per HOST)
+
+azure:
+instance_type(instance type for slave), cpus(number of cpus per group), ram(amount of GB of ram per group), disk_size(hdd size, per HOST)
+
+gcs:
+instance_type(instance type for slave), cpus(number of cpus per group), ram(amount of GB of ram per group), disk_size(hdd size, per HOST), zone(GCS zone to place group to)
+
+openstack:
+instance_type(instance type for slave), slaves(number of slaves)
+
+custom:
+groupips(in custom provider, comma separated list of group ips)
+
 
 optional parameters:
 
-az(availability zone to place group to, AWS only), example:
+common:
+attributes(escaped json format), vars(escaped json format)
 
-```
--d "az=c"
-```
+aws:
+az(AWS availability zone), enhanced_networking(turn on enhanced networking), spot_price(make instances spot), customhwconf(custom hardware configuration)
 
-customhwconf(escaped json format, look at https://www.terraform.io/docs/configuration/syntax.html), example:
+azure:
+customhwconf(custom hardware configuration)
 
+gcs:
+customhwconf(custom hardware configuration), preemptible(make instances preemptible)
+
+openstack:
+customhwconf(custom hardware configuration)
+
+
+example of customhwconf(escaped json format, look at https://www.terraform.io/docs/configuration/syntax.html):
 ```
 {\"ebs_block_device\":[{\"device_name\":\"/dev/sdx\",\"volume_size\":\"200\",\"volume_type\":\"gp2\"}]}
 ```
 All of the new created disks will be mounted to /hdd/xvd{last letter of disk name, eg, x, y, whatever}
 
-
-groupips(in custom provider, comma separated list of group ips)
-
-
-preemptible(True/False in GCS, enables machine's preemptibility(https://cloud.google.com/preemptible-vms/), example:
-
-```
--d "preemptible=True"
-```
-
-
-spot_price(only in AWS - group of slaves will be make of spot instances), example:
-
-```
--d "spot_price=0.9"
-```
 
 Grid Slave group API Requests
 --------------------------------
@@ -247,47 +257,51 @@ PUT - change group parameters, example:
 curl -X PUT -d "name=group2" -d "role=role1" -d "attributes={\"foo\":\"bar\"}" -d "vars={\"var1\":\"varvalue1\"}" -d "instance_type=r3.xlarge" -d "cpus=10" -d "ram=64" -d "disk_size=50" http://localhost:5555/api/v2.0/grids/${grid_name}/groups/${group_name}
 ```
 
-required parameters - name(variable), role(variable), attributes(escaped json format), vars(escaped json format), instance_type(for AWS, for example - m3.large, for Azure, for example - Basic_A3), cpus(number of cpus per group), ram(amount of GB of ram per group), disk_size(hdd size, per HOST)
+required parameters:
 
-zone(GCS zone to place group to, GCS only), example:
+common:
+name(variable), role(variable)
 
-```
--d "zone=us-east1-c"
-```
+aws:
+instance_type(instance type for slave), cpus(number of cpus per group), ram(amount of GB of ram per group), disk_size(hdd size, per HOST)
+
+azure:
+instance_type(instance type for slave), cpus(number of cpus per group), ram(amount of GB of ram per group), disk_size(hdd size, per HOST)
+
+gcs:
+instance_type(instance type for slave), cpus(number of cpus per group), ram(amount of GB of ram per group), disk_size(hdd size, per HOST), zone(GCS zone to place group to)
+
+openstack:
+instance_type(instance type for slave), slaves(number of slaves)
+
+custom:
+groupips(in custom provider, comma separated list of group ips)
 
 
 optional parameters:
 
-az(availability zone to place group to, AWS only), example:
+common:
+attributes(escaped json format), vars(escaped json format)
 
-```
--d "az=c"
-```
+aws:
+az(AWS availability zone), enhanced_networking(turn on enhanced networking), spot_price(make instances spot), customhwconf(custom hardware configuration)
 
-customhwconf(escaped json format, look at https://www.terraform.io/docs/configuration/syntax.html)
+azure:
+customhwconf(custom hardware configuration)
 
-example of customhwconf:
+gcs:
+customhwconf(custom hardware configuration), preemptible(make instances preemptible)
 
+openstack:
+customhwconf(custom hardware configuration)
+
+
+example of customhwconf(escaped json format, look at https://www.terraform.io/docs/configuration/syntax.html):
 ```
 {\"ebs_block_device\":[{\"device_name\":\"/dev/sdx\",\"volume_size\":\"200\",\"volume_type\":\"gp2\"}]}
 ```
-
 All of the new created disks will be mounted to /hdd/xvd{last letter of disk name, eg, x, y, whatever}
 
-spot_price(group of slaves will be make of spot instances), example:
-
-```
--d "spot_price=0.9"
-```
-
-groupips(in custom provider, comma separated list of group ips)
-
-
-preemptible(True/False in GCS, enables machine's preemptibility(https://cloud.google.com/preemptible-vms/), example:
-
-```
--d "preemptible=True"
-```
 
 Grid Deployment API Requests
 -------------------------------
@@ -356,10 +370,13 @@ aws:
 aws_access_key_id(self descriptive,URL-encoded, e.g. curl --data-urlencode "${key}=${value}"), aws_secret_access_key(self descriptive,URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
 
 azure:
-credentials(credentials file, can be aquired here: https://manage.windowsazure.com/publishsettings, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
+credentials(credentials file, should be aquired, as described here: https://www.terraform.io/docs/providers/azure/index.html, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
 
 gcs:
 credentials(credentials file, should be aquired, as described here: https://www.terraform.io/docs/providers/google/index.html, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
+
+openstack:
+api_user(openstack v2 api username), api_pass(openstack v2 api password), api_url(openstack v2 api url)
 
 
 Grid Provision API Requests
@@ -378,42 +395,27 @@ curl http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/provision
 ```
 
 PUT - run grid's provision(install software, configure settings, etc), example:
-
-AWS:
 ```
 curl -X PUT --data-urlencode "aws_access_key_id=${key_id}" --data-urlencode "aws_secret_access_key=${secret}" http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/provision
-```
-
-AZURE:
-```
-curl -X PUT http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/provision
-```
-
-GCS:
-```
-curl -X PUT --data-urlencode "credentials=`cat credentials`" http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/provision
-```
-
-CUSTOM:
-```
-curl -X PUT http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/provision
 ```
 
 required parameters:
 
 aws:
-
 aws_access_key_id(self descriptive,URL-encoded, e.g. curl --data-urlencode "${key}=${value}"), aws_secret_access_key(self descriptive,URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
 
+azure:
+credentials(credentials file, should be aquired, as described here: https://www.terraform.io/docs/providers/azure/index.html, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
 
 gcs:
 credentials(credentials file, should be aquired, as described here: https://www.terraform.io/docs/providers/google/index.html, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
 
+openstack:
+api_user(openstack v2 api username), api_pass(openstack v2 api password), api_url(openstack v2 api url)
 
 optional parameters:
 
 common:
-
 vpn_enabled - by default == 'True', if True - enable VPN server provisioinig, otherwise - disable
 
 duo_ikey, duo_skey, duo_host - duo security api parameters(duo.com) for vpn auth, URL-encoded, e.g. curl --data-urlencode "${key}=${value}"
@@ -590,6 +592,52 @@ Destroy grid
 
 ```
 curl -X DELETE --data-urlencode "credentials=`cat credentials.json`" http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure
+```
+
+Delete grid configs, etc
+
+```
+curl -X DELETE http://localhost:5555/api/v2.0/grids/${grid_name}
+```
+
+Common usage scenario for Mesos on Openstack
+--------------------------------------------
+
+Create grid
+
+```
+curl -X POST -d "name=${grid_name}" -d "provider=openstack" -d "type=mesos" http://localhost:5555/api/v2.0/grids
+```
+
+Update config
+
+```
+curl -X PUT -d "vars={\"mesos_version\":\"0.26.0\"}" -d "master_type=m1.medium" -d "terminal_type=m1.medium" -d "image_name=centos7" -d "tenant=${tenant}" -d "region=${region}" -d "external_network_uuid=${net_uuid}" -d "masters=1" --data-urlencode "sshkeydata=`cat ~/.ssh/id_rsa`" http://localhost:5555/api/v2.0/grids/${grid_name}/config
+```
+
+Create group of slaves
+
+```
+curl -X POST -d "instance_type=m1.medium" -d "name=infra" -d "role=infra" -d "attributes={\"type\":\"infra\"}" -d "slaves=1" http://localhost:5555/api/v2.0/grids/${grid_name}/groups
+```
+
+Deploy grid's infrastructure
+
+```
+curl -X PUT --data-urlencode "api_user=${api_user}" --data-urlencode "api_pass=${api_pass}" --data-urlencode "api_url=http://128.136.179.2:5000/v2.0" http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure
+```
+
+Provision grid
+
+```
+curl -X PUT --data-urlencode "api_user=${api_user}" --data-urlencode "api_pass=${api_pass}" --data-urlencode "api_url=http://128.136.179.2:5000/v2.0" http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/provision
+```
+
+Destroy grid
+
+```
+curl -X DELETE --data-urlencode "api_user=${api_user}" --data-urlencode "api_pass=${api_pass}" --data-urlencode "api_url=http://128.136.179.2:5000/v2.0" http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure
+
 ```
 
 Delete grid configs, etc

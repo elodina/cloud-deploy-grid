@@ -55,6 +55,9 @@ class GroupListHandler(Resource):
             ram / float(gcsinstances[image]['ram'])))
         return max(amount_by_cpu, amount_by_ram)
 
+    def _openstack_slave_calculator(self, slaves):
+        return int(slaves)
+
     def _custom_slave_calculator(self, groupips):
         return len(groupips.split(','))
 
@@ -62,6 +65,7 @@ class GroupListHandler(Resource):
         'aws': _aws_slave_calculator,
         'azure': _azure_slave_calculator,
         'gcs': _gcs_slave_calculator,
+        'openstack': _openstack_slave_calculator,
         'custom': _custom_slave_calculator
     }
 
@@ -94,6 +98,8 @@ class GroupListHandler(Resource):
                 groups[grid.provider].parentgrid == grid).get()
             if group.parentgrid.provider == 'custom':
                 slaves_args = [args['groupips']]
+            elif group.parentgrid.provider == 'openstack':
+                slaves_args = [args['slaves']]
             else:
                 slaves_args = [args['cpus'], args['ram'], args['instance_type']]
             group._slaves = self._slave_calculator[grid.provider](

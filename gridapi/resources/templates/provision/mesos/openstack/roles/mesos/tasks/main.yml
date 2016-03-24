@@ -1,0 +1,67 @@
+---
+- name: add mesosphere repo
+  yum:
+    name: http://repos.mesosphere.io/el/7/noarch/RPMS/mesosphere-el-repo-7-1.noarch.rpm
+    state: present
+  tags:
+    - mesos
+
+- name: install mesos from rpm repo
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "mesos-{{ mesos_version }}"
+  when: ansible_distribution == 'CentOS'
+  tags:
+    - mesos
+
+- name: remove default configuration
+  file:
+    path: "/etc/mesos-{{ item }}"
+    state: absent
+  with_items:
+    - master
+    - slave
+  tags:
+    - mesos
+
+- name: create zk configuration
+  template:
+    src: etc/mesos/zk.j2
+    dest: /etc/mesos/zk
+  tags:
+    - mesos
+
+- name: update six to latest version
+  pip:
+    name: six
+    state: latest
+  tags:
+    - mesos
+
+- name: download mesos python bindings
+  get_url:
+    url: "http://downloads.mesosphere.io/master/centos/7/mesos-{{ mesos_version }}-py2.7-linux-x86_64.egg"
+    dest: /tmp/pymesos.egg
+    mode: 0644
+  tags:
+    - mesos
+
+- name: install mesos python bindings
+  command: "easy_install-2.7 /tmp/pymesos.egg"
+  tags:
+    - mesos
+
+- name: copy mesos python bindings
+  command: "cp -a /usr/lib/python2.7/site-packages/pymesos.egg/mesos /usr/lib/python2.7/site-packages/mesos"
+  tags:
+    - mesos
+
+- include: master.yml
+  when: mesos_mode == 'master' or mesos_mode == 'both'
+
+- include: slave.yml
+  when: mesos_mode == 'slave' or mesos_mode == 'both'
+
+- meta: flush_handlers

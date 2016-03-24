@@ -1,0 +1,63 @@
+---
+- name: disable ipv6 all
+  sysctl:
+    name: net.ipv6.conf.all.disable_ipv6
+    value: 1
+    state: present
+  tags:
+    - common
+
+- name: disable ipv6 default
+  sysctl:
+    name: net.ipv6.conf.default.disable_ipv6
+    value: 1
+    state: present
+  tags:
+    - common
+
+- name: disable selinux
+  selinux:
+    state: disabled
+  tags:
+    - common
+
+- name: enable ntpd
+  service:
+    name: ntpd
+    state: started
+    enabled: yes
+  tags:
+    - common
+
+- name: set timezone
+  command: "timedatectl set-timezone {{ timezone }}"
+  tags:
+    - common
+
+- name: set java_home
+  template:
+    src: etc/profile.d/java.sh
+    dest: /etc/profile.d/java.sh
+    owner: root
+    group: root
+    mode: 0755
+  tags:
+    - common
+
+- name: allow remote sudo
+  lineinfile:
+    dest: /etc/sudoers
+    state: absent
+    line: "Defaults    requiretty"
+  tags:
+    - common
+
+- name: enhance PATH
+  lineinfile:
+    line: "export PATH=$PATH:/usr/local/bin"
+    dest: /etc/profile.d/local_path.sh
+    state: present
+    create: yes
+    mode: 0755
+  tags:
+    - common

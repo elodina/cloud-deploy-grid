@@ -1,0 +1,3 @@
+---
+- include: centos_vpn.yml
+  when: ansible_os_family == 'RedHat'
