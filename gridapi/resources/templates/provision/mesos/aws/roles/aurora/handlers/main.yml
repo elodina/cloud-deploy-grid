@@ -1,0 +1,3 @@
+---
+- name: restart aurora
+  command: systemctl restart aurora

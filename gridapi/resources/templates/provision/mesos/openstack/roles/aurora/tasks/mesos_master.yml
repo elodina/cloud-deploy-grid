@@ -1,0 +1,46 @@
+- name: install aurora scheduler
+  command: rpm -Uvh --nodeps {{ aurora_scheduler_uri }}
+  args:
+    creates: /etc/sysconfig/aurora
+  ignore_errors: true
+  tags:
+    - aurora
+
+- name: remove default configuration
+  file:
+    path: "/etc/sysconfig/aurora"
+    state: absent
+  tags:
+    - aurora
+
+- name: create scheduler configuration
+  template:
+    src: etc/sysconfig/aurora.j2
+    dest: /etc/sysconfig/aurora
+  notify: restart aurora
+  tags:
+    - aurora
+
+- name: create replicated log dir
+  file:
+    path: "{{ aurora_replicated_log_dir }}"
+    state: directory
+    owner: "aurora"
+    group: "aurora"
+  tags:
+    - aurora
+
+- name: check if log is initialized
+  shell: "[ -f {{ aurora_replicated_log_dir }}/LOG ]"
+  ignore_errors: true
+  register: aurora_log_state
+  when: aurora
+  tags:
+    - aurora
+
+- name: initialize log
+  shell: "sudo -u aurora mesos-log initialize --path={{ aurora_replicated_log_dir }}"
+  when: aurora_log_state|failed
+  notify: restart aurora
+  tags:
+    - aurora

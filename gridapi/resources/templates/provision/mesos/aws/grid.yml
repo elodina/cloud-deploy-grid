@@ -51,6 +51,7 @@
   roles:
     - mesos
     - marathon
+    - aurora
 #    - triceratops
 
 - hosts: terminal

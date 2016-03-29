@@ -1,0 +1,3 @@
+---
+- include: mesos_master.yml
+  when: aurora

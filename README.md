@@ -816,8 +816,20 @@ Delete grid configs, etc
 curl http://localhost:5555/api/v1.0/grids/${grid_name} -X DELETE
 ```
 
+Grid optional variables
+-----------------------
+
+These variables can be passed via next construction:
+
+```
+-d "vars={\"key\":\"value"}"
+```
+
+```aurora: true``` - enables aurora scheduler
+
+
 Mesos Cli Grid Access
-------------------------
+---------------------
 
 There are mesos-cli available on terminal
 For transparent usage it is recommended to switch to user "manager" first:

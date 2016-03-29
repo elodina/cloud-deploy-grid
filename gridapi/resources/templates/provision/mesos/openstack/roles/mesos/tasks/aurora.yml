@@ -1,0 +1,26 @@
+---
+- name: install aurora executor
+  command: rpm -Uvh --nodeps {{ aurora_executor_uri }}
+  ignore_errors: true
+  tags:
+    - mesos
+
+- name: install aurora tools
+  command: rpm -Uvh --nodeps {{ aurora_tools_uri }}
+  ignore_errors: true
+  tags:
+    - mesos
+
+- name: remove aurora client default configuration
+  file:
+    path: "/etc/aurora/clusters.json"
+    state: absent
+  tags:
+    - mesos
+
+- name: create aurora client configuration
+  template:
+    src: etc/aurora/clusters.json.j2
+    dest: /etc/aurora/clusters.json
+  tags:
+    - mesos
