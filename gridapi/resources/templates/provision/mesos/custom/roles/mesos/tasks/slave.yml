@@ -53,3 +53,6 @@
     state: running
   tags:
     - mesos
+
+- include: aurora.yml
+  when: aurora
