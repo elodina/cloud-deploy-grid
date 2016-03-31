@@ -19,11 +19,11 @@
   tags:
     - common
 
-- name: docker centos7 fix
+- name: docker dcos fix
   lineinfile:
     dest: /etc/sysconfig/docker-storage
-    regexp: ^DOCKER_STORAGE_OPTIONS=
-    line: DOCKER_STORAGE_OPTIONS='--storage-opt dm.fs=xfs'
+    regexp: ^DOCKER_STORAGE_OPTIONS
+    line: DOCKER_STORAGE_OPTIONS='--storage-driver overlay'
     state: present
   notify:
     - restart docker

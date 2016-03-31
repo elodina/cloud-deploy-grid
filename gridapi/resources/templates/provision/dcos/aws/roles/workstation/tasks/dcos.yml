@@ -16,6 +16,12 @@
   tags:
     - terminal
 
+- debug: msg="{{ nameserver }}"
+- debug: msg="{{ dns_domain }}"
+- debug: msg="{{ groups['dcos_masters'] }}"
+- debug: msg="{{ dcos_user }}"
+- debug: msg="{{ dcos_pass }}"
+
 - name: create dcos config
   template:
     src: dcos/genconf/config.json
@@ -26,9 +32,22 @@
   tags:
     - terminal
 
+- shell: cat /dcos/genconf/config.json
+  register: dcos_conf_json
+
+- set_fact: dcos_conf_yaml="{{ dcos_conf_json.stdout | from_json | to_nice_yaml }}"
+
+- name: save dcos conf as yaml
+  copy:
+    content: "{{ dcos_conf_yaml }}"
+    dest: /dcos/genconf/config.yaml
+    owner: root
+    group: root
+    mode: 0644
+
 - name: download dcos setup file
   get_url:
-    url: http://downloads.mesosphere.com/dcos/stable/dcos_generate_config.sh
+    url: https://downloads.mesosphere.com/dcos/stable/dcos_generate_config.ee.sh
     dest: /dcos/dcos_generate_config.sh
     mode: 0755
   tags:

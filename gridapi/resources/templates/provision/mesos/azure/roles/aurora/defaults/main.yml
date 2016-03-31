@@ -1,4 +1,5 @@
 ---
+aurora: false
 aurora_scheduler_uri: "http://repo.elodina.s3.amazonaws.com/aurora-scheduler-0.12.0-1.el7.centos.aurora.x86_64.rpm"
 aurora_executor_uri: "http://repo.elodina.s3.amazonaws.com/aurora-executor-0.12.0-1.el7.centos.aurora.x86_64.rpm"
 aurora_tools_uri: "http://repo.elodina.s3.amazonaws.com/aurora-tools-0.12.0-1.el7.centos.aurora.x86_64.rpm"
