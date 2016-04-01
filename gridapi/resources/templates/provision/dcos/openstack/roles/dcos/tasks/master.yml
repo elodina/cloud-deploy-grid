@@ -1,0 +1,6 @@
+---
+- name: deploy dcos master
+  ignore_errors: true
+  command: chdir="{{ dcos_install_dir }}" ./dcos_install.sh master
+  tags:
+    - dcos

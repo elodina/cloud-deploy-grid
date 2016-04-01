@@ -14,7 +14,7 @@ class AutoDict(dict):
             value = self[item] = type(self)()
             return value
 
-class gcs_provision_mesos_generator(object):
+class gcs_provision_dcos_generator(object):
     def __init__(self, grid_name, **kwargs):
         self.grid_name = grid_name
         self.kwargs = kwargs
@@ -42,7 +42,7 @@ class gcs_provision_mesos_generator(object):
 
     def copy_templates(self):
         os.system('cp -a -f'
-                  ' gridapi/resources/templates/provision/mesos/gcs/*'
+                  ' gridapi/resources/templates/provision/dcos/gcs/*'
                   ' result/{}'.format(self.grid_name))
 
     def _generate_template(self, filepath, variables):
@@ -111,7 +111,7 @@ class gcs_provision_mesos_generator(object):
 
     def generate_group_vars_roles(self):
         for role in self.current_roles:
-            src = 'result/{}/group_vars/mesos-slaves'.format(self.grid_name)
+            src = 'result/{}/group_vars/dcos_slaves'.format(self.grid_name)
             dst = 'result/{}/group_vars/tag_role_{}_{}'.format(
                 self.grid_name, self.grid_name, role)
             os.system('cp -a -f {src} {dst}'.format(src=src, dst=dst))
@@ -127,11 +127,11 @@ class gcs_provision_mesos_generator(object):
     def generate_roles_provision(self):
         for group in self.current_groups:
             role = group.role
-            src = 'result/{}/roles/mesos'.format(self.grid_name)
-            dst = 'result/{}/roles/mesos-slave_{}_{}'.format(
+            src = 'result/{}/roles/dcos'.format(self.grid_name)
+            dst = 'result/{}/roles/dcos-slave_{}_{}'.format(
                 self.grid_name, self.grid_name, role)
             os.system('cp -a -f {src} {dst}'.format(src=src, dst=dst))
-            with open('{}/files/etc/mesos-slave/attributes'.format(
+            with open('{}/files/etc/mesos_slave/attributes'.format(
                     dst), 'w+') as attributes_file:
                 attributes_file.write(
                     self._generate_attributes_for_group(group))

@@ -1,0 +1,8 @@
+---
+- include: terminal_user.yml
+  when: "'terminal' in group_names"
+
+- include: allhosts_user.yml
+  when: "'terminal' not in group_names"
+
+- meta: flush_handlers

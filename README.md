@@ -148,6 +148,9 @@ required parameters:
 common:
 masters(number of masters hosts)
 
+common_dcos:
+-d "vars={\"dcos_user\":\"${DCOS_WEB_USER}\",\"dcos_pass\":\"${DCOS_WEB_PASSWORD}\"}" - these vars are mandatory for DCOS cluster
+
 aws:
 master_type(AWS instance type for master, default m3.large), region(AWS region for grid), sshkey(AWS ssh key name), sshkeydata(Private path of ssh key, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
 
@@ -698,7 +701,7 @@ curl -X POST -d "name=${grid_name}" -d "provider=aws" -d "type=dcos" http://loca
 Update config
 
 ```
-curl -X PUT -d "master_type=m3.large" -d "masters=3" -d region="us-east-1" -d "sshkey=reference" --data-urlencode "sshkeydata=`cat ~/.ssh/reference.pem`" http://localhost:5555/api/v1.0/grids/${grid_name}/config
+curl -X PUT -d "vars={\"dcos_user\":\"${DCOS_WEB_USER}\",\"dcos_pass\":\"${DCOS_WEB_PASSWORD}\"}" -d "master_type=m3.large" -d "masters=3" -d region="us-east-1" -d "sshkey=reference" --data-urlencode "sshkeydata=`cat ~/.ssh/reference.pem`" http://localhost:5555/api/v1.0/grids/${grid_name}/config
 ```
 
 Create group of slaves
@@ -744,7 +747,7 @@ curl -X POST -d "name=${grid_name}" -d "provider=azure" -d "type=dcos" http://lo
 Update config
 
 ```
-curl http://localhost:5555/api/v1.0/grids/${grid_name}/config -X PUT -d "location=Central US" -d "masters=3" -d "ssh_password=${ssh_password}" -d "ssh_user=${ssh_user}" -d "master_type=Basic_A2"
+curl http://localhost:5555/api/v1.0/grids/${grid_name}/config -X PUT -d "vars={\"dcos_user\":\"${DCOS_WEB_USER}\",\"dcos_pass\":\"${DCOS_WEB_PASSWORD}\"}" -d "location=Central US" -d "masters=3" -d "ssh_password=${ssh_password}" -d "ssh_user=${ssh_user}" -d "master_type=Basic_A2"
 ```
 
 Create group of slaves
