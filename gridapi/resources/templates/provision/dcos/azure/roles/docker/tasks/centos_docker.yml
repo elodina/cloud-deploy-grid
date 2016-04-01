@@ -30,7 +30,7 @@
   tags:
     - common
 
-- name: docker dcos fix
+- name: docker dcos storage fix
   lineinfile:
     dest: /etc/sysconfig/docker-storage
     regexp: ^DOCKER_STORAGE_OPTIONS
