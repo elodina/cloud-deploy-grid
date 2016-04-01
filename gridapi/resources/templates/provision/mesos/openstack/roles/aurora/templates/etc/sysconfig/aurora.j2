@@ -58,7 +58,7 @@ AURORA_FLAGS=(
   # multi-master mode, consult the following document to determine appropriate values:
   #
   # https://aurora.apache.org/documentation/latest/deploying-aurora-scheduler/#replicated-log-configuration
-  -native_log_quorum_size='1'
+  -native_log_quorum_size='{{ aurora_quorum }}'
   # The ZooKeeper ZNode to which Aurora will register the locations of its replicated log.
   -native_log_zk_group_path='/aurora/native-log'
   # The local directory in which an Aurora scheduler can find Aurora's replicated log.

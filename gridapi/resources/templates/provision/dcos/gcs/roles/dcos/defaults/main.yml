@@ -1,0 +1,3 @@
+---
+dcos_mode: both
+dcos_install_dir: /tmp/dcos

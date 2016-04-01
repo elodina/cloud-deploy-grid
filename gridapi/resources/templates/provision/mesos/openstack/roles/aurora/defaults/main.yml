@@ -8,3 +8,4 @@ aurora_zk_port: 2181
 aurora_zk_path: mesos
 aurora_zk_connect: "zk://{{ aurora_zk_dns }}:{{ aurora_zk_port }}/{{ aurora_zk_path }}"
 aurora_replicated_log_dir: "/var/lib/aurora/scheduler/db"
+aurora_quorum: "{{ groups['mesos-masters'] | intersect(groups[grid]) | length // 2 + 1 }}"

@@ -1,0 +1,28 @@
+---
+- name: update resolv.conf file
+  template:
+    src: etc/resolv.conf.j2
+    dest: /etc/resolv.conf
+    owner: root
+    group: root
+    mode: 0644
+  ignore_errors: True
+  tags:
+    - common
+
+- name: update hosts file
+  template:
+    src: etc/hosts.j2
+    dest: /etc/hosts
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - common
+
+- name: add group nogroup
+  group:
+    name: nogroup
+    state: present
+  tags:
+    - common

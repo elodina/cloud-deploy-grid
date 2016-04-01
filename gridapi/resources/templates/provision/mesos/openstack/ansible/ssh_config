@@ -19,7 +19,7 @@ Host *
     UserKnownHostsFile=/dev/null
     LogLevel=ERROR
     ForwardAgent yes
-    User centos
+    User {{ ssh_user }}
     Port 22
     TCPKeepAlive no
     ConnectTimeout 60

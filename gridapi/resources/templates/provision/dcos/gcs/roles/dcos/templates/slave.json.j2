@@ -1,0 +1,33 @@
+{
+  "name": "slave",
+  "description": "",
+  "json_class": "Chef::Role",
+  "default_attributes": {
+
+  },
+  "override_attributes": {
+    "dcos": {
+      "roles": [
+        "slave"
+      ],
+      "exhibitor": {
+        "shared_fs_configdir": "{{ dcos_exhibitor_dir }}"
+      },
+      "master_lb": "{{ dcos_balancer }}",
+      "dns": {
+        "fallback": "8.8.8.8",
+        "resolvers": [
+          "8.8.8.8"
+        ]
+      },
+      "repository-url": "file:///tmp"
+    }
+  },
+  "chef_type": "role",
+  "run_list": [
+    "recipe[dcos]"
+  ],
+  "env_run_lists": {
+
+  }
+}
