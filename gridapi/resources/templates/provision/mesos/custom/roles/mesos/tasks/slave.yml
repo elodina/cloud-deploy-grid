@@ -55,4 +55,4 @@
     - mesos
 
 - include: aurora.yml
-  when: aurora
+  when: aurora == 'true'

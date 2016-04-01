@@ -1,0 +1,23 @@
+- hosts: dcos_masters
+  any_errors_fatal: true
+  sudo: True
+  roles:
+    - users
+
+- hosts: deployment
+
+- hosts: role={{ grid_name }}_{{ role }}
+  any_errors_fatal: true
+  sudo: True
+  roles:
+    - users
+    - common
+    - docker
+
+- hosts: consul-servers
+
+- hosts: role={{ grid_name }}_{{ role }}
+  any_errors_fatal: true
+  sudo: True
+  roles:
+    - dcos

@@ -1,0 +1,27 @@
+---
+common_rpm_packages:
+  - curl
+  - tar
+  - xz
+  - nc
+  - unzip
+  - git
+  - mercurial
+  - jq
+  - wget
+  - htop
+  - telnet
+  - zip
+  - vim
+  - mc
+  - tcping
+  - ntp
+  - python-pip
+  - sysstat
+  - python-crypto
+  - java-1.8.0-openjdk
+  - mosh
+  - mdadm
+  - jna
+
+timezone: "UTC"

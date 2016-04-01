@@ -8,6 +8,17 @@
   tags:
     - common
 
+- name: docker dcos fix
+  lineinfile:
+    dest: /etc/sysconfig/docker
+    regexp: ^OPTIONS=
+    line: OPTIONS=''
+    state: present
+  notify:
+    - restart docker
+  tags:
+    - common
+
 - name: configure docker consul dns
   lineinfile:
     dest: /etc/sysconfig/docker-network
@@ -19,11 +30,11 @@
   tags:
     - common
 
-- name: docker centos7 fix
+- name: docker dcos storage fix
   lineinfile:
-    dest: /etc/sysconfig/docker
-    regexp: ^OPTIONS=
-    line: OPTIONS='--selinux-enabled -s overlay'
+    dest: /etc/sysconfig/docker-storage
+    regexp: ^DOCKER_STORAGE_OPTIONS
+    line: DOCKER_STORAGE_OPTIONS='--storage-driver overlay'
     state: present
   notify:
     - restart docker

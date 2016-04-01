@@ -1,4 +1,5 @@
 import json
+import yaml
 import jinja2
 import subprocess
 import os
@@ -14,7 +15,9 @@ class AutoDict(dict):
             return value
 
 class aws_provision_dcos_generator(object):
-    def __init__(self, grid_name, **kwargs):
+    def __init__(self, grid_name, aws_access_key_id, aws_secret_access_key, **kwargs):
+        self.aws_access_key_id = urllib.unquote(aws_access_key_id)
+        self.aws_secret_access_key = urllib.unquote(aws_secret_access_key)
         self.grid_name = grid_name
         self.kwargs = kwargs
         self.current_grid = GridEntity.select().where(GridEntity.name == grid_name).get()
@@ -147,6 +150,9 @@ class aws_provision_dcos_generator(object):
             self._generate_template(dst, variables)
 
     def generate_all(self, grid_name, accessip):
+        os.environ['AWS_ACCESS_KEY_ID'] = '{}'.format(self.aws_access_key_id)
+        os.environ['AWS_SECRET_ACCESS_KEY'] = '{}'.format(
+            self.aws_secret_access_key)
         self.copy_templates()
         self.generate_ansible_ssh_config(accessip)
         self.generate_openvpn_authenticator()

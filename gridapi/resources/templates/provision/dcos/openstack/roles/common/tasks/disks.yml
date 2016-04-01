@@ -1,0 +1,57 @@
+---
+- shell: "umount /mnt"
+  ignore_errors: yes
+
+- name: create raid
+  shell: "mdadm --create --verbose /dev/md{{ item['key'] }} --level={{ item['value']['level'] }} --metadata=0.90 --raid-devices={{ item['value']['devices'] | length }} {{ item['value']['devices'] | join(' ') }}"
+  args:
+    creates: "/dev/md{{ item['key'] }}"
+  with_dict: "{{ raids | default({}) }}"
+  tags:
+    - common
+
+- name: save raid config
+  shell: "mdadm --detail --scan >> /etc/mdadm.conf"
+  args:
+    creates: "/etc/mdadm.conf"
+  with_dict: "{{ raids | default({}) }}"
+  tags:
+    - common
+
+- name: create filesystem on raid
+  filesystem:
+    dev: "/dev/md{{ item['key'] }}"
+    fstype: "{{ item['value']['fstype'] }}"
+  with_dict: "{{ raids | default({}) }}"
+  tags:
+    - common
+
+- name: create filesystem on disk
+  filesystem:
+    dev: "/dev/{{ item['key'] }}"
+    fstype: "{{ item['value']['fstype'] }}"
+  with_dict: "{{ disks | default({}) }}"
+  tags:
+    - common
+
+- name: mount raid
+  mount:
+    name: "{{ item['value']['mountpoint'] }}"
+    src: "/dev/md{{ item['key'] }}"
+    fstype: "{{ item['value']['fstype'] }}"
+    opts: relatime
+    state: mounted
+  with_dict: "{{ raids | default({}) }}"
+  tags:
+    - common
+
+- name: mount disk
+  mount:
+    name: "{{ item['value']['mountpoint'] }}"
+    src: "/dev/{{ item['key'] }}"
+    fstype: "{{ item['value']['fstype'] }}"
+    opts: relatime
+    state: mounted
+  with_dict: "{{ disks | default({}) }}"
+  tags:
+    - common

@@ -19,6 +19,10 @@ from gridapi.resources.generators.provision.mesos.custom import\
     custom_provision_mesos_generator
 from gridapi.resources.generators.provision.dcos.azure import\
     azure_provision_dcos_generator
+from gridapi.resources.generators.provision.dcos.gcs import\
+    gcs_provision_dcos_generator
+from gridapi.resources.generators.provision.dcos.openstack import\
+    openstack_provision_dcos_generator
 from gridapi.resources.generators.provision.dcos.aws import\
     aws_provision_dcos_generator
 from gridapi.resources.generators.provision.dcos.custom import\
@@ -35,6 +39,8 @@ provision_generators = {
     'dcos': {
         'aws': aws_provision_dcos_generator,
         'azure': azure_provision_dcos_generator,
+        'gcs': gcs_provision_dcos_generator,
+        'openstack': openstack_provision_dcos_generator,
         'custom': custom_provision_dcos_generator
     }
 }
