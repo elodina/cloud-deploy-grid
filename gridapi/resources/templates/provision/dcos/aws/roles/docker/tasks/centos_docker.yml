@@ -8,6 +8,17 @@
   tags:
     - common
 
+- name: docker dcos fix
+  lineinfile:
+    dest: /etc/sysconfig/docker
+    regexp: ^OPTIONS=
+    line: OPTIONS=''
+    state: present
+  notify:
+    - restart docker
+  tags:
+    - common
+
 - name: configure docker consul dns
   lineinfile:
     dest: /etc/sysconfig/docker-network
