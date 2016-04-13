@@ -23,5 +23,6 @@ common_rpm_packages:
   - mosh
   - mdadm
   - jna
+  - ipset
 
 timezone: "UTC"

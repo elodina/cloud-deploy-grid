@@ -41,7 +41,8 @@
 
 - name: download dcos setup file
   get_url:
-    url: https://downloads.mesosphere.com/dcos/stable/dcos_generate_config.ee.sh
+    url: #https://downloads.mesosphere.com/dcos/stable/dcos_generate_config.ee.sh
+    url: https://s3.amazonaws.com/downloads.mesosphere.io/dcos/testing/CM.7/dcos_generate_config.ee.sh
     dest: /dcos/dcos_generate_config.sh
     mode: 0755
   tags:
