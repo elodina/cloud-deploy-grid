@@ -1,7 +1,7 @@
 ---
 - name: download golang package
   get_url:
-    url: "https://storage.googleapis.com/golang/go1.4.2.linux-amd64.tar.gz"
+    url: "http://cloudgrid.s3.amazonaws.com/bin/go1.4.2.linux-amd64.tar.gz"
     dest: /opt/go1.4.2.linux-amd64.tar.gz
   register: package
   tags:

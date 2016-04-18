@@ -3,7 +3,7 @@
 - name: download package
   get_url: 
 #    url: "{{ mirror }}/zookeeper-{{ version }}/zookeeper-{{ version }}.tar.gz"
-    url: "http://repo.elodina.s3.amazonaws.com/zookeeper-3.4.6.tar.gz"
+    url: "http://cloudgrid.s3.amazonaws.com/bin/zookeeper-3.4.6.tar.gz"
     dest: /opt
     sha256sum: "{{ sha256sum }}"
   tags:
