@@ -1,7 +1,7 @@
 ---
 - name: install consul-template
   yum:
-    name: "https://bintray.com/artifact/download/ciscocloud/rpm/consul-template-0.8.0-2.el7.centos.x86_64.rpm"
+    name: "http://cloudgrid.s3.amazonaws.com/rpm/el7/x86_64/RPMS/consul-template-0.8.0-2.el7.centos.x86_64.rpm"
     state: present
   tags:
     - consul-template

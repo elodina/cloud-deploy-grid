@@ -1,7 +1,7 @@
 ---
 - name: install nginx
   yum:
-    name: "http://nginx.org/packages/mainline/centos/7/x86_64/RPMS/nginx-1.9.5-1.el7.ngx.x86_64.rpm"
+    name: "http://cloudgrid.s3.amazonaws.com/rpm/el7/x86_64/RPMS/nginx-1.9.14-1.el7.ngx.x86_64.rpm"
     state: present
   tags:
     - terminal
