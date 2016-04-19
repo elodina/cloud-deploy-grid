@@ -448,6 +448,13 @@ curl -X PUT http://localhost:5555/api/v2.0/grids/${grid_name}/groups/${group_nam
 required parameters are the same as for grid provision calls
 
 
+It is possible to provision just masters, calling
+```
+curl -X PUT http://localhost:5555/api/v2.0/grids/${grid_name}/masters/provision
+```
+
+required parameters are the same as for grid provision calls
+
 
 Common usage scenario for Mesos on AWS
 --------------------------------------
