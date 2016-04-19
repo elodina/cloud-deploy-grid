@@ -1,0 +1,26 @@
+- hosts: terminal
+
+- hosts: deployment
+
+- hosts: consul-servers
+
+- hosts: zookeepers
+  any_errors_fatal: true
+  sudo: True
+  roles:
+    - zookeeper
+
+- hosts: zookeepers
+  any_errors_fatal: true
+  sudo: True
+  roles:
+    - exhibitor
+
+- hosts: mesos-masters
+  any_errors_fatal: true
+  sudo: True
+  roles:
+    - mesos
+    - marathon
+    - aurora
+#    - triceratops
