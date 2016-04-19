@@ -1,0 +1,15 @@
+- hosts: dcos_masters
+
+- hosts: terminal
+  any_errors_fatal: true
+  sudo: True
+  roles:
+    - dcos_dns
+
+- hosts: deployment
+
+- hosts: dcos_masters
+  any_errors_fatal: true
+  sudo: True
+  roles:
+    - dcos

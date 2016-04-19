@@ -14,8 +14,6 @@
     - common
     - docker
 
-- hosts: consul-servers
-
 - hosts: role={{ grid_name }}_{{ role }}
   any_errors_fatal: true
   sudo: True
