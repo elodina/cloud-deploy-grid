@@ -23,6 +23,20 @@
   tags:
     - mesos
 
+- name: create mesos work dir
+  file:
+    path: "{{ mesos_work_dir }}"
+    state: directory
+  tags:
+    - mesos
+
+- name: set mesos work dir
+  copy:
+    content: "{{ mesos_work_dir }}"
+    dest: /etc/mesos-slave/work_dir
+  tags:
+    - mesos
+
 - name: set containerizers
   copy:
     content: "docker,mesos"
