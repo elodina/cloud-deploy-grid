@@ -299,6 +299,7 @@ class aws_infrastructure_generator(object):
             'tags']['Name'] = '${var.grid_name}_terminal'
         self.terminal['resource']['aws_instance']['terminal'][
             'depends_on'] = ['aws_internet_gateway.igw']
+        self.terminal['resource']['aws_instance']['terminal']['source_dest_check'] = 'false'
         self.terminal['resource']['aws_eip']['terminal'][
             'instance'] = '${aws_instance.terminal.id}'
         self.terminal['resource']['aws_eip']['terminal']['vpc'] = 'true'
