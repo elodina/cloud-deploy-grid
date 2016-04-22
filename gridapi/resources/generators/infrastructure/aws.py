@@ -183,7 +183,7 @@ class aws_infrastructure_generator(object):
         self.networking['resource']['aws_subnet']['grid_subnet'][
             'vpc_id'] = '${aws_vpc.vpc.id}'
         self.networking['resource']['aws_subnet']['grid_subnet'][
-            'cidr_block'] = '172.29.0.0/16'
+            'cidr_block'] = '172.29.0.0/20'
         self.networking['resource']['aws_subnet']['grid_subnet'][
             'map_public_ip_on_launch'] = 'true'
         self.networking['resource']['aws_subnet']['grid_subnet'][
@@ -200,31 +200,32 @@ class aws_infrastructure_generator(object):
         self.networking['resource']['aws_route_table_association'][
             'grid_route_table'][
             'route_table_id'] = '${aws_route_table.routes.id}'
-        # for group in self.current_groups:
-        #     if group.az is not None:
-        #         self.networking['resource']['aws_subnet'][
-        #             'az_{}_subnet'.format(
-        #                 group.az)]['vpc_id'] = '${aws_vpc.vpc.id}'
-        #         self.networking['resource']['aws_subnet'][
-        #             'az_{}_subnet'.format(group.az)]['cidr_block'] = '172.29.0.0/16'
-        #         self.networking['resource']['aws_subnet'][
-        #             'az_{}_subnet'.format(group.az)][
-        #             'map_public_ip_on_launch'] = 'true'
-        #         self.networking['resource']['aws_subnet'][
-        #             'az_{}_subnet'.format(group.az)][
-        #             'availability_zone'] = '{}{}'.format(
-        #             self.current_config.region, group.az)
-        #         self.networking['resource']['aws_subnet'][
-        #             'az_{}_subnet'.format(group.az)]['tags'][
-        #             'Name'] = '${{var.vpc_name}}-${{var.region}}{}'.format(
-        #             group.az)
-        #         self.networking['resource']['aws_route_table_association'][
-        #             'az_{}_route_table'.format(group.az)][
-        #             'subnet_id'] = '${{aws_subnet.az_{}_subnet.id}}'.format(
-        #             group.az)
-        #         self.networking['resource']['aws_route_table_association'][
-        #             'az_{}_route_table'.format(group.az)][
-        #             'route_table_id'] = '${aws_route_table.routes.id}'
+        for group in self.current_groups:
+            if group.az is not None:
+                self.networking['resource']['aws_subnet'][
+                    'az_{}_subnet'.format(
+                        group.az)]['vpc_id'] = '${aws_vpc.vpc.id}'
+                self.networking['resource']['aws_subnet'][
+                    'az_{}_subnet'.format(group.az)]['cidr_block'] = az_nets[
+                    group.az]
+                self.networking['resource']['aws_subnet'][
+                    'az_{}_subnet'.format(group.az)][
+                    'map_public_ip_on_launch'] = 'true'
+                self.networking['resource']['aws_subnet'][
+                    'az_{}_subnet'.format(group.az)][
+                    'availability_zone'] = '{}{}'.format(
+                    self.current_config.region, group.az)
+                self.networking['resource']['aws_subnet'][
+                    'az_{}_subnet'.format(group.az)]['tags'][
+                    'Name'] = '${{var.vpc_name}}-${{var.region}}{}'.format(
+                    group.az)
+                self.networking['resource']['aws_route_table_association'][
+                    'az_{}_route_table'.format(group.az)][
+                    'subnet_id'] = '${{aws_subnet.az_{}_subnet.id}}'.format(
+                    group.az)
+                self.networking['resource']['aws_route_table_association'][
+                    'az_{}_route_table'.format(group.az)][
+                    'route_table_id'] = '${aws_route_table.routes.id}'
         with open('result/{}/infrastructure/networking.tf'.format(
                 self.grid_name), 'w') as networking_file:
             json.dump(self.networking, networking_file)
@@ -357,13 +358,13 @@ class aws_infrastructure_generator(object):
                     self.grid_name, group.role)
                 group_export['resource']['aws_spot_instance_request']['mesos_group_{}'.format(
                     group.name)]['tags']['group'] = '{}'.format(group.name)
-                # if group.az is not None:
-                #     group_export['resource']['aws_spot_instance_request'][
-                #         'mesos_group_{}'.format(group.name)][
-                #         'subnet_id'] = '${{aws_subnet.az_{}_subnet.id}}'.format(
-                #         group.az)
-                # else:
-                group_export['resource']['aws_spot_instance_request'][
+                if group.az is not None:
+                    group_export['resource']['aws_spot_instance_request'][
+                        'mesos_group_{}'.format(group.name)][
+                        'subnet_id'] = '${{aws_subnet.az_{}_subnet.id}}'.format(
+                        group.az)
+                else:
+                    group_export['resource']['aws_spot_instance_request'][
                         'mesos_group_{}'.format(group.name)][
                         'subnet_id'] = '${aws_subnet.grid_subnet.id}'
                 group_export['resource']['aws_spot_instance_request']['mesos_group_{}'.format(
@@ -405,13 +406,13 @@ class aws_infrastructure_generator(object):
                     self.grid_name, group.role)
                 group_export['resource']['aws_instance']['mesos_group_{}'.format(
                     group.name)]['tags']['group'] = '{}'.format(group.name)
-                # if group.az is not None:
-                #     group_export['resource']['aws_instance'][
-                #         'mesos_group_{}'.format(group.name)][
-                #         'subnet_id'] = '${{aws_subnet.az_{}_subnet.id}}'.format(
-                #         group.az)
-                # else:
-                group_export['resource']['aws_instance'][
+                if group.az is not None:
+                    group_export['resource']['aws_instance'][
+                        'mesos_group_{}'.format(group.name)][
+                        'subnet_id'] = '${{aws_subnet.az_{}_subnet.id}}'.format(
+                        group.az)
+                else:
+                    group_export['resource']['aws_instance'][
                         'mesos_group_{}'.format(group.name)][
                         'subnet_id'] = '${aws_subnet.grid_subnet.id}'
                 group_export['resource']['aws_instance']['mesos_group_{}'.format(
