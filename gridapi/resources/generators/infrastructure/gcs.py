@@ -77,7 +77,7 @@ class gcs_infrastructure_generator(object):
         self.security['resource']['google_compute_firewall']['{}-terminal'.format(self.grid_name)]['depends_on'] = ['google_compute_network.{}-network'.format(self.grid_name)]
         self.security['resource']['google_compute_firewall']['{}-terminal'.format(self.grid_name)]['allow'] = []
         self.security['resource']['google_compute_firewall']['{}-terminal'.format(self.grid_name)]['allow'].append({'protocol': 'tcp', 'ports': ['0-65535']})
-        self.security['resource']['google_compute_firewall']['{}-terminal'.format(self.grid_name)]['allow'].append({'protocol': 'udp', 'ports': ['1194']})
+        self.security['resource']['google_compute_firewall']['{}-terminal'.format(self.grid_name)]['allow'].append({'protocol': 'udp', 'ports': ['655-65535']})
         self.security['resource']['google_compute_firewall']['{}-terminal'.format(self.grid_name)]['allow'].append({'protocol': 'icmp'})
         self.security['resource']['google_compute_firewall']['{}-terminal'.format(self.grid_name)]['source_ranges'] = ['0.0.0.0/0']
         self.security['resource']['google_compute_firewall']['{}-terminal'.format(self.grid_name)]['target_tags'] = ['terminal']
