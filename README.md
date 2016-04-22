@@ -702,43 +702,43 @@ Common usage scenario for DCOS on AWS
 Create grid
 
 ```
-curl -X POST -d "name=${grid_name}" -d "provider=aws" -d "type=dcos" http://localhost:5555/api/v1.0/grids
+curl -X POST -d "name=${grid_name}" -d "provider=aws" -d "type=dcos" http://localhost:5555/api/v2.0/grids
 ```
 
 Update config
 
 ```
-curl -X PUT -d "vars={\"dcos_user\":\"${DCOS_WEB_USER}\",\"dcos_pass\":\"${DCOS_WEB_PASSWORD}\"}" -d "master_type=m3.large" -d "masters=3" -d region="us-east-1" -d "sshkey=reference" --data-urlencode "sshkeydata=`cat ~/.ssh/reference.pem`" http://localhost:5555/api/v1.0/grids/${grid_name}/config
+curl -X PUT -d "vars={\"dcos_user\":\"${DCOS_WEB_USER}\",\"dcos_pass\":\"${DCOS_WEB_PASSWORD}\"}" -d "master_type=m3.large" -d "masters=3" -d region="us-east-1" -d "sshkey=reference" --data-urlencode "sshkeydata=`cat ~/.ssh/reference.pem`" http://localhost:5555/api/v2.0/grids/${grid_name}/config
 ```
 
 Create group of slaves
 
 ```
-curl -X POST -d "instance_type=r3.xlarge" -d "name=${group_name}" -d "role=myslaves" -d "attributes={\"type\":\"myslaves\"}" -d "vars={\"foo\":\"bar\"}" -d "cpus=12" -d "ram=60" -d "disk_size=200" http://localhost:5555/api/v1.0/grids/${grid_name}/groups
+curl -X POST -d "instance_type=r3.xlarge" -d "name=${group_name}" -d "role=myslaves" -d "attributes={\"type\":\"myslaves\"}" -d "vars={\"foo\":\"bar\"}" -d "cpus=12" -d "ram=60" -d "disk_size=200" http://localhost:5555/api/v2.0/grids/${grid_name}/groups
 ```
 
 Deploy grid's infrastructure
 
 ```
-curl -X PUT --data-urlencode aws_access_key_id=${key_id} --data-urlencode "aws_secret_access_key=${secret}" http://localhost:5555/api/v1.0/grids/${grid_name}/deployment/infrastructure
+curl -X PUT --data-urlencode aws_access_key_id=${key_id} --data-urlencode "aws_secret_access_key=${secret}" http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure
 ```
 
 Provision grid
 
 ```
-curl -X PUT http://localhost:5555/api/v1.0/grids/${grid_name}/deployment/provision
+curl -X PUT http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/provision
 ```
 
 Destroy grid
 
 ```
-curl -X DELETE --data-urlencode aws_access_key_id=${key_id} --data-urlencode "aws_secret_access_key=${secret}" http://localhost:5555/api/v1.0/grids/${grid_name}/deployment/infrastructure
+curl -X DELETE --data-urlencode aws_access_key_id=${key_id} --data-urlencode "aws_secret_access_key=${secret}" http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure
 ```
 
 Delete grids config, etc:
 
 ```
-curl -X DELETE http://localhost:5555/api/v1.0/grids/${grid_name}
+curl -X DELETE http://localhost:5555/api/v2.0/grids/${grid_name}
 ```
 
 
@@ -748,43 +748,43 @@ Common usage scenario for DCOS on Azure
 Create grid
 
 ```
-curl -X POST -d "name=${grid_name}" -d "provider=azure" -d "type=dcos" http://localhost:5555/api/v1.0/grids
+curl -X POST -d "name=${grid_name}" -d "provider=azure" -d "type=dcos" http://localhost:5555/api/v2.0/grids
 ```
 
 Update config
 
 ```
-curl http://localhost:5555/api/v1.0/grids/${grid_name}/config -X PUT -d "vars={\"dcos_user\":\"${DCOS_WEB_USER}\",\"dcos_pass\":\"${DCOS_WEB_PASSWORD}\"}" -d "location=Central US" -d "masters=3" -d "ssh_password=${ssh_password}" -d "ssh_user=${ssh_user}" -d "master_type=Basic_A2"
+curl http://localhost:5555/api/v2.0/grids/${grid_name}/config -X PUT -d "vars={\"dcos_user\":\"${DCOS_WEB_USER}\",\"dcos_pass\":\"${DCOS_WEB_PASSWORD}\"}" -d "location=Central US" -d "masters=3" -d "ssh_password=${ssh_password}" -d "ssh_user=${ssh_user}" -d "master_type=Basic_A2"
 ```
 
 Create group of slaves
 
 ```
-curl -X POST -d "instance_type=Basic_A2"  -d "name=${group_name}" -d "role=myslaves" -d "attributes={\"type\":\"myslaves\"}" -d "vars={\"foo\":\"bar\"}" -d "cpus=12" -d "ram=60" -d "disk_size=200" http://localhost:5555/api/v1.0/grids/${grid_name}/groups
+curl -X POST -d "instance_type=Basic_A2"  -d "name=${group_name}" -d "role=myslaves" -d "attributes={\"type\":\"myslaves\"}" -d "vars={\"foo\":\"bar\"}" -d "cpus=12" -d "ram=60" -d "disk_size=200" http://localhost:5555/api/v2.0/grids/${grid_name}/groups
 ```
 
 Deploy grid's infrastructure
 
 ```
-curl http://localhost:5555/api/v1.0/grids/${grid_name}/deployment/infrastructure -X PUT --data-urlencode "credentials=`cat credentials`"
+curl http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure -X PUT --data-urlencode "credentials=`cat credentials`"
 ```
 
 Provision grid
 
 ```
-curl http://localhost:5555/api/v1.0/grids/${grid_name}/deployment/provision -X PUT
+curl http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/provision -X PUT
 ```
 
 Destroy grid
 
 ```
-curl http://localhost:5555/api/v1.0/grids/${grid_name}/deployment/infrastructure -X DELETE --data-urlencode "credentials=`cat credentials`"
+curl http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure -X DELETE --data-urlencode "credentials=`cat credentials`"
 ```
 
 Delete grid configs, etc
 
 ```
-curl http://localhost:5555/api/v1.0/grids/${grid_name} -X DELETE
+curl http://localhost:5555/api/v2.0/grids/${grid_name} -X DELETE
 ```
 
 Common usage scenario for DCOS on Custom Provider
@@ -793,37 +793,37 @@ Common usage scenario for DCOS on Custom Provider
 Create grid
 
 ```
-curl -X POST -d "name=${grid_name}" -d "provider=custom" -d "type=dcos" http://localhost:5555/api/v1.0/grids
+curl -X POST -d "name=${grid_name}" -d "provider=custom" -d "type=dcos" http://localhost:5555/api/v2.0/grids
 ```
 
 Update config
 
 ```
-curl -X PUT -d "mastersips=172.29.15.83,172.29.15.225,172.29.14.184" -d "terminalips=52.71.23.21,172.29.13.62" -d "ssh_user=centos" --data-urlencode "sshkeydata=`cat ~/.ssh/reference.pem`" http://localhost:5555/api/v1.0/grids/${grid_name}/config
+curl -X PUT -d "mastersips=172.29.15.83,172.29.15.225,172.29.14.184" -d "terminalips=52.71.23.21,172.29.13.62" -d "ssh_user=centos" --data-urlencode "sshkeydata=`cat ~/.ssh/reference.pem`" http://localhost:5555/api/v2.0/grids/${grid_name}/config
 ```
 
 Create group of slaves
 
 ```
-curl -X POST -d "groupips=172.29.5.134,172.29.12.227,172.29.9.93" -d "name=infra" -d "role=infra" -d "attributes={\"type\":\"infra\"}" http://localhost:5555/api/v1.0/grids/${grid_name}/groups
+curl -X POST -d "groupips=172.29.5.134,172.29.12.227,172.29.9.93" -d "name=infra" -d "role=infra" -d "attributes={\"type\":\"infra\"}" http://localhost:5555/api/v2.0/grids/${grid_name}/groups
 ```
 
 Deploy grid's infrastructure
 
 ```
-curl http://localhost:5555/api/v1.0/grids/${grid_name}/deployment/infrastructure -X PUT
+curl http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure -X PUT
 ```
 
 Provision grid
 
 ```
-curl http://localhost:5555/api/v1.0/grids/${grid_name}/deployment/provision -X PUT
+curl http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/provision -X PUT
 ```
 
 Delete grid configs, etc
 
 ```
-curl http://localhost:5555/api/v1.0/grids/${grid_name} -X DELETE
+curl http://localhost:5555/api/v2.0/grids/${grid_name} -X DELETE
 ```
 
 Grid optional variables
