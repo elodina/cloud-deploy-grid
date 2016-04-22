@@ -134,6 +134,9 @@ class azure_infrastructure_generator(object):
             'endpoint'].append({'name': 'HTTPS', 'protocol': 'tcp',
                                 'public_port': '443', 'private_port': '443'})
         self.terminal['resource']['azure_instance']['terminal'][
+            'endpoint'].append({'name': 'TINCVPNTCP', 'protocol': 'tcp',
+                                'public_port': '655', 'private_port': '655'})
+        self.terminal['resource']['azure_instance']['terminal'][
             'endpoint'].append({'name': 'TINCVPN', 'protocol': 'udp',
                                 'public_port': '655', 'private_port': '655'})
         self.terminal['resource']['azure_instance']['terminal'][
