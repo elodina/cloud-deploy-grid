@@ -183,7 +183,7 @@ class aws_infrastructure_generator(object):
         self.networking['resource']['aws_subnet']['grid_subnet'][
             'vpc_id'] = '${aws_vpc.vpc.id}'
         self.networking['resource']['aws_subnet']['grid_subnet'][
-            'cidr_block'] = '172.29.0.0/20'
+            'cidr_block'] = '172.29.0.0/16'
         self.networking['resource']['aws_subnet']['grid_subnet'][
             'map_public_ip_on_launch'] = 'true'
         self.networking['resource']['aws_subnet']['grid_subnet'][
@@ -206,8 +206,7 @@ class aws_infrastructure_generator(object):
                     'az_{}_subnet'.format(
                         group.az)]['vpc_id'] = '${aws_vpc.vpc.id}'
                 self.networking['resource']['aws_subnet'][
-                    'az_{}_subnet'.format(group.az)]['cidr_block'] = az_nets[
-                    group.az]
+                    'az_{}_subnet'.format(group.az)]['cidr_block'] = '172.29.0.0/16'
                 self.networking['resource']['aws_subnet'][
                     'az_{}_subnet'.format(group.az)][
                     'map_public_ip_on_launch'] = 'true'
