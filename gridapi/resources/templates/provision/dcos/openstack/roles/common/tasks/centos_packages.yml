@@ -20,5 +20,3 @@
     - common
 
 - include: centos_golang.yml
-
-- include: centos_mono.yml
