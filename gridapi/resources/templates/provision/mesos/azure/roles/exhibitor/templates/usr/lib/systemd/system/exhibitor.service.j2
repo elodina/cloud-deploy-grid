@@ -12,7 +12,8 @@ ExecStart=/usr/bin/java -jar \
         --defaultconfig {{ exhibitor_defaultconfig }} \
         --configtype zookeeper --port {{ exhibitor_port }} \
         --zkconfigconnect {{ exhibitor_zkconfigconnect }} \
-        --zkconfigzpath {{ exhibitor_zkconfigzpath }}
+        --zkconfigzpath {{ exhibitor_zkconfigzpath }} \
+        --hostname {{ ansible_default_ipv4.address }}
 ExecReload=/bin/kill -HUP $MAINPID
 KillSignal=SIGINT
 

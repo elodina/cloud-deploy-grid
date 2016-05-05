@@ -20,6 +20,7 @@ common_rpm_packages:
   - sysstat
   - python-crypto
   - java-1.8.0-openjdk
+  - java-1.8.0-openjdk-devel
   - mosh
   - mdadm
   - jna
