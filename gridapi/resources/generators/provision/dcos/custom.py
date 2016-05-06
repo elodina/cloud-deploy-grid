@@ -18,14 +18,14 @@ class custom_provision_dcos_generator(object):
     def __init__(self, grid_name, **kwargs):
         self.grid_name = grid_name
         self.kwargs = kwargs
-        self.current_grid = GridEntity.select().where(GridEntity.name == grid_name).get()
-        self.current_config = configs[self.current_grid.provider].select().where(configs[self.current_grid.provider].parentgrid == self.current_grid).get()
+        self.current_grid = GridEntity.objects(name=grid_name).get()
+        grid = self.current_grid
+        self.current_config = configs[grid.provider].objects(parentgrid=grid_name).get()
         self.current_groups = []
         self.current_roles = []
-        for group in groups[self.current_grid.provider].select():
-            if group.parentgrid.name == grid_name:
-                self.current_groups.append(group)
-                self.current_roles.append(group.role)
+        for group in groups[grid.provider].objects(parentgrid=grid_name):
+            self.current_groups.append(group)
+            self.current_roles.append(group.role)
 
     def _nameserver(self):
         return self.current_config.terminalips.split(',')[1]
@@ -103,8 +103,7 @@ class custom_provision_dcos_generator(object):
             pass
         for group in self.current_groups:
             src = 'result/{}/group_vars/dcos_slaves'.format(self.grid_name)
-            dst = 'result/{}/group_vars/{}_{}'.format(
-                self.grid_name, self.grid_name, group.role)
+            dst = 'result/{}/group_vars/{}_{}'.format(self.grid_name, self.grid_name, group.role)
             os.system('cp -a -f {src} {dst}'.format(src=src, dst=dst))
             vars_json = json.loads(group.vars)
             vars_yaml = yaml.safe_dump(vars_json, default_flow_style=False)
@@ -123,13 +122,10 @@ class custom_provision_dcos_generator(object):
         for group in self.current_groups:
             role = group.role
             src = 'result/{}/roles/dcos'.format(self.grid_name)
-            dst = 'result/{}/roles/dcos_slave_{}_{}'.format(
-                self.grid_name, self.grid_name, role)
+            dst = 'result/{}/roles/dcos_slave_{}_{}'.format(self.grid_name, self.grid_name, role)
             os.system('cp -a -f {src} {dst}'.format(src=src, dst=dst))
-            with open('{}/files/etc/mesos_slave/attributes'.format(
-                    dst), 'w+') as attributes_file:
-                attributes_file.write(
-                    self._generate_attributes_for_group(group))
+            with open('{}/files/etc/mesos_slave/attributes'.format(dst), 'w+') as attributes_file:
+                attributes_file.write(self._generate_attributes_for_group(group))
 
     def generate_inventory_grid(self):
         path = 'result/{}/inventory/grid'.format(self.grid_name)
@@ -157,8 +153,7 @@ class custom_provision_dcos_generator(object):
     def generate_groups_runlists(self):
         for group in self.current_groups:
             src = 'result/{}/group.yml'.format(self.grid_name)
-            dst = 'result/{}/group_{}.yml'.format(
-                self.grid_name, group.role)
+            dst = 'result/{}/group_{}.yml'.format(self.grid_name, group.role)
             os.system('cp -a -f {src} {dst}'.format(src=src, dst=dst))
             variables = {}
             variables['grid_name'] = self.grid_name
@@ -178,5 +173,4 @@ class custom_provision_dcos_generator(object):
         self.generate_grid_runlist()
         self.generate_groups_runlists()
         os.chmod('result/{}/grid.pem'.format(self.grid_name), 0600)
-        subprocess.check_call(['ssh-add', 'result/{}/grid.pem'.format(
-            self.grid_name)])
+        subprocess.check_call(['ssh-add', 'result/{}/grid.pem'.format(self.grid_name)])

@@ -10,7 +10,7 @@ Vagrant.configure('2') do |config|
       # Install Docker
       pkg_cmd = "wget -q -O - https://get.docker.io/gpg | apt-key add -;" \
         "echo deb http://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list;" \
-        "apt-get update -qq; apt-get install -q -y --force-yes lxc-docker; "
+        "apt-get update -qq; apt-get install -q -y --force-yes lxc-docker python-pip; pip install docker-compose"
       # Add vagrant user to the docker group
       pkg_cmd << "usermod -a -G docker vagrant; "
       config.vm.provision :shell, :inline => pkg_cmd

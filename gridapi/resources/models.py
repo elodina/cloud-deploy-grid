@@ -1,232 +1,224 @@
-import json
-from peewee import SqliteDatabase, Model, BooleanField, CharField,\
-    ForeignKeyField, IntegerField, TextField
+import uuid
+from cassandra.cqlengine import columns
+from cassandra.cqlengine import connection
+from datetime import datetime
+from cassandra.cqlengine.management import sync_table
+from cassandra.cqlengine.models import Model
 
-db = SqliteDatabase('grids.db', pragmas=(
-    ('foreign_keys', 'ON'),
-))
+cassandra_hosts = ['127.0.0.1']
 
+connection.setup(cassandra_hosts, 'grids', protocol_version=4)
 
-class BaseModel(Model):
-    class Meta:
-        database = db
-
-
-class GridEntity(BaseModel):
-    name = CharField(unique=True)
-    provider = CharField()
-    type = CharField()
+class GridEntity(Model):
+    name = columns.Text(primary_key=True)
+    provider = columns.Text(index=True)
+    type = columns.Text()
 
     def __str__(self):
-        dict_representation = {}
-        for key in self._data.keys():
-            if key != 'id':
-                try:
-                    dict_representation[key] = str(getattr(self, key))
-                except:
-                    dict_representation[key] = json.dumps(getattr(self, key))
-        return str(dict_representation)
+        return str(dict(self))
 
 
-class ConfigEntity(BaseModel):
-    parentgrid = ForeignKeyField(
-        GridEntity, to_field='id', on_delete='CASCADE', on_update='CASCADE')
-    vars = CharField(default='{"foo": "bar"}', null=True)
+class ConfigEntity(Model):
+    parentgrid = columns.Text(primary_key=True)
+    provider = columns.Text(discriminator_column=True)
+    vars = columns.Text()
 
     def __str__(self):
-        dict_representation = {}
-        for key in self._data.keys():
-            if key != 'id' and key != 'parentgrid':
-                try:
-                    dict_representation[key] = str(getattr(self, key))
-                except:
-                    dict_representation[key] = json.dumps(getattr(self, key))
-        return str(dict_representation)
+        return str(dict(self))
 
 
 class AWSConfigEntity(ConfigEntity):
-    masters = IntegerField(null=True)
-    master_type = CharField(null=True)
-    region = CharField(null=True)
-    sshkey = CharField(null=True)
-    sshkeydata = TextField(null=True)
-    ssh_user = CharField(null=True)
+    __discriminator_value__ = 'aws'
+    masters = columns.Integer()
+    master_type = columns.Text()
+    region = columns.Text()
+    sshkey = columns.Text()
+    sshkeydata = columns.Text()
+    ssh_user = columns.Text()
 
 
 class AzureConfigEntity(ConfigEntity):
-    masters = IntegerField(null=True)
-    master_type = CharField(null=True)
-    location = CharField(null=True)
-    ssh_user = CharField(null=True)
-    ssh_password = CharField(null=True)
+    __discriminator_value__ = 'azure'
+    masters = columns.Integer()
+    master_type = columns.Text()
+    location = columns.Text()
+    ssh_user = columns.Text()
+    ssh_password = columns.Text()
 
 
 class GCSConfigEntity(ConfigEntity):
-    masters = IntegerField(null=True)
-    master_type = CharField(null=True)
-    project = CharField(null=True)
-    zone = CharField(null=True)
-    sshkeydata = TextField(null=True)
-    ssh_user = CharField(null=True)
+    __discriminator_value__ = 'gcs'
+    masters = columns.Integer()
+    master_type = columns.Text()
+    project = columns.Text()
+    zone = columns.Text()
+    sshkeydata = columns.Text()
+    ssh_user = columns.Text()
 
 
 class OpenstackConfigEntity(ConfigEntity):
-    masters = IntegerField(null=True)
-    master_type = CharField(null=True)
-    terminal_type = CharField(null=True)
-    image_name = CharField(null=True)
-    sshkeydata = TextField(null=True)
-    tenant = CharField(null=True)
-    region = CharField(null=True)
-    external_network_uuid = CharField(null=True)
-    floating_ip_pool = CharField(null=True)
-    ssh_user = CharField(null=True)
+    __discriminator_value__ = 'openstack'
+    masters = columns.Integer()
+    master_type = columns.Text()
+    terminal_type = columns.Text()
+    image_name = columns.Text()
+    sshkeydata = columns.Text()
+    tenant = columns.Text()
+    region = columns.Text()
+    external_network_uuid = columns.Text()
+    floating_ip_pool = columns.Text()
+    ssh_user = columns.Text()
+
 
 class CustomConfigEntity(ConfigEntity):
-    ssh_user = CharField(null=True)
-    sshkeydata = TextField(null=True)
-    mastersips = CharField(null=True)
-    terminalips = CharField(null=True)
+    __discriminator_value__ = 'custom'
+    ssh_user = columns.Text()
+    sshkeydata = columns.Text()
+    mastersips = columns.Text()
+    terminalips = columns.Text()
 
 
-class DeploymentEntity(BaseModel):
-    _lock = BooleanField(default=False)
-    _status = CharField(default='init')
-    parentgrid = ForeignKeyField(
-        GridEntity, to_field='id', on_delete='CASCADE', on_update='CASCADE')
+class DeploymentEntity(Model):
+    parentgrid = columns.Text(primary_key=True)
+    provider = columns.Text(discriminator_column=True, index=True)
+    lock = columns.Boolean(default=False)
+    state = columns.Text(default='init')
 
     def __str__(self):
-        dict_representation = {}
-        for key in self._data.keys():
-            if key != 'id' and key != 'parentgrid' and key != '_state':
-                try:
-                    dict_representation[key] = str(getattr(self, key))
-                except:
-                    dict_representation[key] = json.dumps(getattr(self, key))
-        return str(dict_representation)
+        return str(dict(self))
 
+class InfrastructureDeploymentEntity(Model):
+    parentgrid = columns.Text(primary_key=True)
+    provider = columns.Text(discriminator_column=True, index=True)
+    accessip = columns.Text()
+    state = columns.Text()
+    tfstate = columns.Text()
+
+    def __str__(self):
+        return str(dict(self))
+
+class ProvisionDeploymentEntity(Model):
+    parentgrid = columns.Text(primary_key=True)
+    provider = columns.Text(discriminator_column=True, index=True)
+    state = columns.Text()
+
+    def __str__(self):
+        return str(dict(self))
 
 class AWSDeploymentEntity(DeploymentEntity):
-    pass
+    __discriminator_value__ = 'aws'
 
 
-class AWSInfrastructureDeploymentEntity(AWSDeploymentEntity):
-    _accessip = CharField(null=True)
-    _state = TextField(default='{"foo": "bar"}')
+class AWSInfrastructureDeploymentEntity(InfrastructureDeploymentEntity):
+    __discriminator_value__ = 'aws'
 
 
-class AWSProvisionDeploymentEntity(AWSDeploymentEntity):
-    pass
+class AWSProvisionDeploymentEntity(ProvisionDeploymentEntity):
+    __discriminator_value__ = 'aws'
 
 
 class AzureDeploymentEntity(DeploymentEntity):
-    pass
+    __discriminator_value__ = 'azure'
 
 
-class AzureInfrastructureDeploymentEntity(AzureDeploymentEntity):
-    _accessip = CharField(null=True)
-    _state = TextField(default='{"foo": "bar"}')
+class AzureInfrastructureDeploymentEntity(InfrastructureDeploymentEntity):
+    __discriminator_value__ = 'azure'
 
 
-class AzureProvisionDeploymentEntity(AzureDeploymentEntity):
-    pass
+class AzureProvisionDeploymentEntity(ProvisionDeploymentEntity):
+    __discriminator_value__ = 'azure'
 
 
 class GCSDeploymentEntity(DeploymentEntity):
-    pass
+    __discriminator_value__ = 'gcs'
 
 
-class GCSInfrastructureDeploymentEntity(GCSDeploymentEntity):
-    _accessip = CharField(null=True)
-    _state = TextField(default='{"foo": "bar"}')
+class GCSInfrastructureDeploymentEntity(InfrastructureDeploymentEntity):
+    __discriminator_value__ = 'gcs'
 
 
-class GCSProvisionDeploymentEntity(GCSDeploymentEntity):
-    pass
+class GCSProvisionDeploymentEntity(ProvisionDeploymentEntity):
+    __discriminator_value__ = 'gcs'
 
 
 class OpenstackDeploymentEntity(DeploymentEntity):
-    pass
+    __discriminator_value__ = 'openstack'
 
 
-class OpenstackInfrastructureDeploymentEntity(OpenstackDeploymentEntity):
-    _accessip = CharField(null=True)
-    _state = TextField(default='{"foo": "bar"}')
+class OpenstackInfrastructureDeploymentEntity(InfrastructureDeploymentEntity):
+    __discriminator_value__ = 'openstack'
 
 
-class OpenstackProvisionDeploymentEntity(OpenstackDeploymentEntity):
-    pass
+class OpenstackProvisionDeploymentEntity(ProvisionDeploymentEntity):
+    __discriminator_value__ = 'openstack'
 
 
 class CustomDeploymentEntity(DeploymentEntity):
-    pass
+    __discriminator_value__ = 'custom'
 
 
-class CustomInfrastructureDeploymentEntity(CustomDeploymentEntity):
-    _accessip = CharField(null=True)
-    _state = TextField(default='{"foo": "bar"}')
+class CustomInfrastructureDeploymentEntity(InfrastructureDeploymentEntity):
+    __discriminator_value__ = 'custom'
 
 
-class CustomProvisionDeploymentEntity(CustomDeploymentEntity):
-    pass
+class CustomProvisionDeploymentEntity(ProvisionDeploymentEntity):
+    __discriminator_value__ = 'custom'
 
 
-class GroupEntity(BaseModel):
-    _slaves = IntegerField(null=True)
-    parentgrid = ForeignKeyField(
-        GridEntity, to_field='id', on_delete='CASCADE', on_update='CASCADE')
-    name = CharField()
-    role = CharField(default='infra')
-    attributes = CharField(null=True)
-    vars = CharField(default='{"foo": "bar"}', null=True)
+class GroupEntity(Model):
+    parentgrid = columns.Text(primary_key=True)
+    provider = columns.Text(discriminator_column=True)
+    slaves = columns.Integer()
+    name = columns.Text(index=True)
+    role = columns.Text(default='infra')
+    attributes = columns.Text()
+    vars = columns.Text(default='{"foo": "bar"}')
 
     def __str__(self):
-        dict_representation = {}
-        for key in self._data.keys():
-            if key != 'id' and key != 'parentgrid':
-                try:
-                    dict_representation[key] = str(getattr(self, key))
-                except:
-                    dict_representation[key] = json.dumps(getattr(self, key))
-        return str(dict_representation)
+        return str(dict(self))
 
 
 class AWSGroupEntity(GroupEntity):
-    instance_type = CharField(null=True)
-    cpus = IntegerField(null=True)
-    ram = IntegerField(null=True)
-    disk_size = IntegerField(null=True)
-    customhwconf = CharField(default='', null=True)
-    enhanced_networking = BooleanField(default=False, null=True)
-    az = CharField(default='', null=True)
-    spot_price = CharField(default='', null=True)
+    __discriminator_value__ = 'aws'
+    instance_type = columns.Text()
+    cpus = columns.Integer()
+    ram = columns.Integer()
+    disk_size = columns.Integer()
+    customhwconf = columns.Text(default='')
+    enhanced_networking = columns.Boolean(default=False)
+    az = columns.Text(default='')
+    spot_price = columns.Text(default='')
 
 
 class AzureGroupEntity(GroupEntity):
-    instance_type = CharField(null=True)
-    cpus = IntegerField(null=True)
-    ram = IntegerField(null=True)
-    disk_size = IntegerField(null=True)
-    customhwconf = CharField(default='', null=True)
+    __discriminator_value__ = 'azure'
+    instance_type = columns.Text()
+    cpus = columns.Integer()
+    ram = columns.Integer()
+    disk_size = columns.Integer()
+    customhwconf = columns.Text(default='')
 
-
+ 
 class GCSGroupEntity(GroupEntity):
-    instance_type = CharField(null=True)
-    cpus = IntegerField(null=True)
-    ram = IntegerField(null=True)
-    disk_size = IntegerField(null=True)
-    customhwconf = CharField(default='', null=True)
-    preemptible = BooleanField(default=False, null=True)
-    zone = CharField(default='', null=True)
+    __discriminator_value__ = 'gcs'
+    instance_type = columns.Text()
+    cpus = columns.Integer()
+    ram = columns.Integer()
+    disk_size = columns.Integer()
+    customhwconf = columns.Text(default='')
+    preemptible = columns.Boolean(default=False)
+    zone = columns.Text(default='')
 
 
 class OpenstackGroupEntity(GroupEntity):
-    instance_type = CharField(null=True)
-    slaves = IntegerField(null=True)
-    customhwconf = CharField(default='', null=True)
+    __discriminator_value__ = 'openstack'
+    instance_type = columns.Text()
+    slaves = columns.Integer()
+    customhwconf = columns.Text(default='')
 
 class CustomGroupEntity(GroupEntity):
-    groupips = CharField(null=True)
+    __discriminator_value__ = 'custom'
+    groupips = columns.Text()
 
 configs = {
     'aws': AWSConfigEntity,
@@ -268,15 +260,49 @@ groups = {
     'custom': CustomGroupEntity
 }
 
+
+
+def init_db():
+    from cassandra.cluster import Cluster
+
+    cluster = Cluster(cassandra_hosts)
+    session = cluster.connect()
+
+    session.execute("CREATE KEYSPACE IF NOT EXISTS grids WITH replication = { 'class': 'SimpleStrategy', 'replication_factor': '2' }")
+
+    connection.setup(cassandra_hosts, "grids", protocol_version=4)
+
+    sync_table(GridEntity)
+    sync_table(ConfigEntity)
+    sync_table(AWSConfigEntity)
+    sync_table(AzureConfigEntity)
+    sync_table(GCSConfigEntity)
+    sync_table(OpenstackConfigEntity)
+    sync_table(CustomConfigEntity)
+    sync_table(DeploymentEntity)
+    sync_table(InfrastructureDeploymentEntity)
+    sync_table(ProvisionDeploymentEntity)    
+    sync_table(AWSDeploymentEntity)
+    sync_table(AWSInfrastructureDeploymentEntity)
+    sync_table(AWSProvisionDeploymentEntity)
+    sync_table(AzureDeploymentEntity)
+    sync_table(AzureInfrastructureDeploymentEntity)
+    sync_table(AzureProvisionDeploymentEntity)
+    sync_table(GCSDeploymentEntity)
+    sync_table(GCSInfrastructureDeploymentEntity)
+    sync_table(GCSProvisionDeploymentEntity)
+    sync_table(OpenstackDeploymentEntity)
+    sync_table(OpenstackInfrastructureDeploymentEntity)
+    sync_table(OpenstackProvisionDeploymentEntity)
+    sync_table(CustomDeploymentEntity)
+    sync_table(CustomInfrastructureDeploymentEntity)
+    sync_table(CustomProvisionDeploymentEntity)
+    sync_table(GroupEntity)
+    sync_table(AWSGroupEntity)
+    sync_table(AzureGroupEntity)
+    sync_table(GCSGroupEntity)
+    sync_table(OpenstackGroupEntity)
+    sync_table(CustomGroupEntity)
+
 if __name__ == '__main__':
-    GridEntity.create_table(fail_silently=True)
-    for provider, config in configs.iteritems():
-        config.create_table(fail_silently=True)
-    for provider, deployment in deployments.iteritems():
-        deployment.create_table(fail_silently=True)
-    for provider, infrastructure_deployment in infrastructure_deployments.iteritems():
-        infrastructure_deployment.create_table(fail_silently=True)
-    for provider, provision_deployment in provision_deployments.iteritems():
-        provision_deployment.create_table(fail_silently=True)
-    for provider, group in groups.iteritems():
-        group.create_table(fail_silently=True)
+    init_db()

@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_restful import Api
+from gridapi.resources.models import init_db
 from gridapi.resources.controller_grid import GridHandler
 from gridapi.resources.controller_gridlist import GridListHandler
 from gridapi.resources.controller_config import ConfigHandler
@@ -10,6 +11,7 @@ from gridapi.resources.controllers_deployment.infrastructure import Infrastructu
 from gridapi.resources.controllers_deployment.provision import ProvisionDeploymentHandler, GroupProvisionDeploymentHandler, MastersProvisionDeploymentHandler
 from gridapi.resources.controllers_deployment.vpn import VpnHandler
 
+init_db()
 app = Flask(__name__)
 api = Api(app)
 

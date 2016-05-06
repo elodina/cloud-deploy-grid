@@ -1,0 +1,19 @@
+version: '2'
+services:
+  cdg:
+    build: .
+    depends_on:
+      - cassandra
+    command: bash -c "eval $$(ssh-agent -s); sleep 60; /usr/bin/python2 main.py"
+    network_mode: "host"
+    ports:
+      - "5555:5555"
+    volumes:
+      - ./:/grid
+  cassandra:
+    image: cassandra:3.3
+    network_mode: "host"
+    ports:
+      - "9042:9042"
+    volumes:
+      - ./db:/var/lib/cassandra

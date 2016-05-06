@@ -11,57 +11,38 @@ from gridapi.libs.gcs.instances import gcsinstances
 
 class GroupHandler(Resource):
     def _abort_if_grid_doesnt_exist(self, grid_name):
-        if not GridEntity.select().where(
-                        GridEntity.name == grid_name).exists():
+        if not len(GridEntity.objects(name=grid_name)):
             abort(404, message="Grid {} doesn't exist".format(grid_name))
 
     def _abort_if_config_doesnt_exist(self, grid_name):
-        grid = GridEntity.select().where(
-            GridEntity.name == grid_name).get()
-        if not configs[grid.provider].select().where(
-                        configs[grid.provider].parentgrid ==
-                        grid).exists():
-            abort(404, message="Config of grid {} doesn't exist".format(
-                grid_name))
+        grid = GridEntity.objects(name=grid_name).get()
+        if not len(configs[grid.provider].objects(parentgrid=grid_name)):
+            abort(404, message="Config of grid {} doesn't exist".format(grid_name))
 
     def _abort_if_deployment_doesnt_exist(self, grid_name):
-        grid = GridEntity.select().where(
-            GridEntity.name == grid_name).get()
-        if not deployments[grid.provider].select().where(
-                        deployments[grid.provider].parentgrid ==
-                        grid).exists():
-            abort(404, message="Deployment of grid {} doesn't exist".format(
-                grid_name))
+        grid = GridEntity.objects(name=grid_name).get()
+        if not len(deployments[grid.provider].objects(parentgrid=grid_name)):
+            abort(404, message="Deployment of grid {} doesn't exist".format(grid_name))
 
     def _abort_if_group_doesnt_exist(self, grid_name, group_name):
-        grid = GridEntity.select().where(
-            GridEntity.name == grid_name).get()
-        if not groups[grid.provider].select().where(
-                        groups[grid.provider].name == group_name,
-                        groups[grid.provider].parentgrid ==
-                        grid).exists():
+        grid = GridEntity.objects(name=grid_name).get()
+        if not len(groups[grid.provider].objects(parentgrid=grid_name, name=group_name)):
             abort(404, message="Group {} doesn't exist".format(group_name))
 
     def _aws_slave_calculator(self, cpus, ram, image):
         ec2instances_load()
-        amount_by_cpu = int(math.ceil(
-            cpus / float(ec2instances[image]['cpu'])))
-        amount_by_ram = int(math.ceil(
-            ram / float(ec2instances[image]['ram'])))
+        amount_by_cpu = int(math.ceil(cpus / float(ec2instances[image]['cpu'])))
+        amount_by_ram = int(math.ceil(ram / float(ec2instances[image]['ram'])))
         return max(amount_by_cpu, amount_by_ram)
 
     def _azure_slave_calculator(self, cpus, ram, image):
-        amount_by_cpu = int(math.ceil(
-            cpus / float(azureinstances[image]['cpu'])))
-        amount_by_ram = int(math.ceil(
-            ram / float(azureinstances[image]['ram'])))
+        amount_by_cpu = int(math.ceil(cpus / float(azureinstances[image]['cpu'])))
+        amount_by_ram = int(math.ceil(ram / float(azureinstances[image]['ram'])))
         return max(amount_by_cpu, amount_by_ram)
 
     def _gcs_slave_calculator(self, cpus, ram, image):
-        amount_by_cpu = int(math.ceil(
-            cpus / float(gcsinstances[image]['cpu'])))
-        amount_by_ram = int(math.ceil(
-            ram / float(gcsinstances[image]['ram'])))
+        amount_by_cpu = int(math.ceil(cpus / float(gcsinstances[image]['cpu'])))
+        amount_by_ram = int(math.ceil(ram / float(gcsinstances[image]['ram'])))
         return max(amount_by_cpu, amount_by_ram)
 
     def _openstack_slave_calculator(self, slaves):
@@ -83,11 +64,8 @@ class GroupHandler(Resource):
         self._abort_if_config_doesnt_exist(grid_name)
         self._abort_if_deployment_doesnt_exist(grid_name)
         self._abort_if_group_doesnt_exist(grid_name, group_name)
-        grid = GridEntity.select().where(
-            GridEntity.name == grid_name).get()
-        group = groups[grid.provider].select().where(
-            groups[grid.provider].name == group_name,
-            groups[grid.provider].parentgrid == grid).get()
+        grid = GridEntity.objects(name=grid_name).get()
+        group = groups[grid.provider].objects(parentgrid=grid_name, name=group_name).get()
         return ast.literal_eval(str(group)), 200
 
     def delete(self, grid_name, group_name):
@@ -95,12 +73,9 @@ class GroupHandler(Resource):
         self._abort_if_config_doesnt_exist(grid_name)
         self._abort_if_deployment_doesnt_exist(grid_name)
         self._abort_if_group_doesnt_exist(grid_name, group_name)
-        grid = GridEntity.select().where(
-            GridEntity.name == grid_name).get()
-        group = groups[grid.provider].select().where(
-            groups[grid.provider].name == group_name,
-            groups[grid.provider].parentgrid == grid).get()
-        group.delete_instance()
+        grid = GridEntity.objects(name=grid_name).get()
+        group = groups[grid.provider].objects(parentgrid=grid_name, name=group_name).get()
+        group.delete()
         return '', 200
 
     def put(self, grid_name, group_name):
@@ -108,30 +83,22 @@ class GroupHandler(Resource):
         self._abort_if_config_doesnt_exist(grid_name)
         self._abort_if_deployment_doesnt_exist(grid_name)
         self._abort_if_group_doesnt_exist(grid_name, group_name)
-        grid = GridEntity.select().where(
-            GridEntity.name == grid_name).get()
-        group = groups[grid.provider].select().where(
-            groups[grid.provider].name == group_name,
-            groups[grid.provider].parentgrid == grid).get()
+        grid = GridEntity.objects(name=grid_name).get()
+        group = groups[grid.provider].objects(parentgrid=grid_name, name=group_name).get()
         oldgroup = group
         args = groupparsers[grid.provider].parse_args()
-        for key in group._data.keys():
-            if key != 'id' and key != 'parentgrid' and key != '_slaves':
+        for key in group.keys():
+            if key != 'parentgrid' and key != 'slaves' and key != 'provider':
                 setattr(group, key, args[key])
-        if group.parentgrid.provider == 'custom':
+        if group.provider == 'custom':
             slaves_args = [args['groupips']]
-        elif group.parentgrid.provider == 'openstack':
+        elif group.provider == 'openstack':
             slaves_args = [args['slaves']]
         else:
             slaves_args = [args['cpus'], args['ram'], args['instance_type']]
-        group._slaves = self._slave_calculator[grid.provider](
-            self, *slaves_args)
+        group.slaves = self._slave_calculator[grid.provider](self, *slaves_args)
         group.save()
         if args['name'] != oldgroup.name:
-            deletegroup = groups[grid.provider].select().where(
-                groups[grid.provider].name == oldgroup.name,
-                groups[grid.provider].parentgrid == grid).get()
-            deletegroup.delete_instance()
+            group_to_delete = groups[grid.provider].objects(parentgrid=grid_name, name=oldgroup.name).get()
+            group_to_delete.delete()
         return ast.literal_eval(str(group)), 200
-
-

@@ -21,21 +21,17 @@ class openstack_infrastructure_generator(object):
         self.api_user = urllib.unquote(api_user)
         self.api_pass = urllib.unquote(api_pass)
         self.api_url = urllib.unquote(api_url)
-        self.current_grid = GridEntity.select().where(
-            GridEntity.name == grid_name).get()
-        self.current_config = configs[
-            self.current_grid.provider].select().where(
-            configs[self.current_grid.provider].parentgrid ==
-            self.current_grid).get()
+        self.current_grid = GridEntity.objects(name=grid_name).get()
+        grid = self.current_grid
+        self.current_config = configs[grid.provider].objects(parentgrid=grid_name).get()
         self.private_key_text = urllib.unquote(self.current_config.sshkeydata)
         self.private_key = RSA.importKey(self.private_key_text.strip())
         self.public_key_text = self.private_key.publickey().exportKey('OpenSSH')
         self.current_groups = []
         if not os.path.exists('result/{}/infrastructure'.format(grid_name)):
             os.makedirs('result/{}/infrastructure'.format(grid_name))
-        for group in groups[self.current_grid.provider].select():
-            if group.parentgrid.name == grid_name:
-                self.current_groups.append(group)
+        for group in groups[grid.provider].objects(parentgrid=grid_name):
+            self.current_groups.append(group)
         self.config = AutoDict()
         self.networking = AutoDict()
         self.security = AutoDict()
@@ -47,11 +43,10 @@ class openstack_infrastructure_generator(object):
         self.config['provider']['openstack']['password'] = self.api_pass
         self.config['provider']['openstack']['auth_url'] = self.api_url
         self.config['provider']['openstack']['tenant_name'] = self.current_config.tenant
-        self.config['variable']['grid_name']['default'] = self.current_config.parentgrid.name
+        self.config['variable']['grid_name']['default'] = self.current_config.parentgrid
         self.config['resource']['openstack_compute_keypair_v2']['{}-ssh_key'.format(self.grid_name)]['name'] = '{}-ssh_key'.format(self.grid_name)
         self.config['resource']['openstack_compute_keypair_v2']['{}-ssh_key'.format(self.grid_name)]['public_key'] = self.public_key_text
-        with open('result/{}/infrastructure/config.tf'.format(
-                self.grid_name), 'w') as config_file:
+        with open('result/{}/infrastructure/config.tf'.format(self.grid_name), 'w') as config_file:
             json.dump(self.config, config_file)
 
     def generate_networking(self):
@@ -74,8 +69,7 @@ class openstack_infrastructure_generator(object):
         self.networking['resource']['openstack_networking_port_v2']['{}-internal-port'.format(self.grid_name)]['security_group_ids'] = []
         self.networking['resource']['openstack_networking_port_v2']['{}-internal-port'.format(self.grid_name)]['security_group_ids'].append('${{openstack_compute_secgroup_v2.{}-gridwide.id}}'.format(self.grid_name))
         self.networking['resource']['openstack_networking_port_v2']['{}-internal-port'.format(self.grid_name)]['security_group_ids'].append('${{openstack_compute_secgroup_v2.{}-terminal.id}}'.format(self.grid_name))
-        with open('result/{}/infrastructure/networking.tf'.format(
-                self.grid_name), 'w') as networking_file:
+        with open('result/{}/infrastructure/networking.tf'.format(self.grid_name), 'w') as networking_file:
             json.dump(self.networking, networking_file)
 
     def generate_security(self):
@@ -91,8 +85,7 @@ class openstack_infrastructure_generator(object):
         self.security['resource']['openstack_compute_secgroup_v2']['{}-terminal'.format(self.grid_name)]['rule'].append({'ip_protocol': 'tcp', 'from_port': '1', 'to_port': '65535', 'cidr': '0.0.0.0/0'})
         self.security['resource']['openstack_compute_secgroup_v2']['{}-terminal'.format(self.grid_name)]['rule'].append({'ip_protocol': 'udp', 'from_port': '1194', 'to_port': '1194', 'cidr': '0.0.0.0/0'})
         self.security['resource']['openstack_compute_secgroup_v2']['{}-terminal'.format(self.grid_name)]['rule'].append({'ip_protocol': 'icmp', 'from_port': '-1', 'to_port': '-1', 'cidr': '0.0.0.0/0'})
-        with open('result/{}/infrastructure/security.tf'.format(
-                self.grid_name), 'w') as security_file:
+        with open('result/{}/infrastructure/security.tf'.format(self.grid_name), 'w') as security_file:
             json.dump(self.security, security_file)
 
 
@@ -111,8 +104,7 @@ class openstack_infrastructure_generator(object):
         self.terminal['resource']['openstack_compute_instance_v2']['{}-terminal'.format(self.grid_name)]['user_data'] = '#cloud-config\r\n disable_root: false\r\n'
         self.terminal['resource']['openstack_compute_instance_v2']['{}-terminal'.format(self.grid_name)]['metadata']['dc'] = '${var.grid_name}'
         self.terminal['resource']['openstack_compute_instance_v2']['{}-terminal'.format(self.grid_name)]['metadata']['role'] = '{}_terminal'.format(self.grid_name)
-        with open('result/{}/infrastructure/terminal.tf'.format(
-                self.grid_name), 'w') as terminal_file:
+        with open('result/{}/infrastructure/terminal.tf'.format(self.grid_name), 'w') as terminal_file:
             json.dump(self.terminal, terminal_file)
 
     def generate_masters(self):
@@ -127,14 +119,13 @@ class openstack_infrastructure_generator(object):
         self.masters['resource']['openstack_compute_instance_v2']['{}-mesos_master'.format(self.grid_name)]['user_data'] = '#cloud-config\r\n disable_root: false\r\n'
         self.masters['resource']['openstack_compute_instance_v2']['{}-mesos_master'.format(self.grid_name)]['metadata']['dc'] = '${var.grid_name}'
         self.masters['resource']['openstack_compute_instance_v2']['{}-mesos_master'.format(self.grid_name)]['metadata']['role'] = '{}_mesos_master'.format(self.grid_name)
-        with open('result/{}/infrastructure/masters.tf'.format(
-                self.grid_name), 'w') as masters_file:
+        with open('result/{}/infrastructure/masters.tf'.format(self.grid_name), 'w') as masters_file:
             json.dump(self.masters, masters_file)
 
     def generate_groups(self):
         for group in self.current_groups:
             group_export = AutoDict()
-            group_export['resource']['openstack_compute_instance_v2']['{}-mesos_group_{}'.format(self.grid_name, group.name)]['count'] = '{}'.format(group._slaves)
+            group_export['resource']['openstack_compute_instance_v2']['{}-mesos_group_{}'.format(self.grid_name, group.name)]['count'] = '{}'.format(group.slaves)
             group_export['resource']['openstack_compute_instance_v2']['{}-mesos_group_{}'.format(self.grid_name, group.name)]['name'] = '${{var.grid_name}}-{}-${{count.index}}'.format(group.name)
             group_export['resource']['openstack_compute_instance_v2']['{}-mesos_group_{}'.format(self.grid_name, group.name)]['image_name'] = self.current_config.image_name
             group_export['resource']['openstack_compute_instance_v2']['{}-mesos_group_{}'.format(self.grid_name, group.name)]['flavor_name'] = '{}'.format(group.instance_type)
@@ -147,13 +138,11 @@ class openstack_infrastructure_generator(object):
             group_export['resource']['openstack_compute_instance_v2']['{}-mesos_group_{}'.format(self.grid_name, group.name)]['metadata']['role'] = '{}_{}'.format(self.grid_name, group.role)
             if group.customhwconf is not None:
                 group_export['resource']['openstack_compute_instance_v2']['{}-mesos_group_{}'.format(self.grid_name, group.name)].update(ast.literal_eval(group.customhwconf))
-            with open('result/{}/infrastructure/group_{}.tf'.format(
-                    self.grid_name, group.name), 'w') as group_file:
+            with open('result/{}/infrastructure/group_{}.tf'.format(self.grid_name, group.name), 'w') as group_file:
                 json.dump(group_export, group_file)
 
     def generate_ssh_key(self):
-        with open('result/{}/grid.pem'.format(
-                self.grid_name), 'w+') as ssh_key:
+        with open('result/{}/grid.pem'.format(self.grid_name), 'w+') as ssh_key:
             ssh_key.write(self.private_key_text)
 
     def generate_all(self):
@@ -165,5 +154,4 @@ class openstack_infrastructure_generator(object):
         self.generate_groups()
         self.generate_ssh_key()
         os.chmod('result/{}/grid.pem'.format(self.grid_name), 0600)
-        subprocess.check_call(['ssh-add', 'result/{}/grid.pem'.format(
-            self.grid_name)])
+        subprocess.check_call(['ssh-add', 'result/{}/grid.pem'.format(self.grid_name)])

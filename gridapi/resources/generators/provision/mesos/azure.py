@@ -16,23 +16,17 @@ class azure_provision_mesos_generator(object):
     def __init__(self, grid_name, **kwargs):
         self.grid_name = grid_name
         self.kwargs = kwargs
-        self.current_grid = GridEntity.select().where(
-            GridEntity.name == grid_name).get()
-        self.current_config = configs[
-            self.current_grid.provider].select().where(
-            configs[self.current_grid.provider].parentgrid ==
-            self.current_grid).get()
+        self.current_grid = GridEntity.objects(name=grid_name).get()
+        grid = self.current_grid
+        self.current_config = configs[grid.provider].objects(parentgrid=grid_name).get()
         self.current_groups = []
         self.current_roles = []
-        for group in groups[self.current_grid.provider].select():
-            if group.parentgrid.name == grid_name:
-                self.current_groups.append(group)
-                self.current_roles.append(group.role)
+        for group in groups[grid.provider].objects(parentgrid=grid_name):
+            self.current_groups.append(group)
+            self.current_roles.append(group.role)
 
     def copy_templates(self):
-        os.system('cp -a -f'
-                  ' gridapi/resources/templates/provision/mesos/azure/*'
-                  ' result/{}'.format(self.grid_name))
+        os.system('cp -a -f gridapi/resources/templates/provision/mesos/azure/* result/{}'.format(self.grid_name))
 
     def _generate_template(self, filepath, variables):
         with open(filepath, 'r') as src:
@@ -66,15 +60,12 @@ class azure_provision_mesos_generator(object):
         path = 'result/{}/group_vars/all'.format(self.grid_name)
         variables = AutoDict()
         hosts_entries = AutoDict()
-        with open('result/{}/infrastructure/terraform.tfstate'.format(
-                self.grid_name), 'r') as json_file:
+        with open('result/{}/infrastructure/terraform.tfstate'.format(self.grid_name), 'r') as json_file:
             json_data = json.load(json_file)
             for module in json_data['modules']:
                 for resource, value in module['resources'].iteritems():
                     if value['type'] == 'azure_instance':
-                        host = '{}.node.{}'.format(
-                            value['primary']['attributes'][
-                                'name'], self.grid_name)
+                        host = '{}.node.{}'.format(value['primary']['attributes']['name'], self.grid_name)
                         ip = value['primary']['attributes']['ip_address']
                         hosts_entries['hosts'][str(host)] = str(ip)
         variables['hosts'] = json.dumps(hosts_entries['hosts'])
@@ -88,8 +79,7 @@ class azure_provision_mesos_generator(object):
     def generate_group_vars_roles(self):
         for role in self.current_roles:
             src = 'result/{}/group_vars/mesos-slaves'.format(self.grid_name)
-            dst = 'result/{}/group_vars/tag_role_{}_{}'.format(
-                self.grid_name, self.grid_name, role)
+            dst = 'result/{}/group_vars/tag_role_{}_{}'.format(self.grid_name, self.grid_name, role)
             os.system('cp -a -f {src} {dst}'.format(src=src, dst=dst))
 
     def _generate_attributes_for_group(self, group):
@@ -104,11 +94,9 @@ class azure_provision_mesos_generator(object):
         for group in self.current_groups:
             role = group.role
             src = 'result/{}/roles/mesos'.format(self.grid_name)
-            dst = 'result/{}/roles/mesos-slave_{}_{}'.format(
-                self.grid_name, self.grid_name, role)
+            dst = 'result/{}/roles/mesos-slave_{}_{}'.format(self.grid_name, self.grid_name, role)
             os.system('cp -a -f {src} {dst}'.format(src=src, dst=dst))
-            with open('{}/files/etc/mesos-slave/attributes'.format(
-                    dst), 'w+') as attributes_file:
+            with open('{}/files/etc/mesos-slave/attributes'.format(dst), 'w+') as attributes_file:
                 attributes_file.write(
                     self._generate_attributes_for_group(group))
 
@@ -130,8 +118,7 @@ class azure_provision_mesos_generator(object):
     def generate_groups_runlists(self):
         for group in self.current_groups:
             src = 'result/{}/group.yml'.format(self.grid_name)
-            dst = 'result/{}/group_{}.yml'.format(
-                self.grid_name, group.role)
+            dst = 'result/{}/group_{}.yml'.format(self.grid_name, group.role)
             os.system('cp -a -f {src} {dst}'.format(src=src, dst=dst))
             variables = {}
             variables['grid_name'] = self.grid_name
