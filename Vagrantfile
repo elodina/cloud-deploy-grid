@@ -5,7 +5,10 @@ Vagrant.configure('2') do |config|
     config.vm.box = "phusion/ubuntu-14.04-amd64"
     config.ssh.insert_key = true
     config.vm.network "forwarded_port", guest: 5555, host: 5555
-
+    config.vm.provider "virtualbox" do |v|
+      v.memory = 8192
+      v.cpus = 2
+    end
     if Dir.glob("#{File.dirname(__FILE__)}/.vagrant/machines/default/*/id").empty?
       # Install Docker
       pkg_cmd = "wget -q -O - https://get.docker.io/gpg | apt-key add -;" \
