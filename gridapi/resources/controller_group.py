@@ -6,7 +6,7 @@ from gridapi.resources.models import GridEntity, configs, deployments,\
     groups
 from gridapi.libs.aws.instances import ec2instances, ec2instances_load
 from gridapi.libs.azure.instances import azureinstances
-from gridapi.libs.gcs.instances import gcsinstances
+from gridapi.libs.gce.instances import gceinstances
 
 
 class GroupHandler(Resource):
@@ -40,9 +40,9 @@ class GroupHandler(Resource):
         amount_by_ram = int(math.ceil(ram / float(azureinstances[image]['ram'])))
         return max(amount_by_cpu, amount_by_ram)
 
-    def _gcs_slave_calculator(self, cpus, ram, image):
-        amount_by_cpu = int(math.ceil(cpus / float(gcsinstances[image]['cpu'])))
-        amount_by_ram = int(math.ceil(ram / float(gcsinstances[image]['ram'])))
+    def _gce_slave_calculator(self, cpus, ram, image):
+        amount_by_cpu = int(math.ceil(cpus / float(gceinstances[image]['cpu'])))
+        amount_by_ram = int(math.ceil(ram / float(gceinstances[image]['ram'])))
         return max(amount_by_cpu, amount_by_ram)
 
     def _openstack_slave_calculator(self, slaves):
@@ -54,7 +54,7 @@ class GroupHandler(Resource):
     _slave_calculator = {
         'aws': _aws_slave_calculator,
         'azure': _azure_slave_calculator,
-        'gcs': _gcs_slave_calculator,
+        'gce': _gce_slave_calculator,
         'openstack': _openstack_slave_calculator,
         'custom': _custom_slave_calculator
     }

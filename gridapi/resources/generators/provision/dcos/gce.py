@@ -14,7 +14,7 @@ class AutoDict(dict):
             value = self[item] = type(self)()
             return value
 
-class gcs_provision_dcos_generator(object):
+class gce_provision_dcos_generator(object):
     def __init__(self, grid_name, **kwargs):
         self.grid_name = grid_name
         self.kwargs = kwargs
@@ -37,7 +37,7 @@ class gcs_provision_dcos_generator(object):
                             return value['primary']['attributes']['network_interface.0.address']
 
     def copy_templates(self):
-        os.system('cp -a -f gridapi/resources/templates/provision/dcos/gcs/* result/{}'.format(self.grid_name))
+        os.system('cp -a -f gridapi/resources/templates/provision/dcos/gce/* result/{}'.format(self.grid_name))
 
     def _generate_template(self, filepath, variables):
         with open(filepath, 'r') as src:

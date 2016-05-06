@@ -11,14 +11,14 @@ from gridapi.resources.parsers import infrastructure_deploymentparsers
 from gridapi.resources.models import GridEntity, configs, deployments, groups, infrastructure_deployments
 from gridapi.resources.generators.infrastructure.aws import aws_infrastructure_generator
 from gridapi.resources.generators.infrastructure.azure import azure_infrastructure_generator
-from gridapi.resources.generators.infrastructure.gcs import gcs_infrastructure_generator
+from gridapi.resources.generators.infrastructure.gce import gce_infrastructure_generator
 from gridapi.resources.generators.infrastructure.openstack import openstack_infrastructure_generator
 from gridapi.resources.generators.infrastructure.custom import custom_infrastructure_generator
 
 infrastructure_generators = {
     'aws': aws_infrastructure_generator,
     'azure': azure_infrastructure_generator,
-    'gcs': gcs_infrastructure_generator,
+    'gce': gce_infrastructure_generator,
     'openstack': openstack_infrastructure_generator,
     'custom': custom_infrastructure_generator
 }
@@ -170,7 +170,7 @@ class InfrastructureDeploymentHandler(Resource):
                                 if resource == 'azure_instance.terminal':
                                     return value['primary']['attributes']['vip_address']
 
-            def _gcs_get_access_ip(grid_name):
+            def _gce_get_access_ip(grid_name):
                 if os.path.isfile('result/{}/infrastructure/terraform.tfstate'.format(grid_name)) and os.access('result/{}/infrastructure/terraform.tfstate'.format(grid_name), os.R_OK):
                     with open('result/{}/infrastructure/terraform.tfstate'.format(grid_name), 'r') as json_file:
                         json_data = json.load(json_file)
@@ -196,7 +196,7 @@ class InfrastructureDeploymentHandler(Resource):
             get_access_ip = {
                 'aws': _aws_get_access_ip,
                 'azure': _azure_get_access_ip,
-                'gcs': _gcs_get_access_ip,
+                'gce': _gce_get_access_ip,
                 'openstack': _openstack_get_access_ip,
                 'custom': _custom_get_access_ip
             }
@@ -224,7 +224,7 @@ class InfrastructureDeploymentHandler(Resource):
                     raise Exception('host is offline')
 
             @retry(stop_max_attempt_number=30, wait_fixed=5000)
-            def _gcs_check_host(host):
+            def _gce_check_host(host):
                 try:
                     subprocess.check_call([
                         'ssh', '-F', 'result/{}/ssh_config'.format(grid_name),
@@ -271,7 +271,7 @@ class InfrastructureDeploymentHandler(Resource):
             check_host = {
                 'aws': _aws_check_host,
                 'azure': _azure_check_host,
-                'gcs': _gcs_check_host,
+                'gce': _gce_check_host,
                 'openstack': _openstack_check_host,
                 'custom': _custom_check_host
             }
@@ -296,7 +296,7 @@ class InfrastructureDeploymentHandler(Resource):
                                     ip = value['primary']['attributes']['vip_address']
                                     check_host[grid.provider](ip)
 
-            def _gcs_check_hosts_online(grid_name):
+            def _gce_check_hosts_online(grid_name):
                 if os.path.isfile('result/{}/infrastructure/terraform.tfstate'.format(grid_name)) and os.access('result/{}/infrastructure/terraform.tfstate'.format(grid_name), os.R_OK):
                     with open('result/{}/infrastructure/terraform.tfstate'.format(grid_name), "r") as json_file:
                         json_data = json.load(json_file)
@@ -329,7 +329,7 @@ class InfrastructureDeploymentHandler(Resource):
             check_hosts_online = {
                 'aws': _aws_check_hosts_online,
                 'azure': _azure_check_hosts_online,
-                'gcs': _gcs_check_hosts_online,
+                'gce': _gce_check_hosts_online,
                 'openstack': _openstack_check_hosts_online,
                 'custom': _custom_check_hosts_online
             }
@@ -447,7 +447,7 @@ class ExportInfrastructureDeploymentHandler(InfrastructureDeploymentHandler):
             export.sort(key=lambda(x): x[0])
             return export
 
-        def _gcs_hosts_export(grid_name):
+        def _gce_hosts_export(grid_name):
             export = []
             with open('result/{}/infrastructure/terraform.tfstate'.format(grid_name), 'r') as input_file:
                 state = json.load(input_file)
@@ -485,7 +485,7 @@ class ExportInfrastructureDeploymentHandler(InfrastructureDeploymentHandler):
         hosts_export = {
             'aws': _aws_hosts_export,
             'azure': _azure_hosts_export,
-            'gcs': _gcs_hosts_export,
+            'gce': _gce_hosts_export,
             'openstack': _openstack_hosts_export,
             'custom': _custom_hosts_export
         }

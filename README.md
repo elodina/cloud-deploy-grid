@@ -15,7 +15,7 @@ Table of Contents
     * [Grid Slave group API Requests](#grid-slave-group-api-requests)
     * [Grid Deployment API Requests](#grid-deployment-api-requests)
     * [Common usage scenario for Mesos on AWS](#common-usage-scenario-for-mesos-on-aws)
-    * [Common usage scenario for Mesos on GCS](#common-usage-scenario-for-mesos-on-gcs)
+    * [Common usage scenario for Mesos on GCE](#common-usage-scenario-for-mesos-on-gce)
     * [Common usage scenario for Mesos on Openstack](#common-usage-scenario-for-mesos-on-openstack)
     * [Common usage scenario for Mesos on Azure](#common-usage-scenario-for-mesos-on-azure)
     * [Common usage scenario for DCOS on AWS](#common-usage-scenario-for-dcos-on-aws)
@@ -92,7 +92,7 @@ POST - add new grid, example:
 curl -X POST -d "name=${grid_name}" -d "provider=aws" -d "type=mesos" http://localhost:5555/api/v2.0/grids
 ```
 
-required parameters - name(variable), provider(aws/azure/gcs/custom), type(mesos/dcos)
+required parameters - name(variable), provider(aws/azure/gce/custom), type(mesos/dcos)
 
 
 Grid Entity API Requests
@@ -157,8 +157,8 @@ master_type(AWS instance type for master, default m3.large), region(AWS region f
 azure:
 master_type(Azure instance type for master, default is Basic_A2), location(Azure location for grid in format like "Central US"), ssh_user(user for ssh login), ssh_password(password for ssh user and sudo)
 
-gcs:
-master_type(GCS instance type for master, default is n1-standard-1), zone(GCS Zone in format like "us-east1-a"), project(GCS project ID), ssh_user(user for ssh login), sshkeydata(Private path of ssh key, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
+gce:
+master_type(GCE instance type for master, default is n1-standard-1), zone(GCE Zone in format like "us-east1-a"), project(GCE project ID), ssh_user(user for ssh login), sshkeydata(Private path of ssh key, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
 
 openstack:
 master_type(Openstack instance type for master), terminal_type(Openstack instance type for terminal server), image_name(Image name for instances, e.g. like centos-7), tenant(Openstack tenant name), region(Openstack region name), external_network_uuid(UUID of external network), sshkeydata(Private path of ssh key, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
@@ -198,8 +198,8 @@ instance_type(instance type for slave), cpus(number of cpus per group), ram(amou
 azure:
 instance_type(instance type for slave), cpus(number of cpus per group), ram(amount of GB of ram per group), disk_size(hdd size, per HOST)
 
-gcs:
-instance_type(instance type for slave), cpus(number of cpus per group), ram(amount of GB of ram per group), disk_size(hdd size, per HOST), zone(GCS zone to place group to)
+gce:
+instance_type(instance type for slave), cpus(number of cpus per group), ram(amount of GB of ram per group), disk_size(hdd size, per HOST), zone(GCE zone to place group to)
 
 openstack:
 instance_type(instance type for slave), slaves(number of slaves)
@@ -219,7 +219,7 @@ az(AWS availability zone), enhanced_networking(turn on enhanced networking), spo
 azure:
 customhwconf(custom hardware configuration)
 
-gcs:
+gce:
 customhwconf(custom hardware configuration), preemptible(make instances preemptible)
 
 openstack:
@@ -271,8 +271,8 @@ instance_type(instance type for slave), cpus(number of cpus per group), ram(amou
 azure:
 instance_type(instance type for slave), cpus(number of cpus per group), ram(amount of GB of ram per group), disk_size(hdd size, per HOST)
 
-gcs:
-instance_type(instance type for slave), cpus(number of cpus per group), ram(amount of GB of ram per group), disk_size(hdd size, per HOST), zone(GCS zone to place group to)
+gce:
+instance_type(instance type for slave), cpus(number of cpus per group), ram(amount of GB of ram per group), disk_size(hdd size, per HOST), zone(GCE zone to place group to)
 
 openstack:
 instance_type(instance type for slave), slaves(number of slaves)
@@ -292,7 +292,7 @@ az(AWS availability zone), enhanced_networking(turn on enhanced networking), spo
 azure:
 customhwconf(custom hardware configuration)
 
-gcs:
+gce:
 customhwconf(custom hardware configuration), preemptible(make instances preemptible)
 
 openstack:
@@ -354,7 +354,7 @@ AZURE:
 curl -X PUT --data-urlencode "credentials=`cat credentials`" http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure
 ```
 
-GCS:
+GCE:
 ```
 curl -X PUT --data-urlencode "credentials=`cat credentials`" http://localhost:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure
 ```
@@ -375,7 +375,7 @@ aws_access_key_id(self descriptive,URL-encoded, e.g. curl --data-urlencode "${ke
 azure:
 credentials(credentials file, should be aquired, as described here: https://www.terraform.io/docs/providers/azure/index.html, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
 
-gcs:
+gce:
 credentials(credentials file, should be aquired, as described here: https://www.terraform.io/docs/providers/google/index.html, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
 
 openstack:
@@ -410,7 +410,7 @@ aws_access_key_id(self descriptive,URL-encoded, e.g. curl --data-urlencode "${ke
 azure:
 credentials(credentials file, should be aquired, as described here: https://www.terraform.io/docs/providers/azure/index.html, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
 
-gcs:
+gce:
 credentials(credentials file, should be aquired, as described here: https://www.terraform.io/docs/providers/google/index.html, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
 
 openstack:
@@ -565,13 +565,13 @@ Delete grid configs, etc
 curl http://localhost:5555/api/v2.0/grids/${grid_name} -X DELETE
 ```
 
-Common usage scenario for Mesos on GCS
+Common usage scenario for Mesos on GCE
 --------------------------------------
 
 Create grid
 
 ```
-curl -X POST -d "name=${grid_name}" -d "provider=gcs" -d "type=mesos" http://localhost:5555/api/v2.0/grids
+curl -X POST -d "name=${grid_name}" -d "provider=gce" -d "type=mesos" http://localhost:5555/api/v2.0/grids
 ```
 
 Update config

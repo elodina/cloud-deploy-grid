@@ -14,7 +14,7 @@ class AutoDict(dict):
             value = self[item] = type(self)()
             return value
 
-class gcs_provision_mesos_generator(object):
+class gce_provision_mesos_generator(object):
     def __init__(self, grid_name, **kwargs):
         self.grid_name = grid_name
         self.kwargs = kwargs
@@ -28,7 +28,7 @@ class gcs_provision_mesos_generator(object):
             self.current_roles.append(group.role)
 
     def copy_templates(self):
-        os.system('cp -a -f gridapi/resources/templates/provision/mesos/gcs/* result/{}'.format(self.grid_name))
+        os.system('cp -a -f gridapi/resources/templates/provision/mesos/gce/* result/{}'.format(self.grid_name))
 
     def _generate_template(self, filepath, variables):
         with open(filepath, 'r') as src:

@@ -46,8 +46,8 @@ class AzureConfigEntity(ConfigEntity):
     ssh_password = columns.Text()
 
 
-class GCSConfigEntity(ConfigEntity):
-    __discriminator_value__ = 'gcs'
+class GCEConfigEntity(ConfigEntity):
+    __discriminator_value__ = 'gce'
     masters = columns.Integer()
     master_type = columns.Text()
     project = columns.Text()
@@ -129,16 +129,16 @@ class AzureProvisionDeploymentEntity(ProvisionDeploymentEntity):
     __discriminator_value__ = 'azure'
 
 
-class GCSDeploymentEntity(DeploymentEntity):
-    __discriminator_value__ = 'gcs'
+class GCEDeploymentEntity(DeploymentEntity):
+    __discriminator_value__ = 'gce'
 
 
-class GCSInfrastructureDeploymentEntity(InfrastructureDeploymentEntity):
-    __discriminator_value__ = 'gcs'
+class GCEInfrastructureDeploymentEntity(InfrastructureDeploymentEntity):
+    __discriminator_value__ = 'gce'
 
 
-class GCSProvisionDeploymentEntity(ProvisionDeploymentEntity):
-    __discriminator_value__ = 'gcs'
+class GCEProvisionDeploymentEntity(ProvisionDeploymentEntity):
+    __discriminator_value__ = 'gce'
 
 
 class OpenstackDeploymentEntity(DeploymentEntity):
@@ -199,8 +199,8 @@ class AzureGroupEntity(GroupEntity):
     customhwconf = columns.Text(default='')
 
  
-class GCSGroupEntity(GroupEntity):
-    __discriminator_value__ = 'gcs'
+class GCEGroupEntity(GroupEntity):
+    __discriminator_value__ = 'gce'
     instance_type = columns.Text()
     cpus = columns.Integer()
     ram = columns.Integer()
@@ -223,7 +223,7 @@ class CustomGroupEntity(GroupEntity):
 configs = {
     'aws': AWSConfigEntity,
     'azure': AzureConfigEntity,
-    'gcs': GCSConfigEntity,
+    'gce': GCEConfigEntity,
     'openstack': OpenstackConfigEntity,
     'custom': CustomConfigEntity
 }
@@ -231,7 +231,7 @@ configs = {
 deployments = {
     'aws': AWSDeploymentEntity,
     'azure': AzureDeploymentEntity,
-    'gcs': GCSDeploymentEntity,
+    'gce': GCEDeploymentEntity,
     'openstack': OpenstackDeploymentEntity,
     'custom': CustomDeploymentEntity
 }
@@ -239,7 +239,7 @@ deployments = {
 infrastructure_deployments = {
     'aws': AWSInfrastructureDeploymentEntity,
     'azure': AzureInfrastructureDeploymentEntity,
-    'gcs': GCSInfrastructureDeploymentEntity,
+    'gce': GCEInfrastructureDeploymentEntity,
     'openstack': OpenstackInfrastructureDeploymentEntity,
     'custom': CustomInfrastructureDeploymentEntity
 }
@@ -247,7 +247,7 @@ infrastructure_deployments = {
 provision_deployments = {
     'aws': AWSProvisionDeploymentEntity,
     'azure': AzureProvisionDeploymentEntity,
-    'gcs': GCSProvisionDeploymentEntity,
+    'gce': GCEProvisionDeploymentEntity,
     'openstack': OpenstackProvisionDeploymentEntity,
     'custom': CustomProvisionDeploymentEntity
 }
@@ -255,7 +255,7 @@ provision_deployments = {
 groups = {
     'aws': AWSGroupEntity,
     'azure': AzureGroupEntity,
-    'gcs': GCSGroupEntity,
+    'gce': GCEGroupEntity,
     'openstack': OpenstackGroupEntity,
     'custom': CustomGroupEntity
 }
@@ -276,7 +276,7 @@ def init_db():
     sync_table(ConfigEntity)
     sync_table(AWSConfigEntity)
     sync_table(AzureConfigEntity)
-    sync_table(GCSConfigEntity)
+    sync_table(GCEConfigEntity)
     sync_table(OpenstackConfigEntity)
     sync_table(CustomConfigEntity)
     sync_table(DeploymentEntity)
@@ -288,9 +288,9 @@ def init_db():
     sync_table(AzureDeploymentEntity)
     sync_table(AzureInfrastructureDeploymentEntity)
     sync_table(AzureProvisionDeploymentEntity)
-    sync_table(GCSDeploymentEntity)
-    sync_table(GCSInfrastructureDeploymentEntity)
-    sync_table(GCSProvisionDeploymentEntity)
+    sync_table(GCEDeploymentEntity)
+    sync_table(GCEInfrastructureDeploymentEntity)
+    sync_table(GCEProvisionDeploymentEntity)
     sync_table(OpenstackDeploymentEntity)
     sync_table(OpenstackInfrastructureDeploymentEntity)
     sync_table(OpenstackProvisionDeploymentEntity)
@@ -300,7 +300,7 @@ def init_db():
     sync_table(GroupEntity)
     sync_table(AWSGroupEntity)
     sync_table(AzureGroupEntity)
-    sync_table(GCSGroupEntity)
+    sync_table(GCEGroupEntity)
     sync_table(OpenstackGroupEntity)
     sync_table(CustomGroupEntity)
 

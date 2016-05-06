@@ -8,11 +8,11 @@ from gridapi.resources.parsers import provision_deploymentparsers
 from gridapi.resources.models import GridEntity, configs, deployments, infrastructure_deployments, provision_deployments, groups
 from gridapi.resources.generators.provision.mesos.aws import aws_provision_mesos_generator
 from gridapi.resources.generators.provision.mesos.azure import azure_provision_mesos_generator
-from gridapi.resources.generators.provision.mesos.gcs import gcs_provision_mesos_generator
+from gridapi.resources.generators.provision.mesos.gce import gce_provision_mesos_generator
 from gridapi.resources.generators.provision.mesos.openstack import openstack_provision_mesos_generator
 from gridapi.resources.generators.provision.mesos.custom import custom_provision_mesos_generator
 from gridapi.resources.generators.provision.dcos.azure import azure_provision_dcos_generator
-from gridapi.resources.generators.provision.dcos.gcs import gcs_provision_dcos_generator
+from gridapi.resources.generators.provision.dcos.gce import gce_provision_dcos_generator
 from gridapi.resources.generators.provision.dcos.openstack import openstack_provision_dcos_generator
 from gridapi.resources.generators.provision.dcos.aws import aws_provision_dcos_generator
 from gridapi.resources.generators.provision.dcos.custom import custom_provision_dcos_generator
@@ -21,14 +21,14 @@ provision_generators = {
     'mesos': {
         'aws': aws_provision_mesos_generator,
         'azure': azure_provision_mesos_generator,
-        'gcs': gcs_provision_mesos_generator,
+        'gce': gce_provision_mesos_generator,
         'openstack': openstack_provision_mesos_generator,
         'custom': custom_provision_mesos_generator
     },
     'dcos': {
         'aws': aws_provision_dcos_generator,
         'azure': azure_provision_dcos_generator,
-        'gcs': gcs_provision_dcos_generator,
+        'gce': gce_provision_dcos_generator,
         'openstack': openstack_provision_dcos_generator,
         'custom': custom_provision_dcos_generator
     }

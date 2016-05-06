@@ -15,7 +15,7 @@ class AutoDict(dict):
             return value
 
 
-class gcs_infrastructure_generator(object):
+class gce_infrastructure_generator(object):
     def __init__(self, grid_name, credentials, **kwargs):
         self.grid_name = grid_name
         self.credentials = urllib.unquote(credentials)
