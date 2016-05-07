@@ -1,4 +1,6 @@
 - hosts: dcos_masters
+
+- hosts: terminal
   any_errors_fatal: true
   sudo: True
   roles:
