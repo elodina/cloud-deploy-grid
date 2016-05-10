@@ -8,7 +8,7 @@
 
 - hosts: deployment
 
-- hosts: role={{ grid_name }}_{{ role }}
+- hosts: {{ grid_name }}_{{ role }}
   any_errors_fatal: true
   sudo: True
   roles:
