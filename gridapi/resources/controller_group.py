@@ -88,7 +88,7 @@ class GroupHandler(Resource):
         oldgroup = group
         args = groupparsers[grid.provider].parse_args()
         for key in group.keys():
-            if key != 'parentgrid' and key != 'slaves' and key != 'provider':
+            if key != 'parentgrid' and key != 'slaves' and key != 'provider' and key != 'id':
                 setattr(group, key, args[key])
         if group.provider == 'custom':
             slaves_args = [args['groupips']]

@@ -166,15 +166,17 @@ class CustomProvisionDeploymentEntity(ProvisionDeploymentEntity):
 
 
 class GroupEntity(Model):
-    parentgrid = columns.Text(primary_key=True)
+    id = columns.UUID(primary_key=True, default=uuid.uuid4)
+    parentgrid = columns.Text(index=True, partition_key=True)
     provider = columns.Text(discriminator_column=True)
     slaves = columns.Integer()
-    name = columns.Text(index=True)
+    name = columns.Text(index=True, partition_key=True)
     role = columns.Text(default='infra')
     attributes = columns.Text()
     vars = columns.Text(default='{"foo": "bar"}')
 
     def __str__(self):
+        self.id = '{}_{}'.format(self.parentgrid, self.name)
         return str(dict(self))
 
 

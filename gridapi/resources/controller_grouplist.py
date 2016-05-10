@@ -78,7 +78,7 @@ class GroupListHandler(Resource):
                 slaves_args = [args['cpus'], args['ram'], args['instance_type']]
             group.slaves = self._slave_calculator[grid.provider](self, *slaves_args)
             for key in group.keys():
-                if key != 'parentgrid' and key != 'slaves' and key != 'provider':
+                if key != 'parentgrid' and key != 'slaves' and key != 'provider' and key != 'id':
                     setattr(group, key, args[key])
             group.save()
             return ast.literal_eval(str(group)), 200
