@@ -11,8 +11,7 @@ config_parser.add_argument('vars', help='Ansible group_vars for all cluster', de
 
 awsconfig_parser = config_parser.copy()
 awsconfig_parser.add_argument(
-    'masters', required=True, type=int,
-    help='Number of Master nodes in grid')
+    'masters', required=True, help='Masters and AZ config')
 awsconfig_parser.add_argument(
     'master_type', default='m3.large', help='Master instance type')
 awsconfig_parser.add_argument(

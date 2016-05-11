@@ -45,7 +45,7 @@ class ConfigEntity(BaseModel):
 
 
 class AWSConfigEntity(ConfigEntity):
-    masters = IntegerField(null=True)
+    masters = TextField(null=True)
     master_type = CharField(null=True)
     region = CharField(null=True)
     sshkey = CharField(null=True)

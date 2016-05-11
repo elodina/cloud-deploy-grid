@@ -226,8 +226,16 @@ class aws_infrastructure_generator(object):
                 self.networking['resource']['aws_route_table_association'][
                     'az_{}_route_table'.format(group.az)][
                     'route_table_id'] = '${aws_route_table.routes.id}'
-        with open('result/{}/infrastructure/networking.tf'.format(
-                self.grid_name), 'w') as networking_file:
+        masters_json = json.loads(self.current_config.masters)
+        for masters_num, az in masters_json.iteritems():
+            self.networking['resource']['aws_subnet']['az_{}_subnet'.format(az)]['vpc_id'] = '${aws_vpc.vpc.id}'
+            self.networking['resource']['aws_subnet']['az_{}_subnet'.format(az)]['cidr_block'] = az_nets[az]
+            self.networking['resource']['aws_subnet']['az_{}_subnet'.format(az)]['map_public_ip_on_launch'] = 'true'
+            self.networking['resource']['aws_subnet']['az_{}_subnet'.format(az)]['availability_zone'] = '{}{}'.format(self.current_config.region, az)
+            self.networking['resource']['aws_subnet']['az_{}_subnet'.format(az)]['tags']['Name'] = '${{var.vpc_name}}-${{var.region}}{}'.format(az)
+            self.networking['resource']['aws_route_table_association']['az_{}_route_table'.format(az)]['subnet_id'] = '${{aws_subnet.az_{}_subnet.id}}'.format(az)
+            self.networking['resource']['aws_route_table_association']['az_{}_route_table'.format(az)]['route_table_id'] = '${aws_route_table.routes.id}'
+        with open('result/{}/infrastructure/networking.tf'.format(self.grid_name), 'w') as networking_file:
             json.dump(self.networking, networking_file)
 
     def generate_security(self):
@@ -308,24 +316,26 @@ class aws_infrastructure_generator(object):
             json.dump(self.terminal, terminal_file)
 
     def generate_masters(self):
-        self.masters['resource']['aws_instance']['mesos_master'][
-            'count'] = '{}'.format(self.current_config.masters)
-        self.masters['resource']['aws_instance']['mesos_master'][
-            'ami'] = '${lookup(var.amis,"${var.region}")}'
-        self.masters['resource']['aws_instance']['mesos_master'][
-            'instance_type'] = 'm3.large'
-        self.masters['resource']['aws_instance']['mesos_master'][
-            'key_name'] = '${var.key_name}'
-        self.masters['resource']['aws_instance']['mesos_master'][
-            'subnet_id'] = '${aws_subnet.grid_subnet.id}'
-        self.masters['resource']['aws_instance']['mesos_master'][
-            'security_groups'] = ['${aws_security_group.gridwide.id}']
-        self.masters['resource']['aws_instance']['mesos_master'][
-            'root_block_device']['volume_size'] = '50'
-        self.masters['resource']['aws_instance']['mesos_master'][
-            'tags']['Name'] = '${var.grid_name}_mesos_master'
-        self.masters['resource']['aws_instance']['mesos_master'][
-            'depends_on'] = ['aws_internet_gateway.igw']
+        masters_json = json.loads(self.current_config.masters)
+        for masters_num, az in masters_json.iteritems():
+            self.masters['resource']['aws_instance']['mesos_master'][
+                'count'] = '{}'.format(masters_num)
+            self.masters['resource']['aws_instance']['mesos_master'][
+                'ami'] = '${lookup(var.amis,"${var.region}")}'
+            self.masters['resource']['aws_instance']['mesos_master'][
+                'instance_type'] = 'm3.large'
+            self.masters['resource']['aws_instance']['mesos_master'][
+                'key_name'] = '${var.key_name}'
+            self.masters['resource']['aws_instance']['mesos_master'][
+                'security_groups'] = ['${aws_security_group.gridwide.id}']
+            self.masters['resource']['aws_instance']['mesos_master'][
+                'root_block_device']['volume_size'] = '50'
+            self.masters['resource']['aws_instance']['mesos_master'][
+                'tags']['Name'] = '${var.grid_name}_mesos_master'
+            self.masters['resource']['aws_instance']['mesos_master'][
+                'depends_on'] = ['aws_internet_gateway.igw']
+            self.masters['resource']['aws_instance']['mesos_master'][
+                'subnet_id'] = '${{aws_subnet.az_{}_subnet.id}}'.format(az)
         with open('result/{}/infrastructure/masters.tf'.format(
                 self.grid_name), 'w') as masters_file:
             json.dump(self.masters, masters_file)
