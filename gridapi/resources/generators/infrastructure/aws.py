@@ -327,9 +327,8 @@ class aws_infrastructure_generator(object):
             self.masters['resource']['aws_instance']['mesos_master_{}'.format(az)]['root_block_device']['volume_size'] = '50'
             self.masters['resource']['aws_instance']['mesos_master_{}'.format(az)]['tags']['Name'] = '${var.grid_name}_mesos_master'
             self.masters['resource']['aws_instance']['mesos_master_{}'.format(az)]['depends_on'] = ['aws_internet_gateway.igw']
-        with open('result/{}/infrastructure/masters.tf'.format(
-                self.grid_name), 'w') as masters_file:
-            json.dump(self.masters, masters_file)
+            with open('result/{}/infrastructure/masters_{}.tf'.format(self.grid_name, az), 'w') as masters_file:
+                json.dump(self.masters, masters_file)
 
     def generate_groups(self):
         for group in self.current_groups:
