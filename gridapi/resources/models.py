@@ -29,7 +29,7 @@ class ConfigEntity(Model):
 
 class AWSConfigEntity(ConfigEntity):
     __discriminator_value__ = 'aws'
-    masters = columns.Integer()
+    masters = columns.Text()
     master_type = columns.Text()
     region = columns.Text()
     sshkey = columns.Text()

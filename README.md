@@ -145,26 +145,23 @@ curl -X PUT -d "master_type=m3.large" -d "masters=3" -d region="us-west-2" -d "s
 
 required parameters:
 
-common:
-masters(number of masters hosts)
-
 common_dcos:
 -d "vars={\"dcos_user\":\"${DCOS_WEB_USER}\",\"dcos_pass\":\"${DCOS_WEB_PASSWORD}\"}" - these vars are mandatory for DCOS cluster
 
 aws:
-master_type(AWS instance type for master, default m3.large), region(AWS region for grid), sshkey(AWS ssh key name), sshkeydata(Private path of ssh key, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
+masters(map of master to az placement, escaped json, example: -d "masters={\"1\":\"a\",\"1\":\"b\",\"1\":\"d\"}"), master_type(AWS instance type for master, default m3.large), region(AWS region for grid), sshkey(AWS ssh key name), sshkeydata(Private path of ssh key, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
 
 azure:
-master_type(Azure instance type for master, default is Basic_A2), location(Azure location for grid in format like "Central US"), ssh_user(user for ssh login), ssh_password(password for ssh user and sudo)
+masters(number of masters hosts), master_type(Azure instance type for master, default is Basic_A2), location(Azure location for grid in format like "Central US"), ssh_user(user for ssh login), ssh_password(password for ssh user and sudo)
 
 gce:
-master_type(GCE instance type for master, default is n1-standard-1), zone(GCE Zone in format like "us-east1-a"), project(GCE project ID), ssh_user(user for ssh login), sshkeydata(Private path of ssh key, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
+masters(number of masters hosts), master_type(GCE instance type for master, default is n1-standard-1), zone(GCE Zone in format like "us-east1-a"), project(GCE project ID), ssh_user(user for ssh login), sshkeydata(Private path of ssh key, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
 
 openstack:
-master_type(Openstack instance type for master), terminal_type(Openstack instance type for terminal server), image_name(Image name for instances, e.g. like centos-7), tenant(Openstack tenant name), region(Openstack region name), external_network_uuid(UUID of external network), sshkeydata(Private path of ssh key, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
+masters(number of masters hosts), master_type(Openstack instance type for master), terminal_type(Openstack instance type for terminal server), image_name(Image name for instances, e.g. like centos-7), tenant(Openstack tenant name), region(Openstack region name), external_network_uuid(UUID of external network), sshkeydata(Private path of ssh key, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
 
 custom:
-mastersips(Comma separated list of masters ips), terminalips(<terminal_external_ip>,<terminal_internal_ip>), ssh_user(ssh user for connection), sshkeydata(Private part of ssh key, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
+masters(number of masters hosts), mastersips(Comma separated list of masters ips), terminalips(<terminal_external_ip>,<terminal_internal_ip>), ssh_user(ssh user for connection), sshkeydata(Private part of ssh key, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
 
 
 Grid Slave group list API Requests
