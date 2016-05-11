@@ -40,8 +40,6 @@ class InfrastructureDeploymentHandler(Resource):
 
     def _abort_if_infrastructure_deployment_doesnt_exist(self, grid_name):
         grid = GridEntity.objects(name=grid_name).get()
-        print(infrastructure_deployments[grid.provider])
-        print(len(infrastructure_deployments[grid.provider].objects(parentgrid=grid_name)))
         if not len(infrastructure_deployments[grid.provider].objects(parentgrid=grid_name)):
             abort(404, message="Infrastructure Deployment of grid {} doesn't exist".format(grid_name))
 

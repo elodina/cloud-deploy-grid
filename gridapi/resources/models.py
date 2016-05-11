@@ -39,7 +39,7 @@ class AWSConfigEntity(ConfigEntity):
 
 class AzureConfigEntity(ConfigEntity):
     __discriminator_value__ = 'azure'
-    masters = columns.Integer()
+    masters = columns.Text()
     master_type = columns.Text()
     location = columns.Text()
     ssh_user = columns.Text()
@@ -48,7 +48,7 @@ class AzureConfigEntity(ConfigEntity):
 
 class GCEConfigEntity(ConfigEntity):
     __discriminator_value__ = 'gce'
-    masters = columns.Integer()
+    masters = columns.Text()
     master_type = columns.Text()
     project = columns.Text()
     zone = columns.Text()
@@ -58,7 +58,7 @@ class GCEConfigEntity(ConfigEntity):
 
 class OpenstackConfigEntity(ConfigEntity):
     __discriminator_value__ = 'openstack'
-    masters = columns.Integer()
+    masters = columns.Text()
     master_type = columns.Text()
     terminal_type = columns.Text()
     image_name = columns.Text()
