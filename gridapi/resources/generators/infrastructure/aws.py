@@ -56,7 +56,6 @@ class aws_infrastructure_generator(object):
         self.networking = AutoDict()
         self.security = AutoDict()
         self.terminal = AutoDict()
-        self.masters = AutoDict()
 
     def generate_ami(self, region):
         ami_config = AutoDict()
@@ -227,7 +226,7 @@ class aws_infrastructure_generator(object):
                     'az_{}_route_table'.format(group.az)][
                     'route_table_id'] = '${aws_route_table.routes.id}'
         masters_json = json.loads(self.current_config.masters)
-        for masters_num, az in masters_json.iteritems():
+        for az, masters_num in masters_json.iteritems():
             self.networking['resource']['aws_subnet']['az_{}_subnet'.format(az)]['vpc_id'] = '${aws_vpc.vpc.id}'
             self.networking['resource']['aws_subnet']['az_{}_subnet'.format(az)]['cidr_block'] = az_nets[az]
             self.networking['resource']['aws_subnet']['az_{}_subnet'.format(az)]['map_public_ip_on_launch'] = 'true'
@@ -316,19 +315,20 @@ class aws_infrastructure_generator(object):
             json.dump(self.terminal, terminal_file)
 
     def generate_masters(self):
+        masters = AutoDict()
         masters_json = json.loads(self.current_config.masters)
-        for masters_num, az in masters_json.iteritems():
-            self.masters['resource']['aws_instance']['mesos_master_{}'.format(az)]['count'] = '{}'.format(masters_num)
-            self.masters['resource']['aws_instance']['mesos_master_{}'.format(az)]['ami'] = '${lookup(var.amis,"${var.region}")}'
-            self.masters['resource']['aws_instance']['mesos_master_{}'.format(az)]['instance_type'] = '{}'.format(self.current_config.master_type)
-            self.masters['resource']['aws_instance']['mesos_master_{}'.format(az)]['key_name'] = '${var.key_name}'
-            self.masters['resource']['aws_instance']['mesos_master_{}'.format(az)]['subnet_id'] = '${{aws_subnet.az_{}_subnet.id}}'.format(az)
-            self.masters['resource']['aws_instance']['mesos_master_{}'.format(az)]['security_groups'] = ['${aws_security_group.gridwide.id}']
-            self.masters['resource']['aws_instance']['mesos_master_{}'.format(az)]['root_block_device']['volume_size'] = '50'
-            self.masters['resource']['aws_instance']['mesos_master_{}'.format(az)]['tags']['Name'] = '${var.grid_name}_mesos_master'
-            self.masters['resource']['aws_instance']['mesos_master_{}'.format(az)]['depends_on'] = ['aws_internet_gateway.igw']
+        for az, masters_num in masters_json.iteritems():
+            masters['resource']['aws_instance']['mesos_master_{}'.format(az)]['count'] = '{}'.format(masters_num)
+            masters['resource']['aws_instance']['mesos_master_{}'.format(az)]['ami'] = '${lookup(var.amis,"${var.region}")}'
+            masters['resource']['aws_instance']['mesos_master_{}'.format(az)]['instance_type'] = '{}'.format(self.current_config.master_type)
+            masters['resource']['aws_instance']['mesos_master_{}'.format(az)]['key_name'] = '${var.key_name}'
+            masters['resource']['aws_instance']['mesos_master_{}'.format(az)]['subnet_id'] = '${{aws_subnet.az_{}_subnet.id}}'.format(az)
+            masters['resource']['aws_instance']['mesos_master_{}'.format(az)]['security_groups'] = ['${aws_security_group.gridwide.id}']
+            masters['resource']['aws_instance']['mesos_master_{}'.format(az)]['root_block_device']['volume_size'] = '50'
+            masters['resource']['aws_instance']['mesos_master_{}'.format(az)]['tags']['Name'] = '${var.grid_name}_mesos_master'
+            masters['resource']['aws_instance']['mesos_master_{}'.format(az)]['depends_on'] = ['aws_internet_gateway.igw']
             with open('result/{}/infrastructure/masters_{}.tf'.format(self.grid_name, az), 'w') as masters_file:
-                json.dump(self.masters, masters_file)
+                json.dump(masters, masters_file)
 
     def generate_groups(self):
         for group in self.current_groups:
