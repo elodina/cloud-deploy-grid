@@ -320,7 +320,7 @@ class aws_infrastructure_generator(object):
         for masters_num, az in masters_json.iteritems():
             self.masters['resource']['aws_instance']['mesos_master_{}'.format(az)]['count'] = '{}'.format(masters_num)
             self.masters['resource']['aws_instance']['mesos_master_{}'.format(az)]['ami'] = '${lookup(var.amis,"${var.region}")}'
-            self.masters['resource']['aws_instance']['mesos_master_{}'.format(az)]['instance_type'] = 'm3.large'
+            self.masters['resource']['aws_instance']['mesos_master_{}'.format(az)]['instance_type'] = '{}'.format(self.current_config.master_type)
             self.masters['resource']['aws_instance']['mesos_master_{}'.format(az)]['key_name'] = '${var.key_name}'
             self.masters['resource']['aws_instance']['mesos_master_{}'.format(az)]['subnet_id'] = '${{aws_subnet.az_{}_subnet.id}}'.format(az)
             self.masters['resource']['aws_instance']['mesos_master_{}'.format(az)]['security_groups'] = ['${aws_security_group.gridwide.id}']
