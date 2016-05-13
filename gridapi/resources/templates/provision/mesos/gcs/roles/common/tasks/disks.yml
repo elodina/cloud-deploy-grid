@@ -1,5 +1,5 @@
 ---
-- shell: "echo '1,+' | sfdisk -N 0 /dev/sda -f"
+- shell: "echo '16,+' | sfdisk -N 0 /dev/sda -f"
   ignore_errors: yes
 
 - shell: "partx -u /dev/sda1"
