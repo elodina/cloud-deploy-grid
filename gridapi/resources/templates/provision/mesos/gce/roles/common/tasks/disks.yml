@@ -1,4 +1,13 @@
 ---
+- shell: "echo '1,+' | sfdisk -N 0 /dev/sda -f"
+  ignore_errors: yes
+
+- shell: "partx -u /dev/sda1"
+  ignore_errors: yes
+
+- shell: "xfs_growfs /dev/sda1"
+  ignore_errors: yes
+
 - shell: "umount /mnt"
   ignore_errors: yes
 
