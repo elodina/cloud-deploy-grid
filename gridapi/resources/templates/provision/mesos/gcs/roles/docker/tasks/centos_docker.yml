@@ -23,7 +23,7 @@
   lineinfile:
     dest: /etc/sysconfig/docker
     regexp: ^OPTIONS=
-    line: OPTIONS='--selinux-enabled -s overlay'
+    line: OPTIONS='-s overlay'
     state: present
   notify:
     - restart docker
