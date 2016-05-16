@@ -130,8 +130,11 @@ class InfrastructureDeploymentHandler(Resource):
                 parent_deployment._status = 'destroyed'
                 infrastructure_deployment._status = 'destroyed'
             except:
+                infrastructure_deployment.save()
                 parent_deployment._status = 'destroy_failed'
                 infrastructure_deployment._status = 'destroy_failed'
+            else:
+                infrastructure_deployment.delete_instance()                
             finally:
                 self.unlock(parent_deployment)
                 parent_deployment.save()
@@ -155,7 +158,6 @@ class InfrastructureDeploymentHandler(Resource):
                 destroy_thread = threading.Thread(
                     target=do_destroy, args=(), kwargs={})
                 destroy_thread.start()
-            infrastructure_deployment.delete_instance()
         return '', 200
 
     def put(self, grid_name):
