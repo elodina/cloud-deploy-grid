@@ -130,6 +130,9 @@ class InfrastructureDeploymentHandler(Resource):
                 parent_deployment._status = 'destroyed'
                 infrastructure_deployment._status = 'destroyed'
             except:
+                with open('result/{}/infrastructure/terraform.tfstate'.format(
+                        grid_name), 'r') as state_file:
+                    infrastructure_deployment._state = state_file.read()
                 infrastructure_deployment.save()
                 parent_deployment._status = 'destroy_failed'
                 infrastructure_deployment._status = 'destroy_failed'
