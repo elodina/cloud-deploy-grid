@@ -100,8 +100,13 @@ class InfrastructureDeploymentHandler(Resource):
                 parent_deployment.state = 'destroyed'
                 infrastructure_deployment.state = 'destroyed'
             except:
+                with open('result/{}/infrastructure/terraform.tfstate'.format(grid_name), 'r') as state_file:
+                    infrastructure_deployment.tfstate = state_file.read()
+                infrastructure_deployment.save()
                 parent_deployment.state = 'destroy_failed'
                 infrastructure_deployment.state = 'destroy_failed'
+            else:
+                infrastructure_deployment.delete()
             finally:
                 self.unlock(parent_deployment)
                 parent_deployment.save()
@@ -124,7 +129,6 @@ class InfrastructureDeploymentHandler(Resource):
             if grid.provider != 'custom':
                 destroy_thread = threading.Thread(target=do_destroy, args=(), kwargs={})
                 destroy_thread.start()
-            infrastructure_deployment.delete()
         return '', 200
 
     def put(self, grid_name):
