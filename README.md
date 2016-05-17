@@ -147,6 +147,7 @@ required parameters:
 
 common_dcos:
 -d "vars={\"dcos_user\":\"${DCOS_WEB_USER}\",\"dcos_pass\":\"${DCOS_WEB_PASSWORD}\"}" - these vars are mandatory for DCOS cluster
+-d "vars={\"dcos_version\":\"enterprise\"}" - specifying of DCOS version for set up, by default it is consumer
 
 aws:
 masters(map of master to az placement, escaped json, example: -d "masters={\"a\":\"1\",\"b\":\"1\",\"d\":\"1\"}"), master_type(AWS instance type for master, default m3.large), region(AWS region for grid), sshkey(AWS ssh key name), sshkeydata(Private path of ssh key, URL-encoded, e.g. curl --data-urlencode "${key}=${value}")
