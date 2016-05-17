@@ -1,0 +1,4 @@
+---
+dcos_version: consumer
+dcos_consumer_url: https://downloads.dcos.io/dcos/EarlyAccess/dcos_generate_config.sh
+dcos_enterprise_url: https://s3.amazonaws.com/downloads.mesosphere.io/dcos/testing/CM.7/dcos_generate_config.ee.sh
