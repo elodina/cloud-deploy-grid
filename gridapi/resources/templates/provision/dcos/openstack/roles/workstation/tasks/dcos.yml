@@ -45,12 +45,21 @@
     group: root
     mode: 0644
 
-- name: download dcos setup file
+- name: download dcos consumer setup file
   get_url:
-    url: https://downloads.dcos.io/dcos/EarlyAccess/dcos_generate_config.sh
-    #url: https://s3.amazonaws.com/downloads.mesosphere.io/dcos/testing/CM.7/dcos_generate_config.ee.sh
+    url: "{{ dcos_consumer_url }}"
     dest: /dcos/dcos_generate_config.sh
     mode: 0755
+  when: dcos_version == "consumer"
+  tags:
+    - terminal
+
+- name: download dcos enterprise setup file
+  get_url:
+    url: "{{ dcos_enterprise_url }}"
+    dest: /dcos/dcos_generate_config.sh
+    mode: 0755
+  when: dcos_version == "enterprise"
   tags:
     - terminal
 
