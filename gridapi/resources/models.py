@@ -5,7 +5,7 @@ from datetime import datetime
 from cassandra.cqlengine.management import sync_table
 from cassandra.cqlengine.models import Model
 
-cassandra_hosts = ['127.0.0.1']
+cassandra_hosts = ['cdg-cassandra.service']
 
 connection.setup(cassandra_hosts, 'grids', protocol_version=4)
 
