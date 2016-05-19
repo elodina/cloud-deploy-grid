@@ -71,6 +71,53 @@ OS X:
 5. (In vagrant) run ./run
 
 
+Running CDG using stack-deploy
+------------------------------
+
+General Prerequisits:
+
+1. Stack-deploy running
+2. Docker registry launched on grid:
+```
+https://github.com/elodina/stacks/tree/master/docker-registry
+```
+3. Alive VPN connection to the cluster
+
+
+Development mode:
+
+
+In development mode one-node Cassandra is runing together with CDG server
+
+Execute commands:
+
+```
+./upload_image.sh <cluster_name>
+<stack_deploy_binary> add --file=cdg-dev.stack
+<stack_deploy_binary> run cdg-dev
+```
+
+
+Production mode:
+
+
+In production mode you should specify existing cassandra nodes into cdg.stack file
+
+Specify correct values:
+```
+CDG_CASSANDRA_HOSTS: <comma_separated_list_of_cassandra_servers>
+CDG_CASSANDRA_PORT: <CQL_native_transport_port>
+```
+
+Execute commands:
+
+```
+./upload_image.sh <cluster_name>
+<stack_deploy_binary> add --file=cdg.stack
+<stack_deploy_binary> run cdg
+```
+
+
 Grid List API Requests
 -------------------------
 

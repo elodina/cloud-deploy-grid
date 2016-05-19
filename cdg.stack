@@ -1,0 +1,21 @@
+name: cdg
+applications:
+  cdg:
+    type: "docker"
+    id: cdg
+    cpu: 0.5
+    mem: 512
+    ports:
+      - 5555
+    env:
+      CDG_CASSANDRA_HOSTS: "cdg-cassandra.service"
+      CDG_CASSANDRA_PORT: "9042"
+    launch_command: "eval `ssh-agent -s`; sleep 60; /usr/bin/python2 main.py"
+    docker:
+      network: BRIDGE
+      image: "docker-registry.service:5000/cdg"
+      name: "cdg"
+      port_mappings:
+        - container_port: 5555
+          host_port: 5555
+          protocol: tcp

@@ -7,4 +7,5 @@ RUN wget -q http://repo.elodina.s3.amazonaws.com/terraform.zip -O terraform.zip 
 RUN wget -q https://releases.hashicorp.com/packer/0.8.6/packer_0.8.6_linux_amd64.zip -O packer.zip && unzip -o packer.zip -d /usr/sbin
 RUN mkdir -p /grid
 RUN echo "eval \$(ssh-agent)" >> ~/.bashrc
+ADD ./ /grid
 WORKDIR /grid
