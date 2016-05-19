@@ -19,6 +19,16 @@
   tags:
     - common
 
+- name: configure docker private registry
+  lineinfile:
+    dest: /etc/sysconfig/docker
+    line: INSECURE_REGISTRY='--insecure-registry docker-registry.service:5000'
+    state: present
+  notify:
+    - restart docker
+  tags:
+    - common
+
 - name: configure docker consul dns
   lineinfile:
     dest: /etc/sysconfig/docker-network
