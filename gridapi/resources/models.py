@@ -8,7 +8,8 @@ from cassandra.cqlengine.models import Model
 
 cassandra_hosts = os.getenv('CDG_CASSANDRA_HOSTS', '127.0.0.1').split(',')
 cassandra_port = os.getenv('CDG_CASSANDRA_PORT', '9042')
-cassandra_protocol = int(os.getenv('CDG_CASSANDRA_PROTOCOL', '4'))
+cassandra_protocol = int(os.getenv('CDG_CASSANDRA_PROTOCOL_VERSION', '4'))
+cassandra_protocol = os.getenv('CDG_CASSANDRA_CQL_VERSION', None)
 
 connection.setup(cassandra_hosts, 'grids', protocol_version=cassandra_protocol, port=cassandra_port)
 
