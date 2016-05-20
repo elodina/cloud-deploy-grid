@@ -10,6 +10,7 @@ applications:
     env:
       CDG_CASSANDRA_HOSTS: "cdg-cassandra.service"
       CDG_CASSANDRA_PORT: "9042"
+      CDG_CASSANDRA_PROTOCOL: "4"
     launch_command: "eval `ssh-agent -s`; sleep 60; /usr/bin/python2 main.py"
     docker:
       network: HOST
