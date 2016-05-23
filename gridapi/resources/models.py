@@ -7,10 +7,11 @@ from cassandra.cqlengine.management import sync_table
 from cassandra.cqlengine.models import Model
 
 cassandra_hosts = os.getenv('CDG_CASSANDRA_HOSTS', '127.0.0.1').split(',')
-cassandra_port = os.getenv('CDG_CASSANDRA_PORT', '9042')
-cassandra_protocol = int(os.getenv('CDG_CASSANDRA_PROTOCOL_VERSION', '4'))
+cassandra_port = int(os.getenv('CDG_CASSANDRA_PORT', '9042'))
+cassandra_protocol_version = int(os.getenv('CDG_CASSANDRA_PROTOCOL_VERSION', '4'))
+cassandra_cql_version = os.getenv('CDG_CASSANDRA_CQL_VERSION', None)
 
-connection.setup(cassandra_hosts, 'grids', protocol_version=cassandra_protocol, port=cassandra_port)
+connection.setup(cassandra_hosts, 'grids', protocol_version=cassandra_protocol_version, port=cassandra_port, cql_version=cassandra_cql_version)
 
 class GridEntity(Model):
     name = columns.Text(primary_key=True)
@@ -270,12 +271,8 @@ groups = {
 def init_db():
     from cassandra.cluster import Cluster
 
-    cluster = Cluster(cassandra_hosts)
-    session = cluster.connect()
-
-    session.execute("CREATE KEYSPACE IF NOT EXISTS grids WITH replication = { 'class': 'SimpleStrategy', 'replication_factor': '2' }")
-
-    connection.setup(cassandra_hosts, "grids", protocol_version=4)
+    connection.setup(cassandra_hosts, 'grids', protocol_version=cassandra_protocol_version, port=cassandra_port, cql_version=cassandra_cql_version)
+    connection.execute("CREATE KEYSPACE IF NOT EXISTS grids WITH replication = { 'class': 'SimpleStrategy', 'replication_factor': '2' }")
 
     sync_table(GridEntity)
     sync_table(ConfigEntity)
