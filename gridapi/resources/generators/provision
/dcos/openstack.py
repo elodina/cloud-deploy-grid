@@ -1,8 +1,8 @@
 import json
-import yaml
 import jinja2
-import subprocess
 import os
+import yaml
+import subprocess
 import urllib
 from gridapi.resources.models import GridEntity, configs, groups
 
@@ -14,10 +14,8 @@ class AutoDict(dict):
             value = self[item] = type(self)()
             return value
 
-class aws_provision_dcos_generator(object):
-    def __init__(self, grid_name, aws_access_key_id, aws_secret_access_key, **kwargs):
-        self.aws_access_key_id = urllib.unquote(aws_access_key_id)
-        self.aws_secret_access_key = urllib.unquote(aws_secret_access_key)
+class openstack_provision_dcos_generator(object):
+    def __init__(self, grid_name, **kwargs):
         self.grid_name = grid_name
         self.kwargs = kwargs
         self.current_grid = GridEntity.objects(name=grid_name).get()
@@ -29,18 +27,17 @@ class aws_provision_dcos_generator(object):
             self.current_groups.append(group)
             self.current_roles.append(group.role)
 
-
     def _nameserver(self):
         if os.path.isfile('result/{}/infrastructure/terraform.tfstate'.format(self.grid_name)) and os.access('result/{}/infrastructure/terraform.tfstate'.format(self.grid_name), os.R_OK):
             with open('result/{}/infrastructure/terraform.tfstate'.format(self.grid_name), 'r') as json_file:
                 json_data = json.load(json_file)
                 for module in json_data['modules']:
                     for resource, value in module['resources'].iteritems():
-                        if resource == 'aws_instance.terminal':
-                            return value['primary']['attributes']['private_ip']
+                        if resource == 'openstack_compute_instance_v2.{}-terminal'.format(self.grid_name):
+                            return value['primary']['attributes']['network.0.fixed_ip_v4']
 
     def copy_templates(self):
-        os.system('cp -a -f gridapi/resources/templates/provision/dcos/aws/* result/{}'.format(self.grid_name))
+        os.system('cp -a -f gridapi/resources/templates/provision/dcos/openstack/* result/{}'.format(self.grid_name))
 
     def _generate_template(self, filepath, variables):
         with open(filepath, 'r') as src:
@@ -49,9 +46,16 @@ class aws_provision_dcos_generator(object):
         with open(filepath, 'w') as dst:
             dst.write(template_content)
 
+    def generate_ansible_cfg(self):
+        path = 'result/{}/ansible.cfg'.format(self.grid_name)
+        variables = {}
+        variables['ssh_user'] = self.current_config.ssh_user
+        self._generate_template(path, variables)
+
     def generate_ansible_ssh_config(self, access_ip):
         path = 'result/{}/ansible/ssh_config'.format(self.grid_name)
         variables = {}
+        variables['ssh_user'] = self.current_config.ssh_user
         variables['access_ip'] = access_ip
         self._generate_template(path, variables)
 
@@ -67,10 +71,9 @@ class aws_provision_dcos_generator(object):
             json_data = json.load(json_file)
             for module in json_data['modules']:
                 for resource, value in module['resources'].iteritems():
-                    if value['type'] == 'aws_instance':
-                        hostname = value['primary']['attributes']['private_dns'].split('.')[0]
-                        host = '{}.node.{}'.format(hostname, self.grid_name)
-                        ip = value['primary']['attributes']['private_ip']
+                    if value['type'] == 'openstack_compute_instance_v2':
+                        host = '{}.node.{}'.format(value['primary']['attributes']['name'], self.grid_name)
+                        ip = value['primary']['attributes']['network.0.fixed_ip_v4']
                         hosts_entries['hosts'][str(host)] = str(ip)
         variables['hosts'] = json.dumps(hosts_entries['hosts'])
         variables['grid_name'] = self.current_grid.name
@@ -99,11 +102,10 @@ class aws_provision_dcos_generator(object):
         for group in self.current_groups:
             role = group.role
             src = 'result/{}/roles/dcos'.format(self.grid_name)
-            dst = 'result/{}/roles/dcos_slave_{}_{}'.format(self.grid_name, self.grid_name, role)
+            dst = 'result/{}/roles/dcos-slave_{}_{}'.format(self.grid_name, self.grid_name, role)
             os.system('cp -a -f {src} {dst}'.format(src=src, dst=dst))
             with open('{}/files/etc/mesos_slave/attributes'.format(dst), 'w+') as attributes_file:
-                attributes_file.write(
-                    self._generate_attributes_for_group(group))
+                attributes_file.write(self._generate_attributes_for_group(group))
 
     def generate_inventory_grid(self):
         path = 'result/{}/inventory/grid'.format(self.grid_name)
@@ -115,9 +117,8 @@ class aws_provision_dcos_generator(object):
     def generate_grid_runlist(self):
         path = 'result/{}/grid.yml'.format(self.grid_name)
         variables = {}
-        variables['roles'] = self.current_roles
         variables['grid_name'] = self.grid_name
-        variables['vpn_enabled'] = self.kwargs['vpn_enabled']
+        variables['roles'] = self.current_roles
         self._generate_template(path, variables)
 
     def generate_groups_runlists(self):
@@ -130,11 +131,10 @@ class aws_provision_dcos_generator(object):
             variables['role'] = group.role
             self._generate_template(dst, variables)
 
-    def generate_all(self, grid_name, accessip):
-        os.environ['AWS_ACCESS_KEY_ID'] = '{}'.format(self.aws_access_key_id)
-        os.environ['AWS_SECRET_ACCESS_KEY'] = '{}'.format(self.aws_secret_access_key)
+    def generate_all(self, grid_name, access_ip):
         self.copy_templates()
-        self.generate_ansible_ssh_config(accessip)
+        self.generate_ansible_cfg()
+        self.generate_ansible_ssh_config(access_ip)
         self.generate_ssh_key()
         self.generate_group_vars_all()
         self.generate_group_vars_roles()

@@ -1,9 +1,7 @@
 import json
-import yaml
 import jinja2
-import subprocess
 import os
-import urllib
+import yaml
 from gridapi.resources.models import GridEntity, configs, groups
 
 class AutoDict(dict):
@@ -14,10 +12,8 @@ class AutoDict(dict):
             value = self[item] = type(self)()
             return value
 
-class aws_provision_dcos_generator(object):
-    def __init__(self, grid_name, aws_access_key_id, aws_secret_access_key, **kwargs):
-        self.aws_access_key_id = urllib.unquote(aws_access_key_id)
-        self.aws_secret_access_key = urllib.unquote(aws_secret_access_key)
+class azure_provision_mesos_generator(object):
+    def __init__(self, grid_name, **kwargs):
         self.grid_name = grid_name
         self.kwargs = kwargs
         self.current_grid = GridEntity.objects(name=grid_name).get()
@@ -29,18 +25,8 @@ class aws_provision_dcos_generator(object):
             self.current_groups.append(group)
             self.current_roles.append(group.role)
 
-
-    def _nameserver(self):
-        if os.path.isfile('result/{}/infrastructure/terraform.tfstate'.format(self.grid_name)) and os.access('result/{}/infrastructure/terraform.tfstate'.format(self.grid_name), os.R_OK):
-            with open('result/{}/infrastructure/terraform.tfstate'.format(self.grid_name), 'r') as json_file:
-                json_data = json.load(json_file)
-                for module in json_data['modules']:
-                    for resource, value in module['resources'].iteritems():
-                        if resource == 'aws_instance.terminal':
-                            return value['primary']['attributes']['private_ip']
-
     def copy_templates(self):
-        os.system('cp -a -f gridapi/resources/templates/provision/dcos/aws/* result/{}'.format(self.grid_name))
+        os.system('cp -a -f gridapi/resources/templates/provision/mesos/azure/* result/{}'.format(self.grid_name))
 
     def _generate_template(self, filepath, variables):
         with open(filepath, 'r') as src:
@@ -49,15 +35,11 @@ class aws_provision_dcos_generator(object):
         with open(filepath, 'w') as dst:
             dst.write(template_content)
 
-    def generate_ansible_ssh_config(self, access_ip):
-        path = 'result/{}/ansible/ssh_config'.format(self.grid_name)
+    def generate_ansible_cfg(self):
+        path = 'result/{}/ansible.cfg'.format(self.grid_name)
         variables = {}
-        variables['access_ip'] = access_ip
+        variables['ssh_user'] = self.current_config.ssh_user
         self._generate_template(path, variables)
-
-    def generate_ssh_key(self):
-        with open('result/{}/grid.pem'.format(self.grid_name), 'w+') as ssh_key:
-            ssh_key.write(urllib.unquote(self.current_config.sshkeydata))
 
     def generate_group_vars_all(self):
         path = 'result/{}/group_vars/all'.format(self.grid_name)
@@ -67,14 +49,12 @@ class aws_provision_dcos_generator(object):
             json_data = json.load(json_file)
             for module in json_data['modules']:
                 for resource, value in module['resources'].iteritems():
-                    if value['type'] == 'aws_instance':
-                        hostname = value['primary']['attributes']['private_dns'].split('.')[0]
-                        host = '{}.node.{}'.format(hostname, self.grid_name)
-                        ip = value['primary']['attributes']['private_ip']
+                    if value['type'] == 'azure_instance':
+                        host = '{}.node.{}'.format(value['primary']['attributes']['name'], self.grid_name)
+                        ip = value['primary']['attributes']['ip_address']
                         hosts_entries['hosts'][str(host)] = str(ip)
         variables['hosts'] = json.dumps(hosts_entries['hosts'])
         variables['grid_name'] = self.current_grid.name
-        variables['terminal_ip'] = self._nameserver()
         self._generate_template(path, variables)
         vars_json = json.loads(self.current_config.vars)
         vars_yaml = yaml.safe_dump(vars_json, default_flow_style=False)
@@ -83,7 +63,7 @@ class aws_provision_dcos_generator(object):
 
     def generate_group_vars_roles(self):
         for role in self.current_roles:
-            src = 'result/{}/group_vars/dcos_slaves'.format(self.grid_name)
+            src = 'result/{}/group_vars/mesos-slaves'.format(self.grid_name)
             dst = 'result/{}/group_vars/tag_role_{}_{}'.format(self.grid_name, self.grid_name, role)
             os.system('cp -a -f {src} {dst}'.format(src=src, dst=dst))
 
@@ -98,10 +78,10 @@ class aws_provision_dcos_generator(object):
     def generate_roles_provision(self):
         for group in self.current_groups:
             role = group.role
-            src = 'result/{}/roles/dcos'.format(self.grid_name)
-            dst = 'result/{}/roles/dcos_slave_{}_{}'.format(self.grid_name, self.grid_name, role)
+            src = 'result/{}/roles/mesos'.format(self.grid_name)
+            dst = 'result/{}/roles/mesos-slave_{}_{}'.format(self.grid_name, self.grid_name, role)
             os.system('cp -a -f {src} {dst}'.format(src=src, dst=dst))
-            with open('{}/files/etc/mesos_slave/attributes'.format(dst), 'w+') as attributes_file:
+            with open('{}/files/etc/mesos-slave/attributes'.format(dst), 'w+') as attributes_file:
                 attributes_file.write(
                     self._generate_attributes_for_group(group))
 
@@ -115,9 +95,8 @@ class aws_provision_dcos_generator(object):
     def generate_grid_runlist(self):
         path = 'result/{}/grid.yml'.format(self.grid_name)
         variables = {}
-        variables['roles'] = self.current_roles
         variables['grid_name'] = self.grid_name
-        variables['vpn_enabled'] = self.kwargs['vpn_enabled']
+        variables['roles'] = self.current_roles
         self._generate_template(path, variables)
 
     def generate_groups_runlists(self):
@@ -131,16 +110,12 @@ class aws_provision_dcos_generator(object):
             self._generate_template(dst, variables)
 
     def generate_all(self, grid_name, accessip):
-        os.environ['AWS_ACCESS_KEY_ID'] = '{}'.format(self.aws_access_key_id)
-        os.environ['AWS_SECRET_ACCESS_KEY'] = '{}'.format(self.aws_secret_access_key)
         self.copy_templates()
-        self.generate_ansible_ssh_config(accessip)
-        self.generate_ssh_key()
+        self.generate_ansible_cfg()
+        self.generate_openvpn_authenticator()
         self.generate_group_vars_all()
         self.generate_group_vars_roles()
         self.generate_roles_provision()
         self.generate_inventory_grid()
         self.generate_grid_runlist()
         self.generate_groups_runlists()
-        os.chmod('result/{}/grid.pem'.format(self.grid_name), 0600)
-        subprocess.check_call(['ssh-add', 'result/{}/grid.pem'.format(self.grid_name)])

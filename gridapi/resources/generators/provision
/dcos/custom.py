@@ -1,9 +1,9 @@
 import json
-import yaml
 import jinja2
 import subprocess
 import os
 import urllib
+import yaml
 from gridapi.resources.models import GridEntity, configs, groups
 
 class AutoDict(dict):
@@ -14,10 +14,8 @@ class AutoDict(dict):
             value = self[item] = type(self)()
             return value
 
-class aws_provision_dcos_generator(object):
-    def __init__(self, grid_name, aws_access_key_id, aws_secret_access_key, **kwargs):
-        self.aws_access_key_id = urllib.unquote(aws_access_key_id)
-        self.aws_secret_access_key = urllib.unquote(aws_secret_access_key)
+class custom_provision_dcos_generator(object):
+    def __init__(self, grid_name, **kwargs):
         self.grid_name = grid_name
         self.kwargs = kwargs
         self.current_grid = GridEntity.objects(name=grid_name).get()
@@ -29,18 +27,11 @@ class aws_provision_dcos_generator(object):
             self.current_groups.append(group)
             self.current_roles.append(group.role)
 
-
     def _nameserver(self):
-        if os.path.isfile('result/{}/infrastructure/terraform.tfstate'.format(self.grid_name)) and os.access('result/{}/infrastructure/terraform.tfstate'.format(self.grid_name), os.R_OK):
-            with open('result/{}/infrastructure/terraform.tfstate'.format(self.grid_name), 'r') as json_file:
-                json_data = json.load(json_file)
-                for module in json_data['modules']:
-                    for resource, value in module['resources'].iteritems():
-                        if resource == 'aws_instance.terminal':
-                            return value['primary']['attributes']['private_ip']
+        return self.current_config.terminalips.split(',')[1]
 
     def copy_templates(self):
-        os.system('cp -a -f gridapi/resources/templates/provision/dcos/aws/* result/{}'.format(self.grid_name))
+        os.system('cp -a -f gridapi/resources/templates/provision/dcos/custom/* result/{}'.format(self.grid_name))
 
     def _generate_template(self, filepath, variables):
         with open(filepath, 'r') as src:
@@ -52,7 +43,14 @@ class aws_provision_dcos_generator(object):
     def generate_ansible_ssh_config(self, access_ip):
         path = 'result/{}/ansible/ssh_config'.format(self.grid_name)
         variables = {}
+        variables['user'] = self.current_config.ssh_user
         variables['access_ip'] = access_ip
+        self._generate_template(path, variables)
+
+    def generate_ansible_config(self):
+        path = 'result/{}/ansible.cfg'.format(self.grid_name)
+        variables = {}
+        variables['user'] = self.current_config.ssh_user
         self._generate_template(path, variables)
 
     def generate_ssh_key(self):
@@ -63,15 +61,19 @@ class aws_provision_dcos_generator(object):
         path = 'result/{}/group_vars/all'.format(self.grid_name)
         variables = AutoDict()
         hosts_entries = AutoDict()
-        with open('result/{}/infrastructure/terraform.tfstate'.format(self.grid_name), 'r') as json_file:
-            json_data = json.load(json_file)
-            for module in json_data['modules']:
-                for resource, value in module['resources'].iteritems():
-                    if value['type'] == 'aws_instance':
-                        hostname = value['primary']['attributes']['private_dns'].split('.')[0]
-                        host = '{}.node.{}'.format(hostname, self.grid_name)
-                        ip = value['primary']['attributes']['private_ip']
-                        hosts_entries['hosts'][str(host)] = str(ip)
+        for group in self.current_groups:
+            for ip in group.groupips.split(','):
+                hostname = ip.replace('.','-')
+                host = '{}.node.{}'.format(hostname, self.grid_name)
+                hosts_entries['hosts'][str(host)] = str(ip)
+            for ip in self.current_config.mastersips.split(','):
+                hostname = ip.replace('.','-')
+                host = '{}.node.{}'.format(hostname, self.grid_name)
+                hosts_entries['hosts'][str(host)] = str(ip)
+            terminal_ip = self.current_config.terminalips.split(',')[1]
+            terminal_hostname = terminal_ip.replace('.','-')
+            terminal_host = '{}.node.{}'.format(terminal_hostname, self.grid_name)
+            hosts_entries['hosts'][str(terminal_host)] = str(terminal_ip)
         variables['hosts'] = json.dumps(hosts_entries['hosts'])
         variables['grid_name'] = self.current_grid.name
         variables['terminal_ip'] = self._nameserver()
@@ -83,9 +85,15 @@ class aws_provision_dcos_generator(object):
 
     def generate_group_vars_roles(self):
         for role in self.current_roles:
+            pass
+        for group in self.current_groups:
             src = 'result/{}/group_vars/dcos_slaves'.format(self.grid_name)
-            dst = 'result/{}/group_vars/tag_role_{}_{}'.format(self.grid_name, self.grid_name, role)
+            dst = 'result/{}/group_vars/{}_{}'.format(self.grid_name, self.grid_name, group.role)
             os.system('cp -a -f {src} {dst}'.format(src=src, dst=dst))
+            vars_json = json.loads(group.vars)
+            vars_yaml = yaml.safe_dump(vars_json, default_flow_style=False)
+            with open(dst, "a") as yaml_file:
+                yaml_file.write(vars_yaml)
 
     def _generate_attributes_for_group(self, group):
         content = []
@@ -102,14 +110,21 @@ class aws_provision_dcos_generator(object):
             dst = 'result/{}/roles/dcos_slave_{}_{}'.format(self.grid_name, self.grid_name, role)
             os.system('cp -a -f {src} {dst}'.format(src=src, dst=dst))
             with open('{}/files/etc/mesos_slave/attributes'.format(dst), 'w+') as attributes_file:
-                attributes_file.write(
-                    self._generate_attributes_for_group(group))
+                attributes_file.write(self._generate_attributes_for_group(group))
 
     def generate_inventory_grid(self):
         path = 'result/{}/inventory/grid'.format(self.grid_name)
         variables = {}
         variables['grid_name'] = self.current_grid.name
         variables['roles'] = self.current_roles
+        groups = {}
+        for group in self.current_groups:
+            role = group.role
+            slave_ips = group.groupips.split(',')
+            groups[role] = slave_ips
+        variables['groups'] = groups
+        variables['masters_ips'] = self.current_config.mastersips.split(',')
+        variables['terminal_ip'] = self.current_config.terminalips.split(',')[1]
         self._generate_template(path, variables)
 
     def generate_grid_runlist(self):
@@ -117,7 +132,6 @@ class aws_provision_dcos_generator(object):
         variables = {}
         variables['roles'] = self.current_roles
         variables['grid_name'] = self.grid_name
-        variables['vpn_enabled'] = self.kwargs['vpn_enabled']
         self._generate_template(path, variables)
 
     def generate_groups_runlists(self):
@@ -131,10 +145,9 @@ class aws_provision_dcos_generator(object):
             self._generate_template(dst, variables)
 
     def generate_all(self, grid_name, accessip):
-        os.environ['AWS_ACCESS_KEY_ID'] = '{}'.format(self.aws_access_key_id)
-        os.environ['AWS_SECRET_ACCESS_KEY'] = '{}'.format(self.aws_secret_access_key)
         self.copy_templates()
         self.generate_ansible_ssh_config(accessip)
+        self.generate_ansible_config()
         self.generate_ssh_key()
         self.generate_group_vars_all()
         self.generate_group_vars_roles()
