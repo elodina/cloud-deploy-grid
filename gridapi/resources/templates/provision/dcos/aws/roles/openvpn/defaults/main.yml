@@ -1,4 +1,11 @@
 ---
+enable_duo: False
+duo_ikey: ""
+duo_skey: ""
+duo_host: ""
+
+vpn_enabled: True
+
 vpn_packages:
   - openvpn
 

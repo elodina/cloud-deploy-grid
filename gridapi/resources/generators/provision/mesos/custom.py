@@ -55,21 +55,6 @@ class custom_provision_mesos_generator(object):
         variables['user'] = self.current_config.ssh_user
         self._generate_template(path, variables)
 
-    def generate_openvpn_authenticator(self):
-        path = 'result/{}/roles/openvpn/templates/etc/openvpn/duoauth.py'.format(self.grid_name)
-        variables = {}
-        if self.kwargs['duo_ikey'] != '' and self.kwargs['duo_skey'] != 0 and self.kwargs['duo_host'] != 0:
-            variables['enable_duo'] = 'True'
-            variables['duo_ikey'] = self.kwargs['duo_ikey']
-            variables['duo_skey'] = self.kwargs['duo_skey']
-            variables['duo_host'] = self.kwargs['duo_host']
-        else:
-            variables['enable_duo'] = 'False'
-            variables['duo_ikey'] = ''
-            variables['duo_skey'] = ''
-            variables['duo_host'] = ''
-        self._generate_template(path, variables)
-
     def generate_ssh_key(self):
         with open('result/{}/grid.pem'.format(
                 self.grid_name), 'w+') as ssh_key:
@@ -153,7 +138,6 @@ class custom_provision_mesos_generator(object):
         variables = {}
         variables['grid_name'] = self.grid_name
         variables['roles'] = self.current_roles
-        variables['vpn_enabled'] = self.kwargs['vpn_enabled']
         self._generate_template(path, variables)
 
     def generate_groups_runlists(self):
@@ -171,7 +155,6 @@ class custom_provision_mesos_generator(object):
         self.copy_templates()
         self.generate_ansible_ssh_config(accessip)
         self.generate_ansible_config()
-        self.generate_openvpn_authenticator()
         self.generate_ssh_key()
         self.generate_group_vars_all()
         self.generate_group_vars_roles()

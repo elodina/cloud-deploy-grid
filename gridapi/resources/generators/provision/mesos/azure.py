@@ -47,21 +47,6 @@ class azure_provision_mesos_generator(object):
         variables['ssh_user'] = self.current_config.ssh_user
         self._generate_template(path, variables)
 
-    def generate_openvpn_authenticator(self):
-        path = 'result/{}/roles/openvpn/templates/etc/openvpn/duoauth.py'.format(self.grid_name)
-        variables = {}
-        if self.kwargs['duo_ikey'] != '' and self.kwargs['duo_skey'] != 0 and self.kwargs['duo_host'] != 0:
-            variables['enable_duo'] = 'True'
-            variables['duo_ikey'] = self.kwargs['duo_ikey']
-            variables['duo_skey'] = self.kwargs['duo_skey']
-            variables['duo_host'] = self.kwargs['duo_host']
-        else:
-            variables['enable_duo'] = 'False'
-            variables['duo_ikey'] = ''
-            variables['duo_skey'] = ''
-            variables['duo_host'] = ''
-        self._generate_template(path, variables)
-
     def generate_group_vars_all(self):
         path = 'result/{}/group_vars/all'.format(self.grid_name)
         variables = AutoDict()
@@ -124,7 +109,6 @@ class azure_provision_mesos_generator(object):
         variables = {}
         variables['grid_name'] = self.grid_name
         variables['roles'] = self.current_roles
-        variables['vpn_enabled'] = self.kwargs['vpn_enabled']
         self._generate_template(path, variables)
 
     def generate_groups_runlists(self):
@@ -141,7 +125,6 @@ class azure_provision_mesos_generator(object):
     def generate_all(self, grid_name, accessip):
         self.copy_templates()
         self.generate_ansible_cfg()
-        self.generate_openvpn_authenticator()
         self.generate_group_vars_all()
         self.generate_group_vars_roles()
         self.generate_roles_provision()
