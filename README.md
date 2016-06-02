@@ -11,3 +11,5 @@ Table of contents
 -   [Quick Start](readme/quick_start.md)
 
 -   [Api Reference](readme/api_reference.md)
+
+-   [How To](readme/howto.md)
