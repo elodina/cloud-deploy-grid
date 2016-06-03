@@ -111,7 +111,11 @@ OpenStack Example:
 curl -X PUT --data-urlencode "api_user=asdasd" --data-urlencode "api_pass=xwqiocby98137cb" --data-urlencode "api_url=http://123.123.123.123:5000/v2.0" http://${api_host}:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
- 
+Bare Metal Example:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+curl -X PUT http://${api_host}:5555/api/v2.0/grids/${grid_name}/deployment/infrastructure
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Infrastructure Deployment Structure Export
 ==========================================

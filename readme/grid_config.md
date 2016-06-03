@@ -19,17 +19,18 @@ Provider Independent HTTP parameters
 
 ### Available vars
 
-| Grid type  | IAAS | key            | value      | description                                          |
-|------------|------|----------------|------------|------------------------------------------------------|
-| mesos only | All  | aurora         | true/false | enables or disables aurora framework, default false  |
-| mesos only | All  | mesos\_version | 0.23-0.XX  | Version of Mesos installed                           |
-| mesos/dcos | All  | vpn\_enabled   | true/false | enables or disables OpenVPN access, default true     |
-| mesos/dcos | All  | enable\_duo    | true/false | enable or disable duo auth(duo.com), default false   |
-| mesos/dcos | All  | duo\_ikey      |            | duo.com ikey, make sense, if enable\_duo is true     |
-| mesos/dcos | All  | duo\_skey      |            | duo.com skey, make sense, if enable\_duo is true     |
-| mesos/dcos | All  | duo\_host      |            | duo.com api host, make sense, if enable\_duo is true |
-| dcos       | All  | dcos\_user     |            | username for DCOS WEB UI, mandatory for DCOS EE      |
-| dcos       | All  | dcos\_pass     |            | password for DCOS WEB UI, mandatory for DCOS EE      |
+| Grid type  | IAAS | key            | value               | description                                          |
+|------------|------|----------------|---------------------|------------------------------------------------------|
+| mesos only | All  | aurora         | true/false          | enables or disables aurora framework, default false  |
+| mesos only | All  | mesos\_version | 0.23-0.XX           | Version of Mesos installed                           |
+| mesos/dcos | All  | vpn\_enabled   | true/false          | enables or disables OpenVPN access, default true     |
+| mesos/dcos | All  | enable\_duo    | true/false          | enable or disable duo auth(duo.com), default false   |
+| mesos/dcos | All  | duo\_ikey      |                     | duo.com ikey, make sense, if enable\_duo is true     |
+| mesos/dcos | All  | duo\_skey      |                     | duo.com skey, make sense, if enable\_duo is true     |
+| mesos/dcos | All  | duo\_host      |                     | duo.com api host, make sense, if enable\_duo is true |
+| dcos       | All  | dcos\_user     |                     | username for DCOS WEB UI, mandatory for DCOS EE      |
+| dcos       | All  | dcos\_pass     |                     | password for DCOS WEB UI, mandatory for DCOS EE      |
+| dcos       | All  | dcos\_version  | consumer/enterprise | Choose version of DCOS for deployment.               |
 
  
 
