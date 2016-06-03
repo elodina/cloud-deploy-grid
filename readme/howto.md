@@ -12,8 +12,8 @@ be up to 16 characters long
 Running Cloud Deploy Grid
 -------------------------
 
--   [Run Cloud Deploy Grid in development mode](#Run Cloud Deploy Grid in
-    development mode)
+-   [Run Cloud Deploy Grid in development
+    mode](#Run-Cloud-Deploy-Grid-in-development-mode)
 
 -   Run Cloud Deploy Grid using Stack Deploy in Development Mode
 
